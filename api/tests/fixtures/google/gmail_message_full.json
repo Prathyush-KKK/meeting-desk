@@ -1,0 +1,74 @@
+{
+  "id": "18f2c1a9b7e4d3f0",
+  "threadId": "18f2c1a9b7e4d3f0",
+  "labelIds": [
+    "INBOX",
+    "CATEGORY_UPDATES"
+  ],
+  "snippet": "Here is the recap of your meeting.",
+  "historyId": "884213",
+  "internalDate": "1789816201000",
+  "sizeEstimate": 8123,
+  "payload": {
+    "partId": "",
+    "mimeType": "multipart/alternative",
+    "filename": "",
+    "headers": [
+      {
+        "name": "Delivered-To",
+        "value": "prathyush.kodhanpur@simpleo.ai"
+      },
+      {
+        "name": "From",
+        "value": "Gemini <gemini-notes@google.com>"
+      },
+      {
+        "name": "To",
+        "value": "prathyush.kodhanpur@simpleo.ai"
+      },
+      {
+        "name": "Subject",
+        "value": "Recap: Nutrition roadmap review"
+      },
+      {
+        "name": "Date",
+        "value": "Fri, 19 Sep 2026 16:50:01 +0530"
+      }
+    ],
+    "body": {
+      "size": 0
+    },
+    "parts": [
+      {
+        "partId": "0",
+        "mimeType": "text/plain",
+        "filename": "",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/plain; charset=\"UTF-8\""
+          }
+        ],
+        "body": {
+          "size": 0,
+          "data": ""
+        }
+      },
+      {
+        "partId": "1",
+        "mimeType": "text/html",
+        "filename": "",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/html; charset=\"UTF-8\""
+          }
+        ],
+        "body": {
+          "size": 579,
+          "data": "PGh0bWw-PGhlYWQ-PHN0eWxlPi54e2NvbG9yOnJlZH08L3N0eWxlPjwvaGVhZD48Ym9keT4KPGRpdiBzdHlsZT0iZm9udC1mYW1pbHk6R29vZ2xlIFNhbnMiPjxoMj5SZWNhcDogTnV0cml0aW9uIHJvYWRtYXAgcmV2aWV3PC9oMj4KPHA-SGkgUHJhdGh5dXNoLDxicj5IZXJlIGlzIHRoZSByZWNhcCBvZiB5b3VyIG1lZXRpbmcuPC9wPgo8aDM-U3VtbWFyeTwvaDM-PHA-VGhlIHRlYW0gcmV2aWV3ZWQgdGhlIGRhdGFzZXQgZ2FwcyAmYW1wOyBhZ3JlZWQgdGhlIE93bmVyIGNvbHVtbiBob2xkcyBvbmUgcGVyc29uLjwvcD4KPGgzPk5leHQgc3RlcHM8L2gzPgo8dWw-PGxpPkFudXNoa2EgTW9oYW50eTogUmV2aWV3IGRhdGFzZXQgZm9yIHdlaWdodCBpbmZvcm1hdGlvbiBieSAzIE9jdDwvbGk-CjxsaT5OaXNoY2hheTogRmluaXNoIHRoZSBhbGVydCBlbWlzc2lvbiBzdGFuZGFyZCB2MS4yIGJ5IGVuZCBvZiB3ZWVrPC9saT48L3VsPgo8dGFibGU-PHRyPjx0ZD5HZW5lcmF0ZWQgYnk8L3RkPjx0ZD5HZW1pbmk8L3RkPjwvdHI-PC90YWJsZT4KPHNjcmlwdD50cmFjaygpPC9zY3JpcHQ-CjwvZGl2PjwvYm9keT48L2h0bWw-"
+        }
+      }
+    ]
+  }
+}

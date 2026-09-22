@@ -1,0 +1,607 @@
+{
+  "name": "task_keyed_no_id",
+  "description": "Keyed on Task with no ID column: no keys are allocated.",
+  "title": "Earn Points",
+  "rows": [
+    [
+      "Task",
+      "Points",
+      "Cap",
+      "Status",
+      "Notes"
+    ],
+    [
+      "Upload an ID",
+      "100",
+      "one time",
+      "live",
+      ""
+    ],
+    [
+      "Sharing a document",
+      "50",
+      "daily",
+      "live",
+      ""
+    ],
+    [
+      "Complete profile",
+      "200",
+      "one time",
+      "live",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  ],
+  "formulas": null,
+  "number_formats": null,
+  "dropdowns": {
+    "3": [
+      "live",
+      "planned",
+      "removed"
+    ]
+  },
+  "formula_cols": [],
+  "date_cols": [],
+  "points": [
+    {
+      "id": "p1",
+      "kind": "action",
+      "text": "Mirror Open Food Facts before launch",
+      "owner": "Prathyush Kodhanpur",
+      "due": "3 Oct",
+      "status": "open",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    },
+    {
+      "id": "p2",
+      "kind": "decision",
+      "text": "Owner column holds a person, not a team",
+      "owner": "",
+      "due": "",
+      "status": "decided",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    },
+    {
+      "id": "p3",
+      "kind": "risk",
+      "text": "Photo portion accuracy is unmeasured",
+      "owner": "Anushka Mohanty",
+      "due": "",
+      "status": "blocked",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    }
+  ],
+  "fill": {
+    "anchor": {
+      "r": 1,
+      "c": 0
+    },
+    "write_keys": false
+  },
+  "with_hooks": null,
+  "expect": {
+    "layout": {
+      "header_row": 0,
+      "first_col": 0,
+      "last_col": 4,
+      "columns": {
+        "task": 0,
+        "status": 3,
+        "notes": 4
+      },
+      "key_col": -1,
+      "key_prefix": "",
+      "last_table_row": 3,
+      "header_score": 3
+    },
+    "next_keys": [
+      "",
+      "",
+      ""
+    ],
+    "append": {
+      "insert_at": 4,
+      "count": 3,
+      "keys": [
+        "",
+        "",
+        ""
+      ],
+      "cells": [
+        "A5",
+        "E5",
+        "A6",
+        "E6",
+        "A7",
+        "E7"
+      ],
+      "writes": [
+        {
+          "ref": "A5",
+          "r": 4,
+          "c": 0,
+          "value": "Mirror Open Food Facts before launch",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "E5",
+          "r": 4,
+          "c": 4,
+          "value": "Platform squad sync · 22 Sep",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "A6",
+          "r": 5,
+          "c": 0,
+          "value": "Owner column holds a person, not a team",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "E6",
+          "r": 5,
+          "c": 4,
+          "value": "Platform squad sync · 22 Sep",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "A7",
+          "r": 6,
+          "c": 0,
+          "value": "Photo portion accuracy is unmeasured",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "E7",
+          "r": 6,
+          "c": 4,
+          "value": "Platform squad sync · 22 Sep",
+          "kind": "new",
+          "existing": null
+        }
+      ],
+      "moved": [],
+      "applied": [
+        [
+          "Task",
+          "Points",
+          "Cap",
+          "Status",
+          "Notes"
+        ],
+        [
+          "Upload an ID",
+          "100",
+          "one time",
+          "live",
+          ""
+        ],
+        [
+          "Sharing a document",
+          "50",
+          "daily",
+          "live",
+          ""
+        ],
+        [
+          "Complete profile",
+          "200",
+          "one time",
+          "live",
+          ""
+        ],
+        [
+          "Mirror Open Food Facts before launch",
+          "",
+          "",
+          "",
+          "Platform squad sync · 22 Sep"
+        ],
+        [
+          "Owner column holds a person, not a team",
+          "",
+          "",
+          "",
+          "Platform squad sync · 22 Sep"
+        ],
+        [
+          "Photo portion accuracy is unmeasured",
+          "",
+          "",
+          "",
+          "Platform squad sync · 22 Sep"
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ]
+    },
+    "fill": {
+      "skip": {
+        "cells": [
+          "E2",
+          "E3",
+          "E4"
+        ],
+        "writes": [
+          {
+            "ref": "A2",
+            "r": 1,
+            "c": 0,
+            "value": "Upload an ID",
+            "kind": "conflict",
+            "existing": "Upload an ID"
+          },
+          {
+            "ref": "E2",
+            "r": 1,
+            "c": 4,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A3",
+            "r": 2,
+            "c": 0,
+            "value": "Sharing a document",
+            "kind": "conflict",
+            "existing": "Sharing a document"
+          },
+          {
+            "ref": "E3",
+            "r": 2,
+            "c": 4,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A4",
+            "r": 3,
+            "c": 0,
+            "value": "Complete profile",
+            "kind": "conflict",
+            "existing": "Complete profile"
+          },
+          {
+            "ref": "E4",
+            "r": 3,
+            "c": 4,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          }
+        ],
+        "conflicts": [
+          "A2",
+          "A3",
+          "A4"
+        ],
+        "field_order": [
+          {
+            "c": 0,
+            "field": "task"
+          },
+          {
+            "c": 3,
+            "field": "status"
+          },
+          {
+            "c": 4,
+            "field": "notes"
+          }
+        ],
+        "insert_at": null,
+        "count": 3,
+        "applied": [
+          [
+            "Task",
+            "Points",
+            "Cap",
+            "Status",
+            "Notes"
+          ],
+          [
+            "Upload an ID",
+            "100",
+            "one time",
+            "live",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "Sharing a document",
+            "50",
+            "daily",
+            "live",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "Complete profile",
+            "200",
+            "one time",
+            "live",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ]
+      },
+      "overwrite": {
+        "cells": [
+          "A2",
+          "E2",
+          "A3",
+          "E3",
+          "A4",
+          "E4"
+        ],
+        "writes": [
+          {
+            "ref": "A2",
+            "r": 1,
+            "c": 0,
+            "value": "Mirror Open Food Facts before launch",
+            "kind": "conflict",
+            "existing": "Upload an ID"
+          },
+          {
+            "ref": "E2",
+            "r": 1,
+            "c": 4,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A3",
+            "r": 2,
+            "c": 0,
+            "value": "Owner column holds a person, not a team",
+            "kind": "conflict",
+            "existing": "Sharing a document"
+          },
+          {
+            "ref": "E3",
+            "r": 2,
+            "c": 4,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A4",
+            "r": 3,
+            "c": 0,
+            "value": "Photo portion accuracy is unmeasured",
+            "kind": "conflict",
+            "existing": "Complete profile"
+          },
+          {
+            "ref": "E4",
+            "r": 3,
+            "c": 4,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          }
+        ],
+        "conflicts": [
+          "A2",
+          "A3",
+          "A4"
+        ],
+        "field_order": [
+          {
+            "c": 0,
+            "field": "task"
+          },
+          {
+            "c": 3,
+            "field": "status"
+          },
+          {
+            "c": 4,
+            "field": "notes"
+          }
+        ],
+        "insert_at": null,
+        "count": 3,
+        "applied": [
+          [
+            "Task",
+            "Points",
+            "Cap",
+            "Status",
+            "Notes"
+          ],
+          [
+            "Mirror Open Food Facts before launch",
+            "100",
+            "one time",
+            "live",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "Owner column holds a person, not a team",
+            "50",
+            "daily",
+            "live",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "Photo portion accuracy is unmeasured",
+            "200",
+            "one time",
+            "live",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ]
+      },
+      "insert": {
+        "cells": [
+          "A2",
+          "E2",
+          "A3",
+          "E3",
+          "A4",
+          "E4"
+        ],
+        "writes": [
+          {
+            "ref": "A2",
+            "r": 1,
+            "c": 0,
+            "value": "Mirror Open Food Facts before launch",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "E2",
+            "r": 1,
+            "c": 4,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A3",
+            "r": 2,
+            "c": 0,
+            "value": "Owner column holds a person, not a team",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "E3",
+            "r": 2,
+            "c": 4,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A4",
+            "r": 3,
+            "c": 0,
+            "value": "Photo portion accuracy is unmeasured",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "E4",
+            "r": 3,
+            "c": 4,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          }
+        ],
+        "conflicts": [],
+        "field_order": [
+          {
+            "c": 0,
+            "field": "task"
+          },
+          {
+            "c": 3,
+            "field": "status"
+          },
+          {
+            "c": 4,
+            "field": "notes"
+          }
+        ],
+        "insert_at": 1,
+        "count": 3,
+        "applied": [
+          [
+            "Task",
+            "Points",
+            "Cap",
+            "Status",
+            "Notes"
+          ],
+          [
+            "Mirror Open Food Facts before launch",
+            "",
+            "",
+            "",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "Owner column holds a person, not a team",
+            "",
+            "",
+            "",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "Photo portion accuracy is unmeasured",
+            "",
+            "",
+            "",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "Upload an ID",
+            "100",
+            "one time",
+            "live",
+            ""
+          ],
+          [
+            "Sharing a document",
+            "50",
+            "daily",
+            "live",
+            ""
+          ],
+          [
+            "Complete profile",
+            "200",
+            "one time",
+            "live",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ]
+      }
+    }
+  }
+}

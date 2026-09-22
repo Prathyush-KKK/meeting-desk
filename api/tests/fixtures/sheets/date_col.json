@@ -1,0 +1,928 @@
+{
+  "name": "date_col",
+  "description": "Due carries a DATE number format, so the write is flagged as a date.",
+  "title": "P2 Dates",
+  "rows": [
+    [
+      "ID",
+      "Task",
+      "Owner",
+      "Due",
+      "Status",
+      "Notes"
+    ],
+    [
+      "T-401",
+      "Mirror Open Food Facts",
+      "Prathyush Kodhanpur",
+      "03/10/2026",
+      "open",
+      ""
+    ],
+    [
+      "T-402",
+      "Confirmation screen",
+      "Prathyush Kodhanpur",
+      "03/10/2026",
+      "in progress",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  ],
+  "formulas": null,
+  "number_formats": [
+    [
+      "TEXT",
+      "TEXT",
+      "TEXT",
+      "TEXT",
+      "TEXT",
+      "TEXT"
+    ],
+    [
+      "TEXT",
+      "TEXT",
+      "TEXT",
+      "DATE",
+      "TEXT",
+      "TEXT"
+    ],
+    [
+      "TEXT",
+      "TEXT",
+      "TEXT",
+      "DATE",
+      "TEXT",
+      "TEXT"
+    ],
+    [
+      "TEXT",
+      "TEXT",
+      "TEXT",
+      "TEXT",
+      "TEXT",
+      "TEXT"
+    ]
+  ],
+  "dropdowns": {
+    "4": [
+      "open",
+      "in progress",
+      "blocked",
+      "done",
+      "dropped"
+    ]
+  },
+  "formula_cols": [],
+  "date_cols": [
+    3
+  ],
+  "points": [
+    {
+      "id": "p1",
+      "kind": "action",
+      "text": "Mirror Open Food Facts before launch",
+      "owner": "Prathyush Kodhanpur",
+      "due": "3 Oct",
+      "status": "open",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    },
+    {
+      "id": "p2",
+      "kind": "decision",
+      "text": "Owner column holds a person, not a team",
+      "owner": "",
+      "due": "",
+      "status": "decided",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    },
+    {
+      "id": "p3",
+      "kind": "risk",
+      "text": "Photo portion accuracy is unmeasured",
+      "owner": "Anushka Mohanty",
+      "due": "",
+      "status": "blocked",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    }
+  ],
+  "fill": {
+    "anchor": {
+      "r": 1,
+      "c": 1
+    },
+    "write_keys": false
+  },
+  "with_hooks": {
+    "append_cells": [
+      "A4",
+      "B4",
+      "C4",
+      "D4",
+      "E4",
+      "F4",
+      "A5",
+      "B5",
+      "E5",
+      "F5",
+      "A6",
+      "B6",
+      "C6",
+      "E6",
+      "F6"
+    ],
+    "formula_fill": [],
+    "date_cells": [
+      "D4"
+    ]
+  },
+  "expect": {
+    "layout": {
+      "header_row": 0,
+      "first_col": 0,
+      "last_col": 5,
+      "columns": {
+        "id": 0,
+        "task": 1,
+        "owner": 2,
+        "due": 3,
+        "status": 4,
+        "notes": 5
+      },
+      "key_col": 0,
+      "key_prefix": "T",
+      "last_table_row": 2,
+      "header_score": 6
+    },
+    "next_keys": [
+      "T-403",
+      "T-404",
+      "T-405"
+    ],
+    "append": {
+      "insert_at": 3,
+      "count": 3,
+      "keys": [
+        "T-403",
+        "T-404",
+        "T-405"
+      ],
+      "cells": [
+        "A4",
+        "B4",
+        "C4",
+        "D4",
+        "E4",
+        "F4",
+        "A5",
+        "B5",
+        "E5",
+        "F5",
+        "A6",
+        "B6",
+        "C6",
+        "E6",
+        "F6"
+      ],
+      "writes": [
+        {
+          "ref": "A4",
+          "r": 3,
+          "c": 0,
+          "value": "T-403",
+          "kind": "key",
+          "existing": null
+        },
+        {
+          "ref": "B4",
+          "r": 3,
+          "c": 1,
+          "value": "Mirror Open Food Facts before launch",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "C4",
+          "r": 3,
+          "c": 2,
+          "value": "Prathyush Kodhanpur",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "D4",
+          "r": 3,
+          "c": 3,
+          "value": "3 Oct",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "E4",
+          "r": 3,
+          "c": 4,
+          "value": "open",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "F4",
+          "r": 3,
+          "c": 5,
+          "value": "Platform squad sync · 22 Sep",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "A5",
+          "r": 4,
+          "c": 0,
+          "value": "T-404",
+          "kind": "key",
+          "existing": null
+        },
+        {
+          "ref": "B5",
+          "r": 4,
+          "c": 1,
+          "value": "Owner column holds a person, not a team",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "E5",
+          "r": 4,
+          "c": 4,
+          "value": "done",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "F5",
+          "r": 4,
+          "c": 5,
+          "value": "Platform squad sync · 22 Sep",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "A6",
+          "r": 5,
+          "c": 0,
+          "value": "T-405",
+          "kind": "key",
+          "existing": null
+        },
+        {
+          "ref": "B6",
+          "r": 5,
+          "c": 1,
+          "value": "Photo portion accuracy is unmeasured",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "C6",
+          "r": 5,
+          "c": 2,
+          "value": "Anushka Mohanty",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "E6",
+          "r": 5,
+          "c": 4,
+          "value": "blocked",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "F6",
+          "r": 5,
+          "c": 5,
+          "value": "Platform squad sync · 22 Sep",
+          "kind": "new",
+          "existing": null
+        }
+      ],
+      "moved": [],
+      "applied": [
+        [
+          "ID",
+          "Task",
+          "Owner",
+          "Due",
+          "Status",
+          "Notes"
+        ],
+        [
+          "T-401",
+          "Mirror Open Food Facts",
+          "Prathyush Kodhanpur",
+          "03/10/2026",
+          "open",
+          ""
+        ],
+        [
+          "T-402",
+          "Confirmation screen",
+          "Prathyush Kodhanpur",
+          "03/10/2026",
+          "in progress",
+          ""
+        ],
+        [
+          "T-403",
+          "Mirror Open Food Facts before launch",
+          "Prathyush Kodhanpur",
+          "3 Oct",
+          "open",
+          "Platform squad sync · 22 Sep"
+        ],
+        [
+          "T-404",
+          "Owner column holds a person, not a team",
+          "",
+          "",
+          "done",
+          "Platform squad sync · 22 Sep"
+        ],
+        [
+          "T-405",
+          "Photo portion accuracy is unmeasured",
+          "Anushka Mohanty",
+          "",
+          "blocked",
+          "Platform squad sync · 22 Sep"
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ]
+    },
+    "fill": {
+      "skip": {
+        "cells": [
+          "F2",
+          "F3",
+          "B4",
+          "C4",
+          "E4",
+          "F4"
+        ],
+        "writes": [
+          {
+            "ref": "B2",
+            "r": 1,
+            "c": 1,
+            "value": "Mirror Open Food Facts",
+            "kind": "conflict",
+            "existing": "Mirror Open Food Facts"
+          },
+          {
+            "ref": "C2",
+            "r": 1,
+            "c": 2,
+            "value": "Prathyush Kodhanpur",
+            "kind": "conflict",
+            "existing": "Prathyush Kodhanpur"
+          },
+          {
+            "ref": "D2",
+            "r": 1,
+            "c": 3,
+            "value": "03/10/2026",
+            "kind": "conflict",
+            "existing": "03/10/2026"
+          },
+          {
+            "ref": "E2",
+            "r": 1,
+            "c": 4,
+            "value": "open",
+            "kind": "conflict",
+            "existing": "open"
+          },
+          {
+            "ref": "F2",
+            "r": 1,
+            "c": 5,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "B3",
+            "r": 2,
+            "c": 1,
+            "value": "Confirmation screen",
+            "kind": "conflict",
+            "existing": "Confirmation screen"
+          },
+          {
+            "ref": "E3",
+            "r": 2,
+            "c": 4,
+            "value": "in progress",
+            "kind": "conflict",
+            "existing": "in progress"
+          },
+          {
+            "ref": "F3",
+            "r": 2,
+            "c": 5,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "B4",
+            "r": 3,
+            "c": 1,
+            "value": "Photo portion accuracy is unmeasured",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "C4",
+            "r": 3,
+            "c": 2,
+            "value": "Anushka Mohanty",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "E4",
+            "r": 3,
+            "c": 4,
+            "value": "blocked",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "F4",
+            "r": 3,
+            "c": 5,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          }
+        ],
+        "conflicts": [
+          "B2",
+          "C2",
+          "D2",
+          "E2",
+          "B3",
+          "E3"
+        ],
+        "field_order": [
+          {
+            "c": 1,
+            "field": "task"
+          },
+          {
+            "c": 2,
+            "field": "owner"
+          },
+          {
+            "c": 3,
+            "field": "due"
+          },
+          {
+            "c": 4,
+            "field": "status"
+          },
+          {
+            "c": 5,
+            "field": "notes"
+          }
+        ],
+        "insert_at": null,
+        "count": 3,
+        "applied": [
+          [
+            "ID",
+            "Task",
+            "Owner",
+            "Due",
+            "Status",
+            "Notes"
+          ],
+          [
+            "T-401",
+            "Mirror Open Food Facts",
+            "Prathyush Kodhanpur",
+            "03/10/2026",
+            "open",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "T-402",
+            "Confirmation screen",
+            "Prathyush Kodhanpur",
+            "03/10/2026",
+            "in progress",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "",
+            "Photo portion accuracy is unmeasured",
+            "Anushka Mohanty",
+            "",
+            "blocked",
+            "Platform squad sync · 22 Sep"
+          ]
+        ]
+      },
+      "overwrite": {
+        "cells": [
+          "B2",
+          "D2",
+          "F2",
+          "B3",
+          "E3",
+          "F3",
+          "B4",
+          "C4",
+          "E4",
+          "F4"
+        ],
+        "writes": [
+          {
+            "ref": "B2",
+            "r": 1,
+            "c": 1,
+            "value": "Mirror Open Food Facts before launch",
+            "kind": "conflict",
+            "existing": "Mirror Open Food Facts"
+          },
+          {
+            "ref": "C2",
+            "r": 1,
+            "c": 2,
+            "value": "Prathyush Kodhanpur",
+            "kind": "conflict",
+            "existing": "Prathyush Kodhanpur"
+          },
+          {
+            "ref": "D2",
+            "r": 1,
+            "c": 3,
+            "value": "3 Oct",
+            "kind": "conflict",
+            "existing": "03/10/2026"
+          },
+          {
+            "ref": "E2",
+            "r": 1,
+            "c": 4,
+            "value": "open",
+            "kind": "conflict",
+            "existing": "open"
+          },
+          {
+            "ref": "F2",
+            "r": 1,
+            "c": 5,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "B3",
+            "r": 2,
+            "c": 1,
+            "value": "Owner column holds a person, not a team",
+            "kind": "conflict",
+            "existing": "Confirmation screen"
+          },
+          {
+            "ref": "E3",
+            "r": 2,
+            "c": 4,
+            "value": "done",
+            "kind": "conflict",
+            "existing": "in progress"
+          },
+          {
+            "ref": "F3",
+            "r": 2,
+            "c": 5,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "B4",
+            "r": 3,
+            "c": 1,
+            "value": "Photo portion accuracy is unmeasured",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "C4",
+            "r": 3,
+            "c": 2,
+            "value": "Anushka Mohanty",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "E4",
+            "r": 3,
+            "c": 4,
+            "value": "blocked",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "F4",
+            "r": 3,
+            "c": 5,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          }
+        ],
+        "conflicts": [
+          "B2",
+          "C2",
+          "D2",
+          "E2",
+          "B3",
+          "E3"
+        ],
+        "field_order": [
+          {
+            "c": 1,
+            "field": "task"
+          },
+          {
+            "c": 2,
+            "field": "owner"
+          },
+          {
+            "c": 3,
+            "field": "due"
+          },
+          {
+            "c": 4,
+            "field": "status"
+          },
+          {
+            "c": 5,
+            "field": "notes"
+          }
+        ],
+        "insert_at": null,
+        "count": 3,
+        "applied": [
+          [
+            "ID",
+            "Task",
+            "Owner",
+            "Due",
+            "Status",
+            "Notes"
+          ],
+          [
+            "T-401",
+            "Mirror Open Food Facts before launch",
+            "Prathyush Kodhanpur",
+            "3 Oct",
+            "open",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "T-402",
+            "Owner column holds a person, not a team",
+            "Prathyush Kodhanpur",
+            "03/10/2026",
+            "done",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "",
+            "Photo portion accuracy is unmeasured",
+            "Anushka Mohanty",
+            "",
+            "blocked",
+            "Platform squad sync · 22 Sep"
+          ]
+        ]
+      },
+      "insert": {
+        "cells": [
+          "B2",
+          "C2",
+          "D2",
+          "E2",
+          "F2",
+          "B3",
+          "E3",
+          "F3",
+          "B4",
+          "C4",
+          "E4",
+          "F4"
+        ],
+        "writes": [
+          {
+            "ref": "B2",
+            "r": 1,
+            "c": 1,
+            "value": "Mirror Open Food Facts before launch",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "C2",
+            "r": 1,
+            "c": 2,
+            "value": "Prathyush Kodhanpur",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "D2",
+            "r": 1,
+            "c": 3,
+            "value": "3 Oct",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "E2",
+            "r": 1,
+            "c": 4,
+            "value": "open",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "F2",
+            "r": 1,
+            "c": 5,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "B3",
+            "r": 2,
+            "c": 1,
+            "value": "Owner column holds a person, not a team",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "E3",
+            "r": 2,
+            "c": 4,
+            "value": "done",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "F3",
+            "r": 2,
+            "c": 5,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "B4",
+            "r": 3,
+            "c": 1,
+            "value": "Photo portion accuracy is unmeasured",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "C4",
+            "r": 3,
+            "c": 2,
+            "value": "Anushka Mohanty",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "E4",
+            "r": 3,
+            "c": 4,
+            "value": "blocked",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "F4",
+            "r": 3,
+            "c": 5,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          }
+        ],
+        "conflicts": [],
+        "field_order": [
+          {
+            "c": 1,
+            "field": "task"
+          },
+          {
+            "c": 2,
+            "field": "owner"
+          },
+          {
+            "c": 3,
+            "field": "due"
+          },
+          {
+            "c": 4,
+            "field": "status"
+          },
+          {
+            "c": 5,
+            "field": "notes"
+          }
+        ],
+        "insert_at": 1,
+        "count": 3,
+        "applied": [
+          [
+            "ID",
+            "Task",
+            "Owner",
+            "Due",
+            "Status",
+            "Notes"
+          ],
+          [
+            "",
+            "Mirror Open Food Facts before launch",
+            "Prathyush Kodhanpur",
+            "3 Oct",
+            "open",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "",
+            "Owner column holds a person, not a team",
+            "",
+            "",
+            "done",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "",
+            "Photo portion accuracy is unmeasured",
+            "Anushka Mohanty",
+            "",
+            "blocked",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "T-401",
+            "Mirror Open Food Facts",
+            "Prathyush Kodhanpur",
+            "03/10/2026",
+            "open",
+            ""
+          ],
+          [
+            "T-402",
+            "Confirmation screen",
+            "Prathyush Kodhanpur",
+            "03/10/2026",
+            "in progress",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ]
+      }
+    }
+  }
+}

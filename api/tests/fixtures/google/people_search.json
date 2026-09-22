@@ -1,0 +1,77 @@
+{
+  "people": [
+    {
+      "resourceName": "people/100000000000000000001",
+      "etag": "%EgUBAgkLNy4=",
+      "names": [
+        {
+          "metadata": {
+            "primary": true,
+            "source": {
+              "type": "DOMAIN_PROFILE",
+              "id": "100000000000000000001"
+            }
+          },
+          "displayName": "Shambhavi Singh",
+          "familyName": "Singh",
+          "givenName": "Shambhavi"
+        }
+      ],
+      "emailAddresses": [
+        {
+          "metadata": {
+            "primary": true,
+            "verified": true,
+            "source": {
+              "type": "DOMAIN_PROFILE",
+              "id": "100000000000000000001"
+            }
+          },
+          "value": "shambhavi.singh@simpleo.ai"
+        },
+        {
+          "metadata": {
+            "source": {
+              "type": "DOMAIN_PROFILE",
+              "id": "100000000000000000001"
+            }
+          },
+          "value": "shambhavi@simpleo.ai"
+        }
+      ]
+    },
+    {
+      "resourceName": "people/100000000000000000002",
+      "etag": "%EgUBAgkLNy5=",
+      "names": [
+        {
+          "metadata": {
+            "primary": true
+          },
+          "displayName": "Shamik Bose"
+        }
+      ],
+      "emailAddresses": [
+        {
+          "metadata": {
+            "primary": true
+          },
+          "value": "Shamik.Bose@simpleo.ai"
+        }
+      ]
+    },
+    {
+      "resourceName": "people/100000000000000000003",
+      "etag": "%EgUBAgkLNy6=",
+      "names": [
+        {
+          "metadata": {
+            "primary": true
+          },
+          "displayName": "Room without mail"
+        }
+      ]
+    }
+  ],
+  "totalSize": 3
+}

@@ -1,0 +1,658 @@
+{
+  "name": "no_header",
+  "description": "No header row: the default column order is used from the first column.",
+  "title": "Scratch",
+  "rows": [
+    [
+      "Fix the upload retry",
+      "Nishchay S",
+      "26 Sep",
+      "open"
+    ],
+    [
+      "Ship the telemetry dashboard",
+      "Shambhavi Singh",
+      "30 Sep",
+      "in progress"
+    ],
+    [
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      ""
+    ]
+  ],
+  "formulas": null,
+  "number_formats": null,
+  "dropdowns": {},
+  "formula_cols": [],
+  "date_cols": [],
+  "points": [
+    {
+      "id": "p1",
+      "kind": "action",
+      "text": "Mirror Open Food Facts before launch",
+      "owner": "Prathyush Kodhanpur",
+      "due": "3 Oct",
+      "status": "open",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    },
+    {
+      "id": "p2",
+      "kind": "decision",
+      "text": "Owner column holds a person, not a team",
+      "owner": "",
+      "due": "",
+      "status": "decided",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    },
+    {
+      "id": "p3",
+      "kind": "risk",
+      "text": "Photo portion accuracy is unmeasured",
+      "owner": "Anushka Mohanty",
+      "due": "",
+      "status": "blocked",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    }
+  ],
+  "fill": {
+    "anchor": {
+      "r": 0,
+      "c": 0
+    },
+    "write_keys": false
+  },
+  "with_hooks": null,
+  "expect": {
+    "layout": {
+      "header_row": -1,
+      "first_col": 0,
+      "last_col": 3,
+      "columns": {},
+      "key_col": -1,
+      "key_prefix": "",
+      "last_table_row": 1,
+      "header_score": 1
+    },
+    "next_keys": [
+      "",
+      "",
+      ""
+    ],
+    "append": {
+      "insert_at": 2,
+      "count": 3,
+      "keys": [
+        "",
+        "",
+        ""
+      ],
+      "cells": [
+        "A3",
+        "B3",
+        "C3",
+        "D3",
+        "A4",
+        "D4",
+        "A5",
+        "B5",
+        "D5"
+      ],
+      "writes": [
+        {
+          "ref": "A3",
+          "r": 2,
+          "c": 0,
+          "value": "Mirror Open Food Facts before launch",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "B3",
+          "r": 2,
+          "c": 1,
+          "value": "Prathyush Kodhanpur",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "C3",
+          "r": 2,
+          "c": 2,
+          "value": "3 Oct",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "D3",
+          "r": 2,
+          "c": 3,
+          "value": "open",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "A4",
+          "r": 3,
+          "c": 0,
+          "value": "Owner column holds a person, not a team",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "D4",
+          "r": 3,
+          "c": 3,
+          "value": "decided",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "A5",
+          "r": 4,
+          "c": 0,
+          "value": "Photo portion accuracy is unmeasured",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "B5",
+          "r": 4,
+          "c": 1,
+          "value": "Anushka Mohanty",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "D5",
+          "r": 4,
+          "c": 3,
+          "value": "blocked",
+          "kind": "new",
+          "existing": null
+        }
+      ],
+      "moved": [],
+      "applied": [
+        [
+          "Fix the upload retry",
+          "Nishchay S",
+          "26 Sep",
+          "open"
+        ],
+        [
+          "Ship the telemetry dashboard",
+          "Shambhavi Singh",
+          "30 Sep",
+          "in progress"
+        ],
+        [
+          "Mirror Open Food Facts before launch",
+          "Prathyush Kodhanpur",
+          "3 Oct",
+          "open"
+        ],
+        [
+          "Owner column holds a person, not a team",
+          "",
+          "",
+          "decided"
+        ],
+        [
+          "Photo portion accuracy is unmeasured",
+          "Anushka Mohanty",
+          "",
+          "blocked"
+        ],
+        [
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          ""
+        ]
+      ]
+    },
+    "fill": {
+      "skip": {
+        "cells": [
+          "A3",
+          "B3",
+          "D3"
+        ],
+        "writes": [
+          {
+            "ref": "A1",
+            "r": 0,
+            "c": 0,
+            "value": "Fix the upload retry",
+            "kind": "conflict",
+            "existing": "Fix the upload retry"
+          },
+          {
+            "ref": "B1",
+            "r": 0,
+            "c": 1,
+            "value": "Nishchay S",
+            "kind": "conflict",
+            "existing": "Nishchay S"
+          },
+          {
+            "ref": "C1",
+            "r": 0,
+            "c": 2,
+            "value": "26 Sep",
+            "kind": "conflict",
+            "existing": "26 Sep"
+          },
+          {
+            "ref": "D1",
+            "r": 0,
+            "c": 3,
+            "value": "open",
+            "kind": "conflict",
+            "existing": "open"
+          },
+          {
+            "ref": "A2",
+            "r": 1,
+            "c": 0,
+            "value": "Ship the telemetry dashboard",
+            "kind": "conflict",
+            "existing": "Ship the telemetry dashboard"
+          },
+          {
+            "ref": "D2",
+            "r": 1,
+            "c": 3,
+            "value": "in progress",
+            "kind": "conflict",
+            "existing": "in progress"
+          },
+          {
+            "ref": "A3",
+            "r": 2,
+            "c": 0,
+            "value": "Photo portion accuracy is unmeasured",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "B3",
+            "r": 2,
+            "c": 1,
+            "value": "Anushka Mohanty",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "D3",
+            "r": 2,
+            "c": 3,
+            "value": "blocked",
+            "kind": "new",
+            "existing": null
+          }
+        ],
+        "conflicts": [
+          "A1",
+          "B1",
+          "C1",
+          "D1",
+          "A2",
+          "D2"
+        ],
+        "field_order": [
+          {
+            "c": 0,
+            "field": "task"
+          },
+          {
+            "c": 1,
+            "field": "owner"
+          },
+          {
+            "c": 2,
+            "field": "due"
+          },
+          {
+            "c": 3,
+            "field": "status"
+          }
+        ],
+        "insert_at": null,
+        "count": 3,
+        "applied": [
+          [
+            "Fix the upload retry",
+            "Nishchay S",
+            "26 Sep",
+            "open"
+          ],
+          [
+            "Ship the telemetry dashboard",
+            "Shambhavi Singh",
+            "30 Sep",
+            "in progress"
+          ],
+          [
+            "Photo portion accuracy is unmeasured",
+            "Anushka Mohanty",
+            "",
+            "blocked"
+          ],
+          [
+            "",
+            "",
+            "",
+            ""
+          ]
+        ]
+      },
+      "overwrite": {
+        "cells": [
+          "A1",
+          "B1",
+          "C1",
+          "A2",
+          "D2",
+          "A3",
+          "B3",
+          "D3"
+        ],
+        "writes": [
+          {
+            "ref": "A1",
+            "r": 0,
+            "c": 0,
+            "value": "Mirror Open Food Facts before launch",
+            "kind": "conflict",
+            "existing": "Fix the upload retry"
+          },
+          {
+            "ref": "B1",
+            "r": 0,
+            "c": 1,
+            "value": "Prathyush Kodhanpur",
+            "kind": "conflict",
+            "existing": "Nishchay S"
+          },
+          {
+            "ref": "C1",
+            "r": 0,
+            "c": 2,
+            "value": "3 Oct",
+            "kind": "conflict",
+            "existing": "26 Sep"
+          },
+          {
+            "ref": "D1",
+            "r": 0,
+            "c": 3,
+            "value": "open",
+            "kind": "conflict",
+            "existing": "open"
+          },
+          {
+            "ref": "A2",
+            "r": 1,
+            "c": 0,
+            "value": "Owner column holds a person, not a team",
+            "kind": "conflict",
+            "existing": "Ship the telemetry dashboard"
+          },
+          {
+            "ref": "D2",
+            "r": 1,
+            "c": 3,
+            "value": "decided",
+            "kind": "conflict",
+            "existing": "in progress"
+          },
+          {
+            "ref": "A3",
+            "r": 2,
+            "c": 0,
+            "value": "Photo portion accuracy is unmeasured",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "B3",
+            "r": 2,
+            "c": 1,
+            "value": "Anushka Mohanty",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "D3",
+            "r": 2,
+            "c": 3,
+            "value": "blocked",
+            "kind": "new",
+            "existing": null
+          }
+        ],
+        "conflicts": [
+          "A1",
+          "B1",
+          "C1",
+          "D1",
+          "A2",
+          "D2"
+        ],
+        "field_order": [
+          {
+            "c": 0,
+            "field": "task"
+          },
+          {
+            "c": 1,
+            "field": "owner"
+          },
+          {
+            "c": 2,
+            "field": "due"
+          },
+          {
+            "c": 3,
+            "field": "status"
+          }
+        ],
+        "insert_at": null,
+        "count": 3,
+        "applied": [
+          [
+            "Mirror Open Food Facts before launch",
+            "Prathyush Kodhanpur",
+            "3 Oct",
+            "open"
+          ],
+          [
+            "Owner column holds a person, not a team",
+            "Shambhavi Singh",
+            "30 Sep",
+            "decided"
+          ],
+          [
+            "Photo portion accuracy is unmeasured",
+            "Anushka Mohanty",
+            "",
+            "blocked"
+          ],
+          [
+            "",
+            "",
+            "",
+            ""
+          ]
+        ]
+      },
+      "insert": {
+        "cells": [
+          "A1",
+          "B1",
+          "C1",
+          "D1",
+          "A2",
+          "D2",
+          "A3",
+          "B3",
+          "D3"
+        ],
+        "writes": [
+          {
+            "ref": "A1",
+            "r": 0,
+            "c": 0,
+            "value": "Mirror Open Food Facts before launch",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "B1",
+            "r": 0,
+            "c": 1,
+            "value": "Prathyush Kodhanpur",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "C1",
+            "r": 0,
+            "c": 2,
+            "value": "3 Oct",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "D1",
+            "r": 0,
+            "c": 3,
+            "value": "open",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A2",
+            "r": 1,
+            "c": 0,
+            "value": "Owner column holds a person, not a team",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "D2",
+            "r": 1,
+            "c": 3,
+            "value": "decided",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A3",
+            "r": 2,
+            "c": 0,
+            "value": "Photo portion accuracy is unmeasured",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "B3",
+            "r": 2,
+            "c": 1,
+            "value": "Anushka Mohanty",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "D3",
+            "r": 2,
+            "c": 3,
+            "value": "blocked",
+            "kind": "new",
+            "existing": null
+          }
+        ],
+        "conflicts": [],
+        "field_order": [
+          {
+            "c": 0,
+            "field": "task"
+          },
+          {
+            "c": 1,
+            "field": "owner"
+          },
+          {
+            "c": 2,
+            "field": "due"
+          },
+          {
+            "c": 3,
+            "field": "status"
+          }
+        ],
+        "insert_at": 0,
+        "count": 3,
+        "applied": [
+          [
+            "Mirror Open Food Facts before launch",
+            "Prathyush Kodhanpur",
+            "3 Oct",
+            "open"
+          ],
+          [
+            "Owner column holds a person, not a team",
+            "",
+            "",
+            "decided"
+          ],
+          [
+            "Photo portion accuracy is unmeasured",
+            "Anushka Mohanty",
+            "",
+            "blocked"
+          ],
+          [
+            "Fix the upload retry",
+            "Nishchay S",
+            "26 Sep",
+            "open"
+          ],
+          [
+            "Ship the telemetry dashboard",
+            "Shambhavi Singh",
+            "30 Sep",
+            "in progress"
+          ],
+          [
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            ""
+          ]
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Spec section 2: "black on white (inverted in dark), 1 px borders, 4 px radius, no colour badges;
+ * state is plain text. One selection colour for grid highlights only."
+ *
+ * So there are exactly two non-neutral tokens in the app:
+ *   --sel          the one selection hue. The grid wears it as a tint, an outline or a strike;
+ *                  the Transfer legend wears the same three on its own labels.
+ *   --destructive  the delete affordance, as text only.
+ * Everything else - warnings, errors, read-only notices, the expired-connection banner - is
+ * foreground or muted-foreground text inside a 1 px border. Review 1, finding 29.
+ */
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 42%;
+    --accent: 0 0% 95%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 60% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 89%;
+    --input: 0 0% 82%;
+    --ring: 0 0% 9%;
+    --radius: 0.25rem;
+    --grid-header: 0 0% 96%;
+    --sel: 216 80% 50%;
+  }
+
+  .dark,
+  :root[data-theme="dark"] {
+    --background: 0 0% 7%;
+    --foreground: 0 0% 92%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 92%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 92%;
+    --primary: 0 0% 92%;
+    --primary-foreground: 0 0% 7%;
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 0 0% 92%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 92%;
+    --destructive: 0 55% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 18%;
+    --input: 0 0% 26%;
+    --ring: 0 0% 92%;
+    --grid-header: 0 0% 13%;
+    --sel: 216 80% 62%;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --background: 0 0% 7%;
+      --foreground: 0 0% 92%;
+      --card: 0 0% 9%;
+      --card-foreground: 0 0% 92%;
+      --popover: 0 0% 9%;
+      --popover-foreground: 0 0% 92%;
+      --primary: 0 0% 92%;
+      --primary-foreground: 0 0% 7%;
+      --secondary: 0 0% 14%;
+      --secondary-foreground: 0 0% 92%;
+      --muted: 0 0% 14%;
+      --muted-foreground: 0 0% 60%;
+      --accent: 0 0% 15%;
+      --accent-foreground: 0 0% 92%;
+      --destructive: 0 55% 55%;
+      --destructive-foreground: 0 0% 100%;
+      --border: 0 0% 18%;
+      --input: 0 0% 26%;
+      --ring: 0 0% 92%;
+      --grid-header: 0 0% 13%;
+      --sel: 216 80% 62%;
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.92em;
+  }
+  /* Otherwise a native radio or tick paints itself in the browser's own accent, which is a sixth
+     hue nobody chose. */
+  input[type="radio"],
+  input[type="checkbox"] {
+    accent-color: hsl(var(--sel));
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
+}
+
+@layer components {
+  /*
+   * The three grid variants, so the marks in Grid.tsx, the Transfer legend and the mobile editor
+   * cannot drift apart. All three are the same hue.
+   */
+  .sel-tint {
+    background-color: hsl(var(--sel) / 0.14);
+  }
+  .sel-soft {
+    background-color: hsl(var(--sel) / 0.07);
+  }
+  .sel-outline {
+    outline: 1px solid hsl(var(--sel));
+    outline-offset: -1px;
+  }
+  .sel-strike {
+    text-decoration-line: line-through;
+    text-decoration-color: hsl(var(--sel));
+    @apply text-muted-foreground;
+  }
+}

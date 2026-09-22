@@ -1,0 +1,65 @@
+# The ArgoCD Application for Meeting Desk.
+#
+# The chart is vendored into hellosia-infra (the GitOps repo) at
+# `charts/meeting-desk/` - copy `deploy/helm/meeting-desk/` there, or add this repo as a second
+# source if the platform team prefers tracking it in place. `values-internal.yaml` lives beside it
+# and is the only file a deploy changes: the image tag and the commit.
+#
+#   kubectl apply -n argocd -f deploy/argocd/application.yaml
+#
+# Nothing here is a secret. The secrets are Infisical paths resolved in-cluster by External
+# Secrets Operator (see deploy/helm/meeting-desk/templates/externalsecret.yaml).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: meeting-desk
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: internal
+  source:
+    repoURL: https://github.com/hellosia/hellosia-infra.git
+    targetRevision: main
+    path: charts/meeting-desk
+    helm:
+      releaseName: meeting-desk
+      valueFiles:
+        - values.yaml
+        - values-internal.yaml
+      # CI sets these two on a release; everything else comes from the values files.
+      parameters:
+        - name: image.tag
+          value: "0.1.0"
+        - name: build.commit
+          value: "set-by-ci"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: meeting-desk
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      # The alembic Job is a pre-upgrade hook; ArgoCD runs Helm hooks as its own hooks and must
+      # wait for it before the Deployments are applied.
+      - ApplyOutOfSyncOnly=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 20s
+        factor: 2
+        maxDuration: 3m
+  ignoreDifferences:
+    # ESO writes the Secret this chart's ExternalSecret owns; ArgoCD must not fight it.
+    - group: ""
+      kind: Secret
+      name: meeting-desk-env
+      jsonPointers:
+        - /data
+    - group: ""
+      kind: Secret
+      name: meeting-desk-vertex-sa
+      jsonPointers:
+        - /data

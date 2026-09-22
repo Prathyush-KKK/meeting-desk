@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# Start Meeting Desk for real on this machine: docker-compose.live.yml, the shipped image, Postgres,
+# Google sign-in. Idempotent: run it again after editing .env or pulling a change.
+#
+#   scripts/mac-launch.sh            build (if needed), start, wait for /healthz
+#   scripts/mac-launch.sh logs       follow the API log
+#   scripts/mac-launch.sh down       stop (the database volume stays)
+#   scripts/mac-launch.sh reset      stop and delete the database volume
+#
+# Needs docker with the compose plugin (Colima or OrbStack on the Mac) and openssl. No Python or
+# node on the host: the image builds both.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+COMPOSE=(docker compose -f docker-compose.live.yml)
+ENV_FILE=.env
+
+case "${1:-up}" in
+  logs) exec "${COMPOSE[@]}" logs -f --tail=200 api ;;
+  down) exec "${COMPOSE[@]}" down ;;
+  reset) exec "${COMPOSE[@]}" down -v ;;
+  up) ;;
+  *) echo "usage: $0 [up|logs|down|reset]" >&2; exit 2 ;;
+esac
+
+if ! docker info >/dev/null 2>&1; then
+  echo "docker is not running (colima start / open OrbStack), then run this again." >&2
+  exit 1
+fi
+
+[ -f "$ENV_FILE" ] || cp .env.live.example "$ENV_FILE"
+
+# --- fill what can be generated -----------------------------------------------------------------
+value_of() { grep -E "^$1=" "$ENV_FILE" | head -n1 | cut -d= -f2- || true; }
+set_value() {
+  # Replace the line if the key exists, append otherwise. Values never touch the shell's history.
+  local key=$1 val=$2 tmp
+  tmp=$(mktemp)
+  if grep -qE "^$key=" "$ENV_FILE"; then
+    awk -v k="$key" -v v="$val" 'BEGIN{FS=OFS="="} $1==k {print k "=" v; next} {print}' "$ENV_FILE" >"$tmp"
+  else
+    cat "$ENV_FILE" >"$tmp"; printf '%s=%s\n' "$key" "$val" >>"$tmp"
+  fi
+  mv "$tmp" "$ENV_FILE"
+}
+
+if [ -z "$(value_of SESSION_SECRET)" ]; then
+  set_value SESSION_SECRET "$(openssl rand -base64 48 | tr -d '\n')"
+  echo "SESSION_SECRET: generated"
+fi
+if [ -z "$(value_of MEETING_DESK_TOKEN_KEY)" ]; then
+  # A Fernet key is the url-safe base64 of 32 random bytes - what `make token-key` prints.
+  set_value MEETING_DESK_TOKEN_KEY "$(openssl rand 32 | base64 | tr '+/' '-_' | tr -d '\n')"
+  echo "MEETING_DESK_TOKEN_KEY: generated (losing it means every admin reconnects; back up .env)"
+fi
+
+# --- refuse to start without the things only a person can supply -------------------------------
+missing=()
+[ -n "$(value_of GOOGLE_CLIENT_ID)" ] || missing+=(GOOGLE_CLIENT_ID)
+[ -n "$(value_of GOOGLE_CLIENT_SECRET)" ] || missing+=(GOOGLE_CLIENT_SECRET)
+[ -n "$(value_of BOOTSTRAP_ADMINS)" ] || missing+=(BOOTSTRAP_ADMINS)
+if [ ${#missing[@]} -gt 0 ]; then
+  echo "Fill these in $ENV_FILE first: ${missing[*]}" >&2
+  echo "The OAuth client: README.md, 'GCP project setup'. Redirect URIs to register:" >&2
+  echo "  $(value_of PUBLIC_URL)/auth/callback" >&2
+  echo "  $(value_of PUBLIC_URL)/admin/connections/callback" >&2
+  exit 1
+fi
+
+# --- build, start, wait -------------------------------------------------------------------------
+"${COMPOSE[@]}" up -d --build
+url="$(value_of PUBLIC_URL)"
+url="${url:-http://localhost:8000}"
+echo -n "waiting for $url/healthz "
+for _ in $(seq 1 60); do
+  if curl -fsS "$url/healthz" >/dev/null 2>&1; then
+    echo
+    echo "Meeting Desk is up: $url"
+    echo "Sign in with a $(value_of GOOGLE_HOSTED_DOMAIN) account on the allow-list ($(value_of BOOTSTRAP_ADMINS)),"
+    echo "then Admin -> Connect an account. Logs: $0 logs"
+    exit 0
+  fi
+  echo -n .
+  sleep 2
+done
+echo
+echo "not healthy after 120 s; the last log lines:" >&2
+"${COMPOSE[@]}" logs --tail=60 api >&2
+exit 1

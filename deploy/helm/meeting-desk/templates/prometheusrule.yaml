@@ -1,0 +1,238 @@
+{{- if .Values.prometheusRule.enabled }}
+{{- $sel := include "meeting-desk.metricSelector" . -}}
+{{- $svc := include "meeting-desk.fullname" . -}}
+{{/*
+The consumer the standard asks for: at least one rule that reads the six metrics.
+
+Every rule carries `service` and `severity` labels and a `remediation` annotation written in the
+event tokens app/telemetry/events.py emits - tests/test_telemetry_alerts.py asserts every token
+named below exists in the code, so a rename cannot leave a runbook pointing at nothing.
+
+`service` and `namespace` on the metrics come from the Prometheus Operator's target labels, not
+from the app: the six metrics carry only the labels the standard names.
+*/}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "meeting-desk.fullname" . }}
+  labels:
+    {{- include "meeting-desk.labels" . | nindent 4 }}
+    {{- with .Values.prometheusRule.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  groups:
+    - name: meeting-desk.providers
+      rules:
+        # --- provider last-success stale ---------------------------------------------------------
+        # min by (provider) across pods: if ANY pod has stopped succeeding against a dependency,
+        # that is the thing to look at, even while its neighbour is fine. max_over_time picks the
+        # freshest success each series saw inside the window, so a scrape gap is not an alert.
+        - alert: MeetingDeskProviderLastSuccessStale
+          expr: |
+            min by (provider) (
+              max_over_time(
+                external_provider_last_success_timestamp_seconds{
+                  {{ $sel }}, provider=~"{{ .Values.prometheusRule.watchedProviders }}"
+                }[30m]
+              )
+            ) < (time() - {{ .Values.prometheusRule.lastSuccessStaleSeconds }})
+          for: 10m
+          labels:
+            service: {{ $svc }}
+            severity: critical
+          annotations:
+            summary: "No successful {{ "{{ $labels.provider }}" }} call for {{ .Values.prometheusRule.lastSuccessStaleSeconds }}s"
+            description: >-
+              At least one Meeting Desk pod has not completed a successful call to
+              {{ "{{ $labels.provider }}" }} inside the window. Capture still works without Google;
+              the list, the Doc import and every Sheet write do not.
+            remediation: >-
+              kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }} --tail=500
+              | grep '"event":"(external_call_failed|breaker_opened|external_call_rejected_by_breaker)"'
+              - the failure_reason field says which: auth_expired means an admin must reconnect the
+              account on the Admin page, rate_limited means wait out the per-connection backoff,
+              upstream_error means Google.
+
+        # --- provider gone entirely --------------------------------------------------------------
+        # absent() rather than a threshold: after a restart the gauge is legitimately missing, so
+        # this only fires when it has not come back at all.
+        - alert: MeetingDeskDatabaseSuccessAbsent
+          expr: |
+            absent(external_provider_last_success_timestamp_seconds{ {{ $sel }}, provider="postgres" })
+          for: 15m
+          labels:
+            service: {{ $svc }}
+            severity: critical
+          annotations:
+            summary: "No Postgres success reported by any Meeting Desk pod"
+            description: >-
+              Either every pod is failing to reach RDS or no pod is running. /healthz is the same
+              check the readiness probe makes.
+            remediation: >-
+              kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }};
+              kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }} --tail=200
+              | grep '"event":"(external_call_failed|unhandled_exception)"'
+
+        # --- the breaker moved -------------------------------------------------------------------
+        - alert: MeetingDeskProviderBreakerOpen
+          expr: |
+            max by (provider) (external_provider_breaker_state{ {{ $sel }} }) == 2
+          for: 5m
+          labels:
+            service: {{ $svc }}
+            severity: warning
+          annotations:
+            summary: "Circuit breaker open for {{ "{{ $labels.provider }}" }}"
+            description: >-
+              Five consecutive dependency failures opened the breaker; calls are being refused
+              until the half-open trial succeeds.
+            remediation: >-
+              kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }} --tail=500
+              | grep '"event":"(breaker_opened|breaker_half_open|breaker_closed)"'
+              - the breaker closes itself 30 s after the dependency answers again; no restart needed.
+
+        # --- OAuth refresh failures --------------------------------------------------------------
+        - alert: MeetingDeskOAuthRefreshFailing
+          expr: |
+            sum(
+              rate(external_provider_requests_total{
+                {{ $sel }}, provider="google_oauth", op="token_refresh", outcome!="success"
+              }[15m])
+            ) > {{ .Values.prometheusRule.oauthRefreshFailures }}
+          for: 15m
+          labels:
+            service: {{ $svc }}
+            severity: critical
+          annotations:
+            summary: "A Google admin connection's refresh token is being refused"
+            description: >-
+              invalid_grant means the account was revoked, its password changed, or the app was
+              removed. Reads fall back to the other connections; with only one connection the
+              Calendar list, Doc import and Sheet writes all stop.
+            remediation: >-
+              kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }} --tail=500
+              | grep '"event":"oauth_refresh_failed"'
+              - then Admin -> Connections -> Reconnect for the account the banner names.
+
+    - name: meeting-desk.work
+      rules:
+        # --- extraction failure rate -------------------------------------------------------------
+        - alert: MeetingDeskExtractionFailureRate
+          expr: |
+            sum(rate(background_job_total{ {{ $sel }}, job_name="extract", outcome="failure" }[15m]))
+              /
+            clamp_min(sum(rate(background_job_total{ {{ $sel }}, job_name="extract" }[15m])), 0.001)
+              > {{ .Values.prometheusRule.extractionFailureRatio }}
+          for: 15m
+          labels:
+            service: {{ $svc }}
+            severity: warning
+          annotations:
+            summary: "More than {{ .Values.prometheusRule.extractionFailureRatio }} of extractions are failing"
+            description: >-
+              Notes are never lost when extraction fails, but the Points step stays empty and the
+              person has to press Try again.
+            remediation: >-
+              kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/component=worker --tail=500
+              | grep '"event":"(extraction_failed|background_job_failed|external_call_failed)"'
+              - failure_reason=provider_unavailable is Vertex or Bedrock; check
+              external_provider_requests_total{provider="vertex"} and whether
+              EXTRACT_FALLBACK_TO_BEDROCK is on.
+
+        # --- Sheets 4xx / 5xx --------------------------------------------------------------------
+        # The six metrics carry a status *class* for HTTP and an outcome for providers, not raw
+        # codes, so "4xx/5xx from Sheets" is the non-success outcome rate on the google_sheets
+        # provider. The log line behind it carries the failure_reason that separates them.
+        - alert: MeetingDeskSheetsErrorRate
+          expr: |
+            sum(rate(external_provider_requests_total{
+              {{ $sel }}, provider="google_sheets", outcome!="success"
+            }[10m]))
+              /
+            clamp_min(sum(rate(external_provider_requests_total{
+              {{ $sel }}, provider="google_sheets"
+            }[10m])), 0.001)
+              > {{ .Values.prometheusRule.sheetsErrorRatio }}
+          for: 10m
+          labels:
+            service: {{ $svc }}
+            severity: warning
+          annotations:
+            summary: "Google Sheets is refusing more than {{ .Values.prometheusRule.sheetsErrorRatio }} of calls"
+            description: >-
+              Reads and writes to the connected workbooks are failing. Transfers stop; the Sheets
+              page shows the last read.
+            remediation: >-
+              kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }} --tail=500
+              | grep '"event":"external_call_failed"' | grep google_sheets
+              - failure_reason=permission_denied is usually a protected range or a workbook the
+              connection can no longer edit; rate_limited is quota.
+
+        # --- transfer 409 rate -------------------------------------------------------------------
+        # 409 is what these three routes return when the tab moved under the person or a point went
+        # across before; they return no other 4xx in normal use (422 is a malformed client call).
+        # A sustained rate means two people are fighting over the same tab, or a re-read is stale.
+        - alert: MeetingDeskTransferConflictRate
+          expr: |
+            sum(rate(http_requests_total{
+              {{ $sel }},
+              route=~"/transfers/execute|/sheets/save|/sheets/add-row",
+              status_class="4xx"
+            }[15m]))
+              /
+            clamp_min(sum(rate(http_requests_total{
+              {{ $sel }},
+              route=~"/transfers/execute|/sheets/save|/sheets/add-row"
+            }[15m])), 0.001)
+              > {{ .Values.prometheusRule.transferConflictRatio }}
+          for: 15m
+          labels:
+            service: {{ $svc }}
+            severity: warning
+          annotations:
+            summary: "More than {{ .Values.prometheusRule.transferConflictRatio }} of writes are coming back 409"
+            description: >-
+              Nothing is lost - a 409 means the write was refused and the plan rebuilt - but people
+              are being made to redo work.
+            remediation: >-
+              kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/component=api --tail=500
+              | grep '"event":"(transfer_conflict|sheets_write_conflict)"'
+              - reason=region_hash_changed is someone editing the tab in Google Sheets at the same
+              time; reason=already_transferred is a point being sent twice.
+
+    - name: meeting-desk.http
+      rules:
+        - alert: MeetingDeskRequestLatencyHigh
+          expr: |
+            histogram_quantile(
+              0.95,
+              sum by (le, route) (rate(http_request_duration_seconds_bucket{ {{ $sel }} }[10m]))
+            ) > {{ .Values.prometheusRule.requestLatencyP95Seconds }}
+          for: 15m
+          labels:
+            service: {{ $svc }}
+            severity: warning
+          annotations:
+            summary: "p95 over {{ .Values.prometheusRule.requestLatencyP95Seconds }}s on {{ "{{ $labels.route }}" }}"
+            description: "Requests on this route are slow enough that the page feels broken."
+            remediation: >-
+              kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/component=api --tail=500
+              | grep '"event":"(request_completed|request_failed)"'
+              - sort by duration_ms; a slow route is almost always a slow provider, so check
+              external_provider_requests_total next.
+
+        - alert: MeetingDeskServerErrors
+          expr: |
+            sum(rate(http_requests_total{ {{ $sel }}, status_class="5xx" }[10m])) > 0.05
+          for: 10m
+          labels:
+            service: {{ $svc }}
+            severity: critical
+          annotations:
+            summary: "Meeting Desk is returning 5xx"
+            description: "Requests are failing outright rather than being refused with a reason."
+            remediation: >-
+              kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/component=api --tail=500
+              | grep '"event":"(request_failed|unhandled_exception)"'
+{{- end }}

@@ -1,0 +1,22 @@
+# local only
+.env
+*.db
+*.sqlite3
+
+# python
+api/.venv/
+*.egg-info/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# node
+node_modules/
+dist/
+web/e2e/last-run.png
+
+# ci
+.ci/

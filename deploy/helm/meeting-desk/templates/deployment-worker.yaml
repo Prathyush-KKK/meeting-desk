@@ -1,0 +1,89 @@
+{{- if .Values.worker.enabled }}
+{{/*
+The procrastinate worker: `python -m app.jobs.queue`.
+
+A Deployment, not a CronJob. procrastinate's own scheduler owns the periodic cadence
+(fetch_missing_docs every 5 minutes, token_health daily) and the same process picks up the
+on-demand extraction jobs the API defers - a CronJob could only do the first half, and extraction
+would sit in the queue until the next tick.
+
+It has no HTTP port and no probes that call one: liveness is the process. It does serve the same
+metrics port, so background_job_* is scraped from where the jobs actually run.
+*/}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "meeting-desk.fullname" . }}-worker
+  labels:
+    {{- include "meeting-desk.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "meeting-desk.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        {{- include "meeting-desk.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: worker
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "meeting-desk.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: worker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            {{- toYaml .Values.worker.command | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- if .Values.worker.metrics.enabled }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.containerPorts.metrics }}
+              protocol: TCP
+          {{- end }}
+          envFrom:
+            {{- include "meeting-desk.envFrom" . | nindent 12 }}
+          env:
+            {{- include "meeting-desk.commonEnv" . | nindent 12 }}
+            - name: JOBS_ENABLED
+              value: "1"
+            - name: METRICS_ENABLED
+              value: {{ .Values.worker.metrics.enabled | ternary "1" "0" | quote }}
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+          volumeMounts:
+            {{- include "meeting-desk.volumeMounts" . | nindent 12 }}
+      volumes:
+        {{- include "meeting-desk.volumes" . | nindent 8 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

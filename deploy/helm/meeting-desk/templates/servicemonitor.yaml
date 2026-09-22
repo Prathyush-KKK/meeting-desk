@@ -1,0 +1,38 @@
+{{- if .Values.serviceMonitor.enabled }}
+{{/*
+Scrapes both Services (api and worker) through the port named `metrics`. Behind a values flag
+because a cluster without the Prometheus Operator has no such CRD and the manifest would be
+rejected.
+*/}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "meeting-desk.fullname" . }}
+  labels:
+    {{- include "meeting-desk.labels" . | nindent 4 }}
+    {{- with .Values.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      {{- include "meeting-desk.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: metrics          # by name, per the standard - never a port number
+      path: /metrics
+      scheme: http
+      interval: {{ .Values.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout }}
+      honorLabels: false
+      {{- with .Values.serviceMonitor.relabelings }}
+      relabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.serviceMonitor.metricRelabelings }}
+      metricRelabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

@@ -1,0 +1,134 @@
+{
+  "kind": "calendar#events",
+  "etag": "\"p32ofbnlk8fpb20o\"",
+  "summary": "prathyush.kodhanpur@simpleo.ai",
+  "updated": "2026-09-22T10:41:12.317Z",
+  "timeZone": "Asia/Kolkata",
+  "accessRole": "owner",
+  "nextPageToken": "CigKGjNpY2ZjYnRxb2VpdDVnZ2JqYjRiNXVrYWRxGAEggIDAoLzk5a4YGg0IABIAGLDQ8-2Tt48DIAEoAQ",
+  "items": [
+    {
+      "kind": "calendar#event",
+      "etag": "\"3512345678901000\"",
+      "id": "3icfcbtqoeit5ggbjb4b5ukadq_20260919T103000Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=M2ljZmNidHFvZWl0NWdnYmpiNGI1dWthZHFfMjAyNjA5MTlUMTAzMDAwWiBwcmF0aHl1c2gua29kaGFucHVyQHNpbXBsZW8uYWk",
+      "updated": "2026-09-18T06:12:44.101Z",
+      "summary": "Nutrition roadmap review",
+      "description": "Weekly. Agenda in the doc.",
+      "location": "Meet",
+      "iCalUID": "3icfcbtqoeit5ggbjb4b5ukadq@google.com",
+      "recurringEventId": "3icfcbtqoeit5ggbjb4b5ukadq",
+      "organizer": {
+        "email": "prathyush.kodhanpur@simpleo.ai",
+        "displayName": "Prathyush Kodhanpur",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2026-09-19T16:00:00+05:30",
+        "timeZone": "Asia/Kolkata"
+      },
+      "end": {
+        "dateTime": "2026-09-19T16:45:00+05:30",
+        "timeZone": "Asia/Kolkata"
+      },
+      "attendees": [
+        {
+          "email": "prathyush.kodhanpur@simpleo.ai",
+          "displayName": "Prathyush Kodhanpur",
+          "organizer": true,
+          "self": true,
+          "responseStatus": "accepted"
+        },
+        {
+          "email": "anushka.mohanty@simpleo.ai",
+          "displayName": "Anushka Mohanty",
+          "responseStatus": "accepted"
+        },
+        {
+          "email": "nishchay.s@simpleo.ai",
+          "responseStatus": "tentative"
+        }
+      ],
+      "conferenceData": {
+        "entryPoints": [
+          {
+            "entryPointType": "video",
+            "uri": "https://meet.google.com/abc-defg-hij",
+            "label": "meet.google.com/abc-defg-hij"
+          },
+          {
+            "entryPointType": "phone",
+            "uri": "tel:+91-22-7127-0000",
+            "label": "+91 22 7127 0000"
+          }
+        ],
+        "conferenceSolution": {
+          "key": {
+            "type": "hangoutsMeet"
+          },
+          "name": "Google Meet"
+        },
+        "conferenceId": "abc-defg-hij"
+      },
+      "attachments": [
+        {
+          "fileUrl": "https://docs.google.com/document/d/1qX9Lm3kNotesDocIdForNutrition/edit",
+          "title": "Nutrition roadmap review - 2026/09/19 16:00 IST - Notes by Gemini",
+          "mimeType": "application/vnd.google-apps.document",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.document",
+          "fileId": "1qX9Lm3kNotesDocIdForNutrition"
+        }
+      ]
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3512345678902000\"",
+      "id": "7bq1r5m8k2dtn0p3vfhs6cej4o",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=N2JxMXI1bThrMmR0bjBwM3ZmaHM2Y2VqNG8gcHJhdGh5dXNoLmtvZGhhbnB1ckBzaW1wbGVvLmFp",
+      "updated": "2026-09-20T14:02:10.000Z",
+      "summary": "Sprinto vendor call",
+      "iCalUID": "7bq1r5m8k2dtn0p3vfhs6cej4o@google.com",
+      "organizer": {
+        "email": "madhu.rao@sprinto.com",
+        "displayName": "Madhu Rao"
+      },
+      "start": {
+        "dateTime": "2026-09-21T09:30:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2026-09-21T10:00:00-04:00",
+        "timeZone": "America/New_York"
+      },
+      "attendees": [
+        {
+          "email": "madhu.rao@sprinto.com",
+          "displayName": "Madhu Rao",
+          "organizer": true,
+          "responseStatus": "accepted"
+        },
+        {
+          "email": "prathyush.kodhanpur@simpleo.ai",
+          "self": true,
+          "responseStatus": "accepted"
+        }
+      ]
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3512345678903000\"",
+      "id": "cancelled_event_id_0001",
+      "status": "cancelled",
+      "summary": "Dropped 1:1",
+      "iCalUID": "cancelled_event_id_0001@google.com",
+      "start": {
+        "dateTime": "2026-09-20T11:00:00+05:30"
+      },
+      "end": {
+        "dateTime": "2026-09-20T11:30:00+05:30"
+      }
+    }
+  ]
+}

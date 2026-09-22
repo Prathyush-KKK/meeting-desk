@@ -1,0 +1,24 @@
+{
+  "notes": "Nutrition roadmap review\n\nThe Goal\nClose the dataset gaps before the launch.\n\nThe Discussion\nWeight data: the Open Food Facts mirror is missing portion weights for 40% of Indian items.\nAlert standard: v1.2 lands first, then the telemetry rollout.\nPayments: the vendor spike is unfunded.\n\nThe Next Steps\nAnushka Mohanty: Review dataset for weight information by 3 Oct\nNishchay: Finish the alert emission standard v1.2 by end of week\nPrathyush: Mirror Open Food Facts before launch\nDecided: the Owner column holds a person, not a team\nOpen question: do we fund the payments spike this quarter?\nRisk: the upload flag has no rollback plan",
+  "response": {
+    "output": {
+      "message": {
+        "role": "assistant",
+        "content": [
+          {
+            "text": "These notes do not contain a meeting."
+          }
+        ]
+      }
+    },
+    "stopReason": "end_turn",
+    "usage": {
+      "inputTokens": 1655,
+      "outputTokens": 11,
+      "totalTokens": 1666
+    },
+    "metrics": {
+      "latencyMs": 900
+    }
+  }
+}

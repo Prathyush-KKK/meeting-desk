@@ -1,0 +1,50 @@
+{
+  "spreadsheetId": "1RoadmapSpreadsheetId0000000000000000000000",
+  "sheets": [
+    {
+      "properties": {
+        "sheetId": 0,
+        "title": "P1 Resolve & Log"
+      },
+      "protectedRanges": [
+        {
+          "protectedRangeId": 1234,
+          "range": {
+            "sheetId": 0,
+            "startRowIndex": 0,
+            "endRowIndex": 3
+          },
+          "description": "Header rows",
+          "warningOnly": false,
+          "editors": {
+            "users": [
+              "ansul.s@simpleo.ai"
+            ]
+          }
+        },
+        {
+          "protectedRangeId": 5678,
+          "range": {
+            "sheetId": 0,
+            "startColumnIndex": 6,
+            "endColumnIndex": 7
+          },
+          "description": "Days left formulas",
+          "warningOnly": false,
+          "editors": {
+            "users": [
+              "ansul.s@simpleo.ai",
+              "prathyush.kodhanpur@simpleo.ai"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "properties": {
+        "sheetId": 1487211930,
+        "title": "Decisions"
+      }
+    }
+  ]
+}

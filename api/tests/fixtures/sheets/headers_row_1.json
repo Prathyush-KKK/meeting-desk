@@ -1,0 +1,894 @@
+{
+  "name": "headers_row_1",
+  "description": "Headers on row 1; the table runs to the last decision row.",
+  "title": "Decisions",
+  "rows": [
+    [
+      "ID",
+      "Decision",
+      "Workstream",
+      "Meeting",
+      "Date",
+      "Status",
+      "Notes",
+      ""
+    ],
+    [
+      "D-039",
+      "Owner column holds a person, not a team",
+      "Nutrition",
+      "Sheet review",
+      "21 Sep",
+      "decided",
+      "",
+      ""
+    ],
+    [
+      "D-040",
+      "Prioritise user acquisition over perfecting AI photo accuracy; add a verification step",
+      "Nutrition",
+      "Nutrition roadmap review",
+      "19 Sep",
+      "decided",
+      "",
+      ""
+    ],
+    [
+      "Q-011",
+      "Is a drink a meal?",
+      "Nutrition",
+      "Nutrition roadmap review",
+      "19 Sep",
+      "open",
+      "unblocks two items",
+      ""
+    ],
+    [
+      "Q-012",
+      "Practitioner identity model",
+      "Nutrition",
+      "Nutrition roadmap review",
+      "19 Sep",
+      "open",
+      "sets the P6 timeline",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  ],
+  "formulas": null,
+  "number_formats": null,
+  "dropdowns": {
+    "5": [
+      "decided",
+      "open",
+      "superseded"
+    ]
+  },
+  "formula_cols": [],
+  "date_cols": [],
+  "points": [
+    {
+      "id": "p1",
+      "kind": "action",
+      "text": "Mirror Open Food Facts before launch",
+      "owner": "Prathyush Kodhanpur",
+      "due": "3 Oct",
+      "status": "open",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    },
+    {
+      "id": "p2",
+      "kind": "decision",
+      "text": "Owner column holds a person, not a team",
+      "owner": "",
+      "due": "",
+      "status": "decided",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    },
+    {
+      "id": "p3",
+      "kind": "risk",
+      "text": "Photo portion accuracy is unmeasured",
+      "owner": "Anushka Mohanty",
+      "due": "",
+      "status": "blocked",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    }
+  ],
+  "fill": {
+    "anchor": {
+      "r": 5,
+      "c": 1
+    },
+    "write_keys": true
+  },
+  "with_hooks": null,
+  "expect": {
+    "layout": {
+      "header_row": 0,
+      "first_col": 0,
+      "last_col": 6,
+      "columns": {
+        "id": 0,
+        "decision": 1,
+        "status": 5,
+        "notes": 6
+      },
+      "key_col": 0,
+      "key_prefix": "D",
+      "last_table_row": 4,
+      "header_score": 4
+    },
+    "next_keys": [
+      "D-041",
+      "D-042",
+      "D-043"
+    ],
+    "append": {
+      "insert_at": 5,
+      "count": 3,
+      "keys": [
+        "D-041",
+        "D-042",
+        "D-043"
+      ],
+      "cells": [
+        "A6",
+        "F6",
+        "G6",
+        "A7",
+        "B7",
+        "F7",
+        "G7",
+        "A8",
+        "G8"
+      ],
+      "writes": [
+        {
+          "ref": "A6",
+          "r": 5,
+          "c": 0,
+          "value": "D-041",
+          "kind": "key",
+          "existing": null
+        },
+        {
+          "ref": "F6",
+          "r": 5,
+          "c": 5,
+          "value": "open",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "G6",
+          "r": 5,
+          "c": 6,
+          "value": "Platform squad sync · 22 Sep",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "A7",
+          "r": 6,
+          "c": 0,
+          "value": "D-042",
+          "kind": "key",
+          "existing": null
+        },
+        {
+          "ref": "B7",
+          "r": 6,
+          "c": 1,
+          "value": "Owner column holds a person, not a team",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "F7",
+          "r": 6,
+          "c": 5,
+          "value": "decided",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "G7",
+          "r": 6,
+          "c": 6,
+          "value": "Platform squad sync · 22 Sep",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "A8",
+          "r": 7,
+          "c": 0,
+          "value": "D-043",
+          "kind": "key",
+          "existing": null
+        },
+        {
+          "ref": "G8",
+          "r": 7,
+          "c": 6,
+          "value": "Platform squad sync · 22 Sep",
+          "kind": "new",
+          "existing": null
+        }
+      ],
+      "moved": [],
+      "applied": [
+        [
+          "ID",
+          "Decision",
+          "Workstream",
+          "Meeting",
+          "Date",
+          "Status",
+          "Notes",
+          ""
+        ],
+        [
+          "D-039",
+          "Owner column holds a person, not a team",
+          "Nutrition",
+          "Sheet review",
+          "21 Sep",
+          "decided",
+          "",
+          ""
+        ],
+        [
+          "D-040",
+          "Prioritise user acquisition over perfecting AI photo accuracy; add a verification step",
+          "Nutrition",
+          "Nutrition roadmap review",
+          "19 Sep",
+          "decided",
+          "",
+          ""
+        ],
+        [
+          "Q-011",
+          "Is a drink a meal?",
+          "Nutrition",
+          "Nutrition roadmap review",
+          "19 Sep",
+          "open",
+          "unblocks two items",
+          ""
+        ],
+        [
+          "Q-012",
+          "Practitioner identity model",
+          "Nutrition",
+          "Nutrition roadmap review",
+          "19 Sep",
+          "open",
+          "sets the P6 timeline",
+          ""
+        ],
+        [
+          "D-041",
+          "",
+          "",
+          "",
+          "",
+          "open",
+          "Platform squad sync · 22 Sep",
+          ""
+        ],
+        [
+          "D-042",
+          "Owner column holds a person, not a team",
+          "",
+          "",
+          "",
+          "decided",
+          "Platform squad sync · 22 Sep",
+          ""
+        ],
+        [
+          "D-043",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "Platform squad sync · 22 Sep",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ]
+    },
+    "fill": {
+      "skip": {
+        "cells": [
+          "F6",
+          "G6",
+          "A6",
+          "B7",
+          "F7",
+          "G7",
+          "A7",
+          "G8",
+          "A8"
+        ],
+        "writes": [
+          {
+            "ref": "F6",
+            "r": 5,
+            "c": 5,
+            "value": "open",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "G6",
+            "r": 5,
+            "c": 6,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A6",
+            "r": 5,
+            "c": 0,
+            "value": "D-041",
+            "kind": "key",
+            "existing": null
+          },
+          {
+            "ref": "B7",
+            "r": 6,
+            "c": 1,
+            "value": "Owner column holds a person, not a team",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "F7",
+            "r": 6,
+            "c": 5,
+            "value": "decided",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "G7",
+            "r": 6,
+            "c": 6,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A7",
+            "r": 6,
+            "c": 0,
+            "value": "D-042",
+            "kind": "key",
+            "existing": null
+          },
+          {
+            "ref": "G8",
+            "r": 7,
+            "c": 6,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A8",
+            "r": 7,
+            "c": 0,
+            "value": "D-043",
+            "kind": "key",
+            "existing": null
+          }
+        ],
+        "conflicts": [],
+        "field_order": [
+          {
+            "c": 1,
+            "field": "decision"
+          },
+          {
+            "c": 5,
+            "field": "status"
+          },
+          {
+            "c": 6,
+            "field": "notes"
+          }
+        ],
+        "insert_at": null,
+        "count": 3,
+        "applied": [
+          [
+            "ID",
+            "Decision",
+            "Workstream",
+            "Meeting",
+            "Date",
+            "Status",
+            "Notes",
+            ""
+          ],
+          [
+            "D-039",
+            "Owner column holds a person, not a team",
+            "Nutrition",
+            "Sheet review",
+            "21 Sep",
+            "decided",
+            "",
+            ""
+          ],
+          [
+            "D-040",
+            "Prioritise user acquisition over perfecting AI photo accuracy; add a verification step",
+            "Nutrition",
+            "Nutrition roadmap review",
+            "19 Sep",
+            "decided",
+            "",
+            ""
+          ],
+          [
+            "Q-011",
+            "Is a drink a meal?",
+            "Nutrition",
+            "Nutrition roadmap review",
+            "19 Sep",
+            "open",
+            "unblocks two items",
+            ""
+          ],
+          [
+            "Q-012",
+            "Practitioner identity model",
+            "Nutrition",
+            "Nutrition roadmap review",
+            "19 Sep",
+            "open",
+            "sets the P6 timeline",
+            ""
+          ],
+          [
+            "D-041",
+            "",
+            "",
+            "",
+            "",
+            "open",
+            "Platform squad sync · 22 Sep",
+            ""
+          ],
+          [
+            "D-042",
+            "Owner column holds a person, not a team",
+            "",
+            "",
+            "",
+            "decided",
+            "Platform squad sync · 22 Sep",
+            ""
+          ],
+          [
+            "D-043",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Platform squad sync · 22 Sep",
+            ""
+          ]
+        ]
+      },
+      "overwrite": {
+        "cells": [
+          "F6",
+          "G6",
+          "A6",
+          "B7",
+          "F7",
+          "G7",
+          "A7",
+          "G8",
+          "A8"
+        ],
+        "writes": [
+          {
+            "ref": "F6",
+            "r": 5,
+            "c": 5,
+            "value": "open",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "G6",
+            "r": 5,
+            "c": 6,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A6",
+            "r": 5,
+            "c": 0,
+            "value": "D-041",
+            "kind": "key",
+            "existing": null
+          },
+          {
+            "ref": "B7",
+            "r": 6,
+            "c": 1,
+            "value": "Owner column holds a person, not a team",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "F7",
+            "r": 6,
+            "c": 5,
+            "value": "decided",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "G7",
+            "r": 6,
+            "c": 6,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A7",
+            "r": 6,
+            "c": 0,
+            "value": "D-042",
+            "kind": "key",
+            "existing": null
+          },
+          {
+            "ref": "G8",
+            "r": 7,
+            "c": 6,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A8",
+            "r": 7,
+            "c": 0,
+            "value": "D-043",
+            "kind": "key",
+            "existing": null
+          }
+        ],
+        "conflicts": [],
+        "field_order": [
+          {
+            "c": 1,
+            "field": "decision"
+          },
+          {
+            "c": 5,
+            "field": "status"
+          },
+          {
+            "c": 6,
+            "field": "notes"
+          }
+        ],
+        "insert_at": null,
+        "count": 3,
+        "applied": [
+          [
+            "ID",
+            "Decision",
+            "Workstream",
+            "Meeting",
+            "Date",
+            "Status",
+            "Notes",
+            ""
+          ],
+          [
+            "D-039",
+            "Owner column holds a person, not a team",
+            "Nutrition",
+            "Sheet review",
+            "21 Sep",
+            "decided",
+            "",
+            ""
+          ],
+          [
+            "D-040",
+            "Prioritise user acquisition over perfecting AI photo accuracy; add a verification step",
+            "Nutrition",
+            "Nutrition roadmap review",
+            "19 Sep",
+            "decided",
+            "",
+            ""
+          ],
+          [
+            "Q-011",
+            "Is a drink a meal?",
+            "Nutrition",
+            "Nutrition roadmap review",
+            "19 Sep",
+            "open",
+            "unblocks two items",
+            ""
+          ],
+          [
+            "Q-012",
+            "Practitioner identity model",
+            "Nutrition",
+            "Nutrition roadmap review",
+            "19 Sep",
+            "open",
+            "sets the P6 timeline",
+            ""
+          ],
+          [
+            "D-041",
+            "",
+            "",
+            "",
+            "",
+            "open",
+            "Platform squad sync · 22 Sep",
+            ""
+          ],
+          [
+            "D-042",
+            "Owner column holds a person, not a team",
+            "",
+            "",
+            "",
+            "decided",
+            "Platform squad sync · 22 Sep",
+            ""
+          ],
+          [
+            "D-043",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Platform squad sync · 22 Sep",
+            ""
+          ]
+        ]
+      },
+      "insert": {
+        "cells": [
+          "F6",
+          "G6",
+          "A6",
+          "B7",
+          "F7",
+          "G7",
+          "A7",
+          "G8",
+          "A8"
+        ],
+        "writes": [
+          {
+            "ref": "F6",
+            "r": 5,
+            "c": 5,
+            "value": "open",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "G6",
+            "r": 5,
+            "c": 6,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A6",
+            "r": 5,
+            "c": 0,
+            "value": "D-041",
+            "kind": "key",
+            "existing": null
+          },
+          {
+            "ref": "B7",
+            "r": 6,
+            "c": 1,
+            "value": "Owner column holds a person, not a team",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "F7",
+            "r": 6,
+            "c": 5,
+            "value": "decided",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "G7",
+            "r": 6,
+            "c": 6,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A7",
+            "r": 6,
+            "c": 0,
+            "value": "D-042",
+            "kind": "key",
+            "existing": null
+          },
+          {
+            "ref": "G8",
+            "r": 7,
+            "c": 6,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A8",
+            "r": 7,
+            "c": 0,
+            "value": "D-043",
+            "kind": "key",
+            "existing": null
+          }
+        ],
+        "conflicts": [],
+        "field_order": [
+          {
+            "c": 1,
+            "field": "decision"
+          },
+          {
+            "c": 5,
+            "field": "status"
+          },
+          {
+            "c": 6,
+            "field": "notes"
+          }
+        ],
+        "insert_at": 5,
+        "count": 3,
+        "applied": [
+          [
+            "ID",
+            "Decision",
+            "Workstream",
+            "Meeting",
+            "Date",
+            "Status",
+            "Notes",
+            ""
+          ],
+          [
+            "D-039",
+            "Owner column holds a person, not a team",
+            "Nutrition",
+            "Sheet review",
+            "21 Sep",
+            "decided",
+            "",
+            ""
+          ],
+          [
+            "D-040",
+            "Prioritise user acquisition over perfecting AI photo accuracy; add a verification step",
+            "Nutrition",
+            "Nutrition roadmap review",
+            "19 Sep",
+            "decided",
+            "",
+            ""
+          ],
+          [
+            "Q-011",
+            "Is a drink a meal?",
+            "Nutrition",
+            "Nutrition roadmap review",
+            "19 Sep",
+            "open",
+            "unblocks two items",
+            ""
+          ],
+          [
+            "Q-012",
+            "Practitioner identity model",
+            "Nutrition",
+            "Nutrition roadmap review",
+            "19 Sep",
+            "open",
+            "sets the P6 timeline",
+            ""
+          ],
+          [
+            "D-041",
+            "",
+            "",
+            "",
+            "",
+            "open",
+            "Platform squad sync · 22 Sep",
+            ""
+          ],
+          [
+            "D-042",
+            "Owner column holds a person, not a team",
+            "",
+            "",
+            "",
+            "decided",
+            "Platform squad sync · 22 Sep",
+            ""
+          ],
+          [
+            "D-043",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Platform squad sync · 22 Sep",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ]
+      }
+    }
+  }
+}

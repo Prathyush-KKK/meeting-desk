@@ -1,0 +1,51 @@
+{
+  "documentId": "1legacyDocWithoutTabs",
+  "title": "Old style doc",
+  "body": {
+    "content": [
+      {
+        "sectionBreak": {}
+      },
+      {
+        "startIndex": 0,
+        "endIndex": 1,
+        "paragraph": {
+          "elements": [
+            {
+              "startIndex": 0,
+              "endIndex": 12,
+              "textRun": {
+                "content": "Only a body\n",
+                "textStyle": {}
+              }
+            }
+          ],
+          "paragraphStyle": {
+            "namedStyleType": "HEADING_2",
+            "direction": "LEFT_TO_RIGHT"
+          }
+        }
+      },
+      {
+        "startIndex": 0,
+        "endIndex": 1,
+        "paragraph": {
+          "elements": [
+            {
+              "startIndex": 0,
+              "endIndex": 10,
+              "textRun": {
+                "content": "One line.\n",
+                "textStyle": {}
+              }
+            }
+          ],
+          "paragraphStyle": {
+            "namedStyleType": "NORMAL_TEXT",
+            "direction": "LEFT_TO_RIGHT"
+          }
+        }
+      }
+    ]
+  }
+}

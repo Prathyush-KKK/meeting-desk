@@ -1,0 +1,56 @@
+{{/*
+Two Services, both naming their ports.
+
+The API Service carries `http` (the ingress target) and `metrics`. The worker Service is headless
+and carries `metrics` only - the worker has no HTTP surface, but background_job_* is emitted where
+the jobs run, so it has to be scraped there.
+
+The ServiceMonitor references the port by the name `metrics`, never by number, so moving
+containerPorts.metrics needs no change on the Prometheus side.
+*/}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "meeting-desk.fullname" . }}
+  labels:
+    {{- include "meeting-desk.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.service.httpPort }}
+      targetPort: http
+      protocol: TCP
+    - name: metrics
+      port: {{ .Values.service.metricsPort }}
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    {{- include "meeting-desk.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+{{- if and .Values.worker.enabled .Values.worker.metrics.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "meeting-desk.fullname" . }}-worker
+  labels:
+    {{- include "meeting-desk.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: metrics
+      port: {{ .Values.service.metricsPort }}
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    {{- include "meeting-desk.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+{{- end }}

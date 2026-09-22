@@ -1,0 +1,69 @@
+# Meeting Desk on one machine, for real: the shipped image (API + built SPA + alembic) against
+# Postgres, with the real Google clients and Google sign-in. This is the Mac launch.
+#
+#   cp .env.live.example .env      # then fill GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET
+#   scripts/mac-launch.sh          # generates the two keys if missing, builds, starts, waits
+#   open http://localhost:8000
+#
+# Standalone on purpose (not an override of docker-compose.yml): the dev file mounts the source
+# tree, runs uvicorn --reload, seeds the demo world and signs everyone in as AUTH_DEV_USER. None of
+# that belongs in a stack that holds real refresh tokens. Nothing here mounts source; the image is
+# the deployment artefact, exactly as the chart runs it.
+name: meeting-desk-live
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: meetingdesk
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-meetingdesk}
+      POSTGRES_DB: meetingdesk
+    volumes:
+      - db-data-live:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meetingdesk -d meetingdesk"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.api
+      args:
+        # "[llm]" adds the Vertex and Bedrock SDKs, needed once FAKE_LLM=0. Off by default: the
+        # rule-based extractor needs nothing.
+        EXTRAS: ${EXTRAS:-}
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: true
+    environment:
+      # Everything below is fixed by the shape of this stack; .env holds the secrets and the choices.
+      ENVIRONMENT: local # http://localhost: the cookies must not be Secure (Safari drops them)
+      DATABASE_URL: postgresql+psycopg://meetingdesk:${POSTGRES_PASSWORD:-meetingdesk}@db:5432/meetingdesk
+      FAKE_GOOGLE: "0"
+      FAKE_LLM: ${FAKE_LLM:-1}
+      SEED_DEMO: "0"
+      AUTH_DEV_USER: ""
+      WEB_DIST: /srv/web/dist
+      WEB_BASE_URL: ${PUBLIC_URL:-http://localhost:8000}
+      GOOGLE_OIDC_REDIRECT_URI: ${PUBLIC_URL:-http://localhost:8000}/auth/callback
+      GOOGLE_CONNECT_REDIRECT_URI: ${PUBLIC_URL:-http://localhost:8000}/admin/connections/callback
+      CORS_ORIGINS: '["${PUBLIC_URL:-http://localhost:8000}"]'
+      JOBS_ENABLED: "0" # extraction runs inline; the Doc re-check and token health run from Admin
+      METRICS_ENABLED: "1"
+      METRICS_PORT: "9464"
+    ports:
+      - "${BIND_HOST:-127.0.0.1}:8000:8000"
+      - "127.0.0.1:9464:9464"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >-
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --no-access-log"
+
+volumes:
+  db-data-live:

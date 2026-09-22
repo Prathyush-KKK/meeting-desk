@@ -1,0 +1,11 @@
+{{/* Non-secret environment. Anything that would be a credential belongs in externalsecret.yaml. */}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "meeting-desk.configMapName" . }}
+  labels:
+    {{- include "meeting-desk.labels" . | nindent 4 }}
+data:
+  {{- range $key, $value := .Values.env }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

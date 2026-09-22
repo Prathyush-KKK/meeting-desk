@@ -1,0 +1,82 @@
+{
+  "spreadsheetId": "1RoadmapSpreadsheetId0000000000000000000000",
+  "valueRanges": [
+    {
+      "range": "'P1 Resolve & Log'!A1:Z40",
+      "majorDimension": "ROWS",
+      "values": [
+        [
+          "Nutrition Sialet Product Roadmap",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Updated weekly",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "ID",
+          "Task",
+          "Owner",
+          "Due",
+          "Status",
+          "Priority",
+          "Days left",
+          "Notes"
+        ],
+        [
+          "T-101",
+          "Mirror Open Food Facts",
+          "Prathyush Kodhanpur",
+          "3 Oct 2026",
+          "In progress",
+          "P1",
+          "11",
+          "Nutrition roadmap review · 19 Sep"
+        ],
+        [
+          "T-102",
+          "Review dataset for weight information",
+          "Anushka Mohanty",
+          "3 Oct 2026",
+          "Open",
+          "P2",
+          "11",
+          ""
+        ],
+        [
+          "T-103",
+          "Finish the alert emission standard v1.2",
+          "Nishchay S",
+          "25 Sep 2026",
+          "Open",
+          "P1",
+          "3",
+          ""
+        ],
+        [],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "Note: keep P0 items at the top"
+        ]
+      ]
+    }
+  ]
+}

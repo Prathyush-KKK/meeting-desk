@@ -1,0 +1,99 @@
+name: meeting-desk
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: meetingdesk
+      POSTGRES_PASSWORD: meetingdesk
+      POSTGRES_DB: meetingdesk
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meetingdesk -d meetingdesk"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.api
+    env_file:
+      # Copy .env.example to .env to override anything below.
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+psycopg://meetingdesk:meetingdesk@db:5432/meetingdesk
+      FAKE_GOOGLE: "1"
+      FAKE_LLM: "1"
+      AUTH_DEV_USER: prathyush.kodhanpur@simpleo.ai
+      CORS_ORIGINS: '["http://localhost:5173"]'
+      # /metrics is on its own port here too, so `curl localhost:8000/metrics` fails locally
+      # exactly as it does through the ingress.
+      METRICS_ENABLED: "1"
+      METRICS_PORT: "9464"
+    ports:
+      - "8000:8000"
+      - "9464:9464"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./api:/srv/api
+    command: >-
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  # The job worker: extraction, the Notes by Gemini re-check, token health. Opt in with
+  # `docker compose --profile jobs up` and JOBS_ENABLED=1 on the api (in .env) so it enqueues.
+  worker:
+    profiles: ["jobs"]
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.api
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+psycopg://meetingdesk:meetingdesk@db:5432/meetingdesk
+      FAKE_GOOGLE: "1"
+      FAKE_LLM: "1"
+      JOBS_ENABLED: "1"
+      # The worker serves the same metrics app, so background_job_* is scraped where jobs run.
+      METRICS_ENABLED: "1"
+      METRICS_PORT: "9464"
+    ports:
+      - "9465:9464"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./api:/srv/api
+    command: >-
+      sh -c "python -m app.jobs.schema &&
+             python -m app.jobs.queue"
+
+  # The Vite dev server, proxying /api to the api service - the fast loop for web work.
+  # The deployed artefact is different: deploy/Dockerfile.api builds this app and copies `dist`
+  # into the API image as WEB_DIST, so one container serves both. `make docker-build` builds it.
+  web:
+    image: node:22-alpine
+    working_dir: /srv/web
+    environment:
+      VITE_API_TARGET: http://api:8000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./web:/srv/web
+    command: >-
+      sh -c "corepack enable &&
+             pnpm install &&
+             pnpm dev --host 0.0.0.0"
+    depends_on:
+      - api
+
+volumes:
+  db-data:
