@@ -53,6 +53,11 @@ services:
       GOOGLE_CONNECT_REDIRECT_URI: ${PUBLIC_URL:-http://localhost:8000}/admin/connections/callback
       CORS_ORIGINS: '["${PUBLIC_URL:-http://localhost:8000}"]'
       JOBS_ENABLED: "0" # extraction runs inline; the Doc re-check and token health run from Admin
+      # AWS credentials for Bedrock: from .env, or from the shell that runs the script.
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-ap-south-1}
       METRICS_ENABLED: "1"
       METRICS_PORT: "9464"
     ports:

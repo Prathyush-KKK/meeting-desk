@@ -15,7 +15,7 @@ from sqlalchemy import select
 from app.config import Settings
 from app.google.tokens import generate_key
 from app.main import create_app
-from app.models import Activity, AllowListEntry, User
+from app.models import Activity, AllowListEntry, Connection, User
 from tests.conftest import ADMIN, MEMBER, make_settings
 
 FIRST = "first.admin@simpleo.ai"
@@ -121,3 +121,86 @@ def test_local_real_mode_sign_in_refuses_a_weak_session_secret(tmp_path: Path) -
     # A real secret starts; the same weak secret is fine while AUTH_DEV_USER carries sign-in.
     create_app(_real_mode(tmp_path, environment="local", session_secret="x" * 40))
     create_app(_real_mode(tmp_path, environment="local", session_secret="short", auth_dev_user=ADMIN))
+
+
+# --- first sign-in goes straight to the connector -----------------------------------------------------------------
+
+
+def _user(role: str, email: str = FIRST) -> User:
+    return User(google_sub=f"sub|{email}", email=email, name="First Admin", role=role)
+
+
+def test_a_new_admin_is_sent_to_the_connect_flow_after_signing_in(tmp_path: Path) -> None:
+    from urllib.parse import parse_qs, urlparse
+
+    from app.auth.oidc import first_signin_redirect
+
+    settings = _real_mode(tmp_path, bootstrap_admins=FIRST)
+    app = create_app(settings)
+    with TestClient(app), app.state.db.session() as db:
+        target = first_signin_redirect(db, settings, _user("admin"))
+        assert target is not None
+        parsed = urlparse(target)
+        assert parsed.path == "/admin/connections/connect"
+        assert parse_qs(parsed.query) == {"email": [FIRST], "next": ["/"]}
+
+        # A member is never asked; an admin whose account is connected is not asked again.
+        assert first_signin_redirect(db, settings, _user("member", "m@simpleo.ai")) is None
+        db.add(Connection(email=FIRST, name="First", scopes=[], status="ok", key_version=1))
+        db.commit()
+        assert first_signin_redirect(db, settings, _user("admin")) is None
+        # An expired connection asks again: that is the reconnect the Admin banner would ask for.
+        db.query(Connection).filter_by(email=FIRST).update({"status": "expired"})
+        db.commit()
+        assert first_signin_redirect(db, settings, _user("admin")) is not None
+
+
+def test_the_connect_redirect_is_skipped_in_fake_mode_and_when_unconfigured(tmp_path: Path) -> None:
+    from app.auth.oidc import first_signin_redirect
+
+    fake = make_settings(tmp_path, bootstrap_admins=FIRST)
+    app = create_app(fake)
+    with TestClient(app), app.state.db.session() as db:
+        assert first_signin_redirect(db, fake, _user("admin")) is None
+
+    half = _real_mode(tmp_path, token_key="")
+    # Not started as an app (the real suite refuses an empty key); the decision alone is under test.
+    with app.state.db.session() as db:
+        assert first_signin_redirect(db, half, _user("admin")) is None
+
+
+def test_connect_next_lands_the_person_where_they_started(tmp_path: Path) -> None:
+    """``next=/`` from sign-in returns to Step 1; anything off-host falls back to /admin."""
+    from urllib.parse import parse_qs, urlparse
+
+    from app.routes.admin import safe_next
+    from tests.google_mock import MockGoogleApi
+
+    assert safe_next("/") == "/"
+    assert safe_next("/admin") == "/admin"
+    assert safe_next("") == "/admin"
+    assert safe_next("https://evil.example/") == "/admin"
+    assert safe_next("//evil.example") == "/admin"
+
+    api = (
+        MockGoogleApi()
+        .on("POST", "/token", "oauth_token_exchange.json")
+        .on("GET", "/v1/userinfo", "oauth_userinfo.json")
+    )
+    settings = make_settings(
+        tmp_path,
+        google_client_id="client-id.apps.googleusercontent.com",
+        google_client_secret="client-secret",
+        token_key=generate_key(),
+    )
+    app = create_app(settings, transport=api.transport())
+    with TestClient(app) as client:
+        start = client.get("/admin/connections/connect", params={"next": "/"}, follow_redirects=False)
+        state = parse_qs(urlparse(start.headers["location"]).query)["state"][0]
+        done = client.get(
+            "/admin/connections/callback", params={"code": "c", "state": state}, follow_redirects=False
+        )
+        assert done.status_code == 303
+        assert done.headers["location"] == "http://localhost:5173/?connected=ansul.s%40simpleo.ai"
+        listing = client.get("/admin/connections").json()
+        assert listing["first_run"] is False and listing["first_run_notice"] == ""

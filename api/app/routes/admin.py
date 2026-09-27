@@ -34,6 +34,19 @@ ONE_CONNECTION_WARNING = (
 )
 CONNECT_STATE_KEY = "connect_state"
 CONNECT_VERIFIER_KEY = "connect_code_verifier"
+CONNECT_NEXT_KEY = "connect_next"
+FIRST_RUN_NOTICE = (
+    "No Google account is connected yet, so the calendar, Notes by Gemini and Sheets are off. "
+    "Connect yours to switch them on."
+)
+
+
+def safe_next(value: str) -> str:
+    """Where to land after the connect flow: a path inside the app, never another host."""
+    value = (value or "").strip()
+    if not value.startswith("/") or value.startswith("//") or "\\" in value:
+        return "/admin"
+    return value
 
 
 @router.get("/connections")
@@ -52,6 +65,10 @@ def list_connections(
             if expired
             else ""
         ),
+        # First run: nothing is connected at all. The app shows this with a Connect button, and
+        # sign-in sends a new admin straight to the consent screen (app.auth.oidc).
+        "first_run": not rows,
+        "first_run_notice": FIRST_RUN_NOTICE if not rows else "",
     }
 
 
@@ -88,15 +105,22 @@ def _require_connect_config(settings: Settings) -> TokenCipher:
 def connect_account(
     request: Request,
     email: str = "",
+    next: str = "/admin",
     settings: Settings = Depends(get_config),
     user: User = Depends(require_admin),
 ) -> Response:
-    """Send the admin to Google. ``email`` pre-selects the account for a reconnect."""
+    """Send the admin to Google.
+
+    ``email`` pre-selects the account (a reconnect, or the person who just signed in); ``next`` is
+    the app path to land on afterwards - ``/admin`` by default, ``/`` when sign-in started this so
+    the person arrives at Step 1 with their calendar already there.
+    """
     _require_connect_config(settings)
     client = connect_flow.oauth_client(settings, getattr(request.app.state, "transport", None))
     url, state, verifier = connect_flow.authorization_url(client, settings, login_hint=email)
     request.session[CONNECT_STATE_KEY] = state
     request.session[CONNECT_VERIFIER_KEY] = verifier
+    request.session[CONNECT_NEXT_KEY] = safe_next(next)
     return RedirectResponse(url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 
 
@@ -115,9 +139,10 @@ def connect_callback(
     cipher = _require_connect_config(settings)
     expected = request.session.pop(CONNECT_STATE_KEY, None)
     verifier = request.session.pop(CONNECT_VERIFIER_KEY, "") or ""
+    back_to = safe_next(str(request.session.pop(CONNECT_NEXT_KEY, "") or ""))
     if error:
         log(db, user.email, f"Google connection refused: {error}")
-        return _back_to_admin(settings, error=error)
+        return _back_to_app(settings, back_to, error=error)
     if not code or not state or not expected or state != expected:
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST, "The connect flow did not come back with a valid state."
@@ -153,17 +178,22 @@ def connect_callback(
     clear_calendar_cache(request)
     missing = connect_flow.missing_scopes(list(connection.scopes or []))
     log(db, user.email, f"{'Connected' if created else 'Reconnected'} Google account {connection.email}")
-    return _back_to_admin(
-        settings, connected=connection.email, missing=",".join(missing) if missing else None
+    # A scope left unticked is worth a look at the Admin page whatever ``next`` said.
+    return _back_to_app(
+        settings,
+        "/admin" if missing else back_to,
+        connected=connection.email,
+        missing=",".join(missing) if missing else None,
     )
 
 
-def _back_to_admin(settings: Settings, **params: str | None) -> Response:
+def _back_to_app(settings: Settings, path: str, **params: str | None) -> Response:
+    """303 to the web app at ``path`` (``/`` is the capture flow, ``/admin`` the Admin page)."""
     query = urlencode({k: v for k, v in params.items() if v})
-    return RedirectResponse(
-        f"{settings.web_base_url.rstrip('/')}/admin" + (f"?{query}" if query else ""),
-        status_code=status.HTTP_303_SEE_OTHER,
-    )
+    base = settings.web_base_url.rstrip("/")
+    path = safe_next(path)
+    url = base + path + (f"?{query}" if query else "")
+    return RedirectResponse(url, status_code=status.HTTP_303_SEE_OTHER)
 
 
 @router.post("/connections/rotate-keys")

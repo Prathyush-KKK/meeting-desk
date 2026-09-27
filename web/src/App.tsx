@@ -9,7 +9,7 @@ import { SheetsPage } from "@/pages/SheetsPage";
 import { AdminPage } from "@/pages/AdminPage";
 import { NotAllowed, SignIn } from "@/pages/SignIn";
 import { cn } from "@/lib/utils";
-import { ApiError } from "@/api/client";
+import { ApiError, apiUrl } from "@/api/client";
 import { useConnections, useMe, useMeetings } from "@/api/hooks";
 
 type Page = "capture" | "sheets" | "admin";
@@ -135,6 +135,12 @@ export default function App() {
 
       {connections.data?.banner && (
         <div className="shrink-0 border-b px-4 py-1.5 text-xs font-medium md:px-6" data-testid="connection-banner">{connections.data.banner}</div>
+      )}
+      {!connections.data?.banner && connections.data?.first_run && (
+        <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-b px-4 py-1.5 text-xs md:px-6" data-testid="first-run-banner">
+          <span>{connections.data.first_run_notice}</span>
+          <a className="font-medium underline underline-offset-2" href={apiUrl("/admin/connections/connect?next=/")}>Connect Google account</a>
+        </div>
       )}
 
       <main className="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:overflow-hidden md:px-6">

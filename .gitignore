@@ -20,3 +20,6 @@ web/e2e/last-run.png
 
 # ci
 .ci/
+
+# local launch output
+.launch.log

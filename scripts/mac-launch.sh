@@ -67,6 +67,30 @@ if [ ${#missing[@]} -gt 0 ]; then
   exit 1
 fi
 
+# --- the model: which extra to build, and is it configured --------------------------------------
+provider="$(value_of EXTRACTION_PROVIDER)"
+if [ "$(value_of FAKE_LLM)" = "0" ]; then
+  case "$provider" in
+    bedrock)
+      export EXTRAS="[bedrock]"
+      if [ -z "$(value_of AWS_ACCESS_KEY_ID)" ] && [ -z "${AWS_ACCESS_KEY_ID:-}" ]; then
+        echo "EXTRACTION_PROVIDER=bedrock needs AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY (in $ENV_FILE or the shell)." >&2
+        exit 1
+      fi
+      [ -n "$(value_of BEDROCK_MODEL)" ] || { echo "BEDROCK_MODEL is empty." >&2; exit 1; }
+      echo "extraction: Bedrock $(value_of BEDROCK_MODEL) in $(value_of BEDROCK_REGION)"
+      ;;
+    vertex)
+      export EXTRAS="[vertex]"
+      [ -n "$(value_of VERTEX_PROJECT)" ] || { echo "VERTEX_PROJECT is empty." >&2; exit 1; }
+      echo "extraction: Vertex $(value_of VERTEX_MODEL) in $(value_of VERTEX_LOCATION), project $(value_of VERTEX_PROJECT)"
+      ;;
+    *) echo "FAKE_LLM=0 but EXTRACTION_PROVIDER is '$provider' (bedrock or vertex)." >&2; exit 1 ;;
+  esac
+else
+  echo "extraction: rule-based (FAKE_LLM=1)"
+fi
+
 # --- build, start, wait -------------------------------------------------------------------------
 "${COMPOSE[@]}" up -d --build
 url="$(value_of PUBLIC_URL)"

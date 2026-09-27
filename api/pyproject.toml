@@ -31,10 +31,9 @@ dependencies = [
 
 [project.optional-dependencies]
 # The model SDKs are heavy and only needed with FAKE_LLM=0; both are imported lazily.
-llm = [
-  "google-cloud-aiplatform==1.75.0",
-  "boto3==1.35.90",
-]
+vertex = ["google-cloud-aiplatform==1.75.0"]
+bedrock = ["boto3==1.35.90"]
+llm = ["google-cloud-aiplatform==1.75.0", "boto3==1.35.90"]
 dev = [
   "pytest==8.3.4",
   "pytest-cov==6.0.0",

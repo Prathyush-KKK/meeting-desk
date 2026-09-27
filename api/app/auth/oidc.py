@@ -8,6 +8,7 @@ allow-list entry binds to the Google ``sub`` on first sign-in.
 from __future__ import annotations
 
 from typing import Any
+from urllib.parse import urlencode
 
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -19,7 +20,7 @@ from app.auth import session as session_cookie
 from app.auth.deps import authenticate, get_config
 from app.config import Settings
 from app.db import get_session
-from app.models import AllowListEntry, User
+from app.models import AllowListEntry, Connection, User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -117,9 +118,32 @@ async def callback(
     entry.matched_user_id = user.id
     db.commit()
 
-    response = RedirectResponse(settings.web_base_url)
+    # An admin who has not connected their Google account goes straight on to that consent
+    # screen: one sign-in, one scope screen, and Step 1 already has their calendar. Everyone else
+    # lands in the app.
+    response = RedirectResponse(first_signin_redirect(db, settings, user) or settings.web_base_url)
     session_cookie.issue(settings, response, google_sub, email)
     return response
+
+
+def first_signin_redirect(db: Session, settings: Settings, user: User) -> str | None:
+    """The connect flow for an admin with no working connection of their own, else ``None``.
+
+    Only when the real Google clients are in use and the connect flow is configured (client id,
+    secret and the token key): in fake mode or on a half-configured box the person is not sent
+    into a flow that would answer 503. The path is relative, so it resolves against the API's
+    own origin whether the SPA is served from it or from Vite.
+    """
+    if user.role != "admin" or settings.fake_google:
+        return None
+    if not (settings.google_client_id and settings.google_client_secret and settings.token_key):
+        return None
+    connected = db.scalar(
+        select(Connection.id).where(Connection.email == user.email).where(Connection.status == "ok")
+    )
+    if connected is not None:
+        return None
+    return "/admin/connections/connect?" + urlencode({"email": user.email, "next": "/"})
 
 
 @router.post("/logout")

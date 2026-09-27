@@ -52,7 +52,7 @@ class BedrockExtractionProvider:
             try:
                 import boto3
             except ImportError as exc:  # pragma: no cover - the extra is not installed
-                raise ExtractionError("boto3 is not installed (pip install '.[llm]').") from exc
+                raise ExtractionError("boto3 is not installed (pip install '.[bedrock]').") from exc
             self._client = boto3.client("bedrock-runtime", region_name=self.region)
         return self._client
 

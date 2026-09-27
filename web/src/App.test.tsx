@@ -34,6 +34,14 @@ const BANNER: Connections = {
   banner: "ansul.s@simpleo.ai needs reconnecting. Ask prathyush.kodhanpur@simpleo.ai.",
 };
 
+const FIRST_RUN: Connections = {
+  connections: [],
+  warning: "",
+  banner: "",
+  first_run: true,
+  first_run_notice: "No Google account is connected yet.",
+};
+
 function user(role: "admin" | "member"): Me {
   return {
     id: "u-1",
@@ -80,5 +88,26 @@ describe("the expired-connection banner", () => {
     const banner = screen.getByTestId("connection-banner");
     expect(banner.className).not.toMatch(/warn|bad|destructive/);
     expect(banner.className).toContain("border-b");
+  });
+});
+
+describe("the first-run notice", () => {
+  it("offers the connect flow, returning to Step 1, when nothing is connected", () => {
+    h.me = user("admin");
+    h.connections.mockReturnValue({ data: FIRST_RUN, isLoading: false, error: null });
+    render(<App />);
+    const banner = screen.getByTestId("first-run-banner");
+    expect(banner.textContent).toContain("No Google account is connected yet.");
+    const link = banner.querySelector("a");
+    expect(link?.getAttribute("href")).toMatch(/\/admin\/connections\/connect\?next=\/$/);
+    expect(screen.queryByTestId("connection-banner")).toBeNull();
+  });
+
+  it("gives way to the reconnect banner", () => {
+    h.me = user("admin");
+    h.connections.mockReturnValue({ data: { ...BANNER, first_run: true, first_run_notice: "x" }, isLoading: false, error: null });
+    render(<App />);
+    expect(screen.getByTestId("connection-banner")).toBeTruthy();
+    expect(screen.queryByTestId("first-run-banner")).toBeNull();
   });
 });

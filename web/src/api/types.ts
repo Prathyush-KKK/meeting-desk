@@ -292,6 +292,9 @@ export interface Connections {
   connections: Connection[];
   warning: string;
   banner: string;
+  /** Nothing connected at all: the app shows the notice with a Connect button. */
+  first_run?: boolean;
+  first_run_notice?: string;
 }
 
 export interface AllowEntry {
