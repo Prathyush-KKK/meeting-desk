@@ -125,3 +125,61 @@ def test_the_service_health_endpoint_needs_no_sign_in(tmp_path: Path) -> None:
         body = client.get("/health").json()
         assert body["ok"] is True
         assert body["fake_google"] is True
+
+
+def test_the_banner_reaches_members_too(client: TestClient, member_client: TestClient) -> None:
+    """Screen review R1-23. Spec section 7: an expired admin connection puts a banner on every page.
+    The banner came from the admin-only connections list, so members never saw it."""
+    from app.models import Connection
+
+    assert member_client.get("/admin/connections/status").json() == {
+        "banner": "",
+        "first_run": False,
+        "first_run_notice": "",
+        "can_connect": False,
+    }
+
+    with client.app.state.db.session() as session:
+        connection = session.query(Connection).filter_by(email="ansul.s@simpleo.ai").one()
+        connection.status = "expired"
+        session.commit()
+
+    for who, can_connect in ((member_client, False), (client, True)):
+        body = who.get("/admin/connections/status").json()
+        assert "ansul.s@simpleo.ai" in body["banner"]
+        assert "keep working" in body["banner"]
+        assert body["can_connect"] is can_connect
+        # Only what the banner says: no scopes, no list of accounts.
+        assert set(body) == {"banner", "first_run", "first_run_notice", "can_connect"}
+
+
+def test_first_run_tells_a_member_whom_to_ask(tmp_path: Path) -> None:
+    from app.models import Connection
+
+    app = create_app(make_settings(tmp_path))
+    with TestClient(app) as client:
+        with app.state.db.session() as session:
+            for connection in session.query(Connection).all():
+                session.delete(connection)
+            session.commit()
+        admin = client.get("/admin/connections/status").json()
+        assert admin["first_run"] is True
+        assert "Connect yours" in admin["first_run_notice"]
+        # No connections at all is the first run, not "only one connected".
+        assert client.get("/admin/connections").json()["warning"] == ""
+
+
+def test_first_run_notice_for_a_member_names_the_admins(tmp_path: Path) -> None:
+    from app.models import Connection
+
+    app = create_app(make_settings(tmp_path, auth_dev_user="nishchay.s@simpleo.ai"))
+    with TestClient(app) as member:
+        with app.state.db.session() as session:
+            for connection in session.query(Connection).all():
+                session.delete(connection)
+            session.commit()
+        body = member.get("/admin/connections/status").json()
+        assert body["first_run"] is True
+        assert body["can_connect"] is False
+        assert "ask an admin" in body["first_run_notice"]
+        assert ADMIN in body["first_run_notice"]

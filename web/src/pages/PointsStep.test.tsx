@@ -1,0 +1,100 @@
+// Screen review round 1, Step 3:
+//   R1-11  the "Extracted with" label names whoever answered, read from the meeting's extractions;
+//          it was a fixed "gemini-2.5-flash · Vertex AI asia-south1".
+//   R1-10  the footer ends on Transfer, so on a phone's 2 x 2 block it is bottom right.
+
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { PointsStep } from "@/pages/PointsStep";
+import type { ExtractionRecord, MeetingItem, Point } from "@/api/types";
+
+const h = vi.hoisted(() => ({ extractions: [] as unknown[], points: [] as unknown[] }));
+
+vi.mock("@/api/hooks", () => ({
+  usePoints: (_m: string, lifecycle: string) => ({ data: lifecycle === "active" ? h.points : [], isLoading: false }),
+  usePointEditor: () => ({ merge: (p: Point[]) => p, edit: vi.fn(), pending: 0, savedAt: null }),
+  useBulkPatchPoints: () => ({ mutate: vi.fn() }),
+  useDeferPoints: () => ({ mutateAsync: vi.fn() }),
+  useRestorePoint: () => ({ mutate: vi.fn() }),
+  useDeletePoint: () => ({ mutateAsync: vi.fn() }),
+  useAddPoint: () => ({ mutate: vi.fn() }),
+  useCopyPointsAsText: () => ({ mutateAsync: vi.fn() }),
+  useExtract: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useExtractions: () => ({ data: h.extractions }),
+}));
+
+const MEETING = {
+  id: "m-1",
+  title: "Vendor call with Madhu",
+  date: "2026-09-22",
+  attendees: [],
+  workstream: "Nutrition",
+} as unknown as MeetingItem;
+
+const POINT = {
+  id: "p-1",
+  meeting_id: "m-1",
+  kind: "action",
+  text: "Send the Sprinto questionnaire",
+  owner_text: "Ansul S",
+  owner_email: null,
+  owner_ambiguous: false,
+  due_text: "by Friday",
+  status: "open",
+  workstream: "Nutrition",
+  lifecycle: "active",
+  selected: true,
+} as unknown as Point;
+
+function record(over: Partial<ExtractionRecord>): ExtractionRecord {
+  return { id: "e-1", meeting_id: "m-1", provider: "vertex", model: "gemini-2.5-flash", region: "asia-south1", status: "done", fallback_from: null, error: null, ...over };
+}
+
+const renderStep = () => render(<PointsStep meeting={MEETING} onBack={vi.fn()} onTransfer={vi.fn()} onKeep={vi.fn()} />);
+
+beforeEach(() => {
+  h.points = [POINT];
+  h.extractions = [];
+});
+
+describe("PointsStep", () => {
+  it("names the model and provider that actually answered", () => {
+    h.extractions = [record({ provider: "fake", model: "rule-based", region: "local" })];
+    renderStep();
+    const label = screen.getByTestId("extracted-with");
+    expect(label).toHaveTextContent("Extracted by the local rule-based fake");
+    expect(label).not.toHaveTextContent("gemini");
+  });
+
+  it("says when Bedrock answered after Vertex failed", () => {
+    h.extractions = [record({ provider: "bedrock", model: "claude", region: "ap-south-1", fallback_from: "vertex" })];
+    renderStep();
+    expect(screen.getByTestId("extracted-with")).toHaveTextContent("Amazon Bedrock ap-south-1, after Vertex AI failed");
+  });
+
+  it("claims no model when the points did not come from an extraction", () => {
+    renderStep();
+    expect(screen.queryByTestId("extracted-with")).not.toBeInTheDocument();
+    expect(screen.queryByText(/gemini-2\.5-flash/)).not.toBeInTheDocument();
+  });
+
+  it("ends the footer on Transfer, which a phone's 2 x 2 block puts bottom right", () => {
+    renderStep();
+    const footer = screen.getByTestId("points-footer");
+    const buttons = Array.from(footer.querySelectorAll("button")).map((b) => b.textContent);
+    expect(buttons).toEqual(["Back", "Copy as text", "Keep here", "Transfer 1"]);
+    expect(footer.className).toMatch(/grid-cols-2/);
+  });
+
+  it("lays the bulk controls out as two rows of three on a phone, never scrolling sideways (R4-02)", () => {
+    renderStep();
+    const bar = screen.getByTestId("bulk-bar");
+    expect(bar.children).toHaveLength(6);
+    expect(bar.className).toMatch(/(^|\s)grid-cols-3(\s|$)/);
+    expect(bar.className).not.toMatch(/overflow-x-(auto|scroll)/);
+    expect(bar.className).not.toMatch(/flex-nowrap/);
+    const labels = Array.from(bar.children).map((el) => el.getAttribute("aria-label") ?? el.textContent);
+    expect(labels).toEqual(["1 selected", "Assign selected to", "Set status of selected", "Apply", "Defer", "Add point"]);
+    expect(bar.className).toMatch(/md:flex/); // one row again from 768 px
+  });
+});

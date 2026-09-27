@@ -139,18 +139,28 @@ def _preview_payload(state: TabState, plan: Plan, points: list[Point]) -> dict[s
     }
 
 
+def _count(n: int, one: str, many: str) -> str:
+    """ "1 cell", "3 cells" - the preview is read by people (screen review R3-01: "1 cell(s)")."""
+    return f"{n} {one if n == 1 else many}"
+
+
 def _warnings(state: TabState, plan: Plan) -> list[str]:
     out = []
     if plan.unmapped:
+        n = len(plan.unmapped)
         out.append(
-            f"{len(plan.unmapped)} point(s) have a status the column's dropdown does not allow; "
-            "those cells stay blank."
+            f"{_count(n, 'point has', 'points have')} a status the column's dropdown does not allow; "
+            f"{'that cell stays' if n == 1 else 'those cells stay'} blank."
         )
     if state.layout.formula_cols:
-        letters = ", ".join(a1(0, c)[:-1] for c in state.layout.formula_cols)
-        out.append(f"Column(s) {letters} hold formulas; they are never written, only copied down.")
+        cols = state.layout.formula_cols
+        letters = ", ".join(a1(0, c)[:-1] for c in cols)
+        if len(cols) == 1:
+            out.append(f"Column {letters} holds a formula; it is never written, only copied down.")
+        else:
+            out.append(f"Columns {letters} hold formulas; they are never written, only copied down.")
     if plan.conflicts:
-        out.append(f"{len(plan.conflicts)} cell(s) already have content.")
+        out.append(f"{_count(len(plan.conflicts), 'cell already has', 'cells already have')} content.")
     if not state.workbook.can_edit:
         out.append("This workbook is connected read-only.")
     return out
@@ -306,7 +316,7 @@ def execute(
     log(
         db,
         user.email,
-        f"Transferred {len(points)} point(s) to {state.read.title} in {workbook.name}",
+        f"Transferred {_count(len(points), 'point', 'points')} to {state.read.title} in {workbook.name}",
     )
     db.flush()
     result = {
@@ -347,12 +357,22 @@ def list_transfers(
     workbook_id: str | None = None,
     limit: int = 50,
     db: Session = Depends(get_session),
+    clock: Clock = Depends(get_clock),
+    settings: Settings = Depends(get_config),
     user: User = Depends(authenticate),
 ) -> list[dict[str, Any]]:
+    """The log, newest first. ``can_undo`` says whether ``POST /{batch_id}/undo`` is still open for
+    that line, by the server's clock - the Sheets page offers Undo on it rather than only in a
+    toast that is gone after ten seconds, and the browser's clock is not the one that decides."""
     query = select(Transfer).order_by(Transfer.at.desc()).limit(limit)
     if workbook_id:
         query = query.where(Transfer.workbook_id == get_workbook(db, workbook_id).id)
-    return [transfer_out(t) for t in db.scalars(query).all()]
+    now = clock.now()
+    window = timedelta(minutes=settings.transfer_undo_minutes)
+    return [
+        {**transfer_out(t), "can_undo": t.undone_at is None and now - _aware(t.at) <= window}
+        for t in db.scalars(query).all()
+    ]
 
 
 @router.post("/{batch_id}/undo")

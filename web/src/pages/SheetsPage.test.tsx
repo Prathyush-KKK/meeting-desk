@@ -26,6 +26,7 @@ vi.mock("@/api/hooks", () => ({
   useTransfers: () => ({ data: [] }),
   useConnectWorkbook: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useDisconnectWorkbook: () => ({ mutateAsync: vi.fn() }),
+  useUndoTransfer: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useSaveSheet: () => ({ mutateAsync: h.save, isPending: false }),
   useAddRow: () => ({ mutateAsync: h.addRow, isPending: false }),
   useMeetings: () => ({ data: { items: [] } }),

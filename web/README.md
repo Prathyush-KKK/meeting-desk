@@ -14,6 +14,8 @@ src/lib/display.ts   dates, clocks, status labels, the workstream list
 src/components/      Grid (the sheet), MeetingList, PointRow, AddRowPanel, ui/ (six shadcn parts)
 src/pages/           MeetingStep, NotesStep, PointsStep, TransferStep, SheetsPage, AdminPage, SignIn
 e2e/walkthrough.mjs  the README walkthrough driven through a real browser
+e2e/screens.mjs      every screen at 1280, 390 and 768 px (and dark) for the screen review:
+                     node e2e/screens.mjs <round|final> -> docs/review/shots/ (docs/review/SCREENS-REVIEW.md)
 ```
 
 ## Run it locally

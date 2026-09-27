@@ -12,7 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.activity import log, recent
-from app.auth.deps import require_admin
+from app.auth.deps import authenticate, require_admin
 from app.clock import Clock
 from app.config import Settings
 from app.db import get_session
@@ -39,6 +39,20 @@ FIRST_RUN_NOTICE = (
     "No Google account is connected yet, so the calendar, Notes by Gemini and Sheets are off. "
     "Connect yours to switch them on."
 )
+FIRST_RUN_NOTICE_MEMBER = (
+    "No Google account is connected yet, so the calendar, Notes by Gemini and Sheets are off. "
+    "Paste, points and manual meetings work; ask an admin to connect one: {admins}."
+)
+
+
+def _banner(rows: list[Connection]) -> str:
+    expired = [c.email for c in rows if c.status != "ok"]
+    if not expired:
+        return ""
+    return (
+        f"Google connection needs reconnecting: {', '.join(expired)}. "
+        "Paste, points and manual meetings keep working."
+    )
 
 
 def safe_next(value: str) -> str:
@@ -55,20 +69,44 @@ def list_connections(
     user: User = Depends(require_admin),
 ) -> dict[str, Any]:
     rows = list(db.scalars(select(Connection).order_by(Connection.connected_at)).all())
-    expired = [c.email for c in rows if c.status != "ok"]
     return {
         "connections": [connection_out(c) for c in rows],
-        "warning": ONE_CONNECTION_WARNING if len(rows) < 2 else "",
-        "banner": (
-            f"Google connection needs reconnecting: {', '.join(expired)}. "
-            "Paste, points and manual meetings keep working."
-            if expired
-            else ""
-        ),
+        # "Only one" is wrong with none; the first-run notice covers that case (screen review R1-33).
+        "warning": ONE_CONNECTION_WARNING if len(rows) == 1 else "",
+        "banner": _banner(rows),
         # First run: nothing is connected at all. The app shows this with a Connect button, and
         # sign-in sends a new admin straight to the consent screen (app.auth.oidc).
         "first_run": not rows,
         "first_run_notice": FIRST_RUN_NOTICE if not rows else "",
+    }
+
+
+@router.get("/connections/status")
+def connection_status(
+    db: Session = Depends(get_session),
+    user: User = Depends(authenticate),
+) -> dict[str, Any]:
+    """The banner, for everyone signed in - not only admins.
+
+    Spec section 7: "Admin connection expires: a banner on every page names the connection and the
+    admin." ``GET /connections`` is admin-only (Review 1, finding 28), so a member saw no banner at
+    all (screen review R1-23). This answers only what the banner says: which connection needs
+    reconnecting, and whether nothing is connected yet - no scopes, no list.
+    """
+    rows = list(db.scalars(select(Connection).order_by(Connection.connected_at)).all())
+    admins = db.scalars(select(AllowListEntry.email).where(AllowListEntry.role == "admin")).all()
+    is_admin = user.role == "admin"
+    first_run = not rows
+    notice = ""
+    if first_run:
+        notice = FIRST_RUN_NOTICE if is_admin else FIRST_RUN_NOTICE_MEMBER.format(
+            admins=", ".join(admins) or "the workspace owner"
+        )
+    return {
+        "banner": _banner(rows),
+        "first_run": first_run,
+        "first_run_notice": notice,
+        "can_connect": is_admin,
     }
 
 

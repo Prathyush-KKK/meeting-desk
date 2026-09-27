@@ -48,9 +48,10 @@ describe("the palette", () => {
   });
 
   it("carries the three grid variants, so the grid and the legend cannot drift", () => {
-    for (const variant of [".sel-tint", ".sel-soft", ".sel-outline", ".sel-strike"]) {
+    for (const variant of [".sel-tint", ".sel-soft", ".sel-outline", ".sel-strike", ".sel-anchor"]) {
       expect(css).toContain(variant);
     }
+    expect(css).toMatch(/\.sel-anchor\s*\{\s*outline: 2px solid hsl\(var\(--sel\)\);/);
   });
 });
 
@@ -92,5 +93,43 @@ describe("the app's classes", () => {
     }
     expect(config).toContain("hsl(var(--sel))");
     expect(config).toContain("hsl(var(--destructive))");
+  });
+});
+
+// Screen review round 1. These are rules of the whole app, so like the palette above they are read
+// from the source: a component test can only prove the component it renders.
+describe("the screen review's app-wide rules", () => {
+  const files = sources();
+
+  it("draws no shadows: 1 px borders only (R1-27)", () => {
+    const shadow = /(?<![\w-])shadow(?:-(?:sm|md|lg|xl|2xl|inner))?(?![\w-])/;
+    const offenders = files
+      .filter((f) => /\.tsx?$/.test(f))
+      .filter((f) => shadow.test(readFileSync(f, "utf8").replace(/\/\/.*$/gm, "")))
+      .map((f) => path.relative(SRC, f));
+    expect(offenders).toEqual([]);
+    expect(css).toMatch(/\[data-sonner-toast\]\s*\{\s*box-shadow:\s*none !important;/);
+  });
+
+  it("gives every focus ring the foreground colour, not the browser's (R1-08)", () => {
+    expect(css).toMatch(/:focus-visible\s*\{\s*outline:\s*2px solid hsl\(var\(--ring\)\);/);
+  });
+
+  it("makes every control at least 44 px on a phone (R1-07)", () => {
+    const phone = css.slice(css.indexOf("@media (max-width: 767.98px)"));
+    expect(phone).toContain("min-height: 44px");
+    expect(phone).toMatch(/:has\(> svg:only-child\)\s*\{\s*min-width: 44px;/);
+    expect(phone).toMatch(/\[role="checkbox"\]::after\s*\{[^}]*inset: -14px -8px;/);
+  });
+
+  it("applies hover styles only where a pointer can hover (R1-28)", () => {
+    const config = readFileSync(path.join(SRC, "..", "tailwind.config.js"), "utf8");
+    expect(config).toMatch(/hoverOnlyWhenSupported:\s*true/);
+  });
+
+  it("tints the grid more strongly in the dark, where 14 % disappears (R1-35)", () => {
+    expect(css).toContain("background-color: hsl(var(--sel) / var(--sel-tint-alpha));");
+    const alphas = [...css.matchAll(/--sel-tint-alpha:\s*([\d.]+)/g)].map((m) => Number(m[1]));
+    expect(alphas).toEqual([0.14, 0.3, 0.3]);
   });
 });

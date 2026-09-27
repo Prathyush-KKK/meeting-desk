@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Grid, type CellMark } from "@/components/Grid";
 import { AddRowPanel } from "@/components/AddRowPanel";
-import { a1, detectLayout } from "@/lib/sheet";
+import { ConnectWorkbook } from "@/components/ConnectWorkbook";
+import { a1, colLetter, detectLayout } from "@/lib/sheet";
 import { cn } from "@/lib/utils";
 import { useBatchId } from "@/lib/batch";
-import { fmtClock, shortName } from "@/lib/display";
+import { useNarrow } from "@/lib/overlay";
+import { fmtClock, fmtDate, shortName } from "@/lib/display";
 import { ApiError } from "@/api/client";
 import {
   useConnectWorkbook,
@@ -16,9 +18,10 @@ import {
   useSaveSheet,
   useTab,
   useTransfers,
+  useUndoTransfer,
   useWorkbooks,
 } from "@/api/hooks";
-import type { Me, SaveClash } from "@/api/types";
+import type { Me, SaveClash, Transfer, Workbook } from "@/api/types";
 
 interface Props {
   selection: { wb: string; tab: string } | null;
@@ -34,6 +37,9 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: "mine", label: "Mine" },
   { key: "noowner", label: "No owner" },
 ];
+
+/** The last option of the phone's workbook select: it opens the Connect field. */
+const CONNECT_OPTION = "__connect__";
 
 /**
  * One staged cell edit. `before` is what the cell held **when the person changed it**, not what the
@@ -57,14 +63,17 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
   const transfers = useTransfers(wb?.id);
   const connect = useConnectWorkbook();
   const disconnect = useDisconnectWorkbook();
+  const undoTransfer = useUndoTransfer();
   const save = useSaveSheet();
+  const narrow = useNarrow();
 
   const [filter, setFilter] = useState<Filter>("all");
   const [q, setQ] = useState("");
   const [pending, setPending] = useState<Map<string, PendingEdit>>(new Map());
   const [clashes, setClashes] = useState<SaveClash[]>([]);
-  const [newUrl, setNewUrl] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  /** On a phone the Connect field sits behind the select's last option (R2-06). */
+  const [connectOpen, setConnectOpen] = useState(false);
   const [aboveRow, setAboveRow] = useState<number | null>(null);
   const saveBatch = useBatchId();
 
@@ -111,13 +120,23 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
 
   const editableCols = useMemo(() => {
     const cols = new Set<number>();
+    if (wb && !wb.can_edit) return cols; // a read-only workbook: every tap says why instead
     const formula = new Set(server?.formula_cols ?? []);
     for (let c = layout.firstCol; c <= layout.lastCol; c++) {
       if (c === layout.keyCol || formula.has(c)) continue;
       cols.add(c);
     }
     return cols;
-  }, [layout, server]);
+  }, [layout, server, wb]);
+
+  /** Spec section 7: key and formula cells "say why they are not editable on tap" (R1-19). */
+  const explainLocked = (_r: number, c: number) => {
+    const header = (layout.headerRow >= 0 ? values[layout.headerRow]?.[c] : "")?.trim();
+    const name = `${colLetter(c)}${header ? ` (${header})` : ""}`;
+    if (wb && !wb.can_edit) toast.message(`${wb.name} is read-only: no admin connection can edit it.`);
+    else if (c === layout.keyCol) toast.message(`${name} is the key column. Keys are set when a row is written, not edited here.`);
+    else toast.message(`${name} holds a formula. Change it in Google Sheets.`);
+  };
 
   /**
    * A cell was changed in the grid. The baseline is read here, from the render the person clicked
@@ -179,21 +198,52 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
     setClashes((list) => list.filter((c) => c.cell !== clash.cell));
   };
 
-  const doConnect = async () => {
+  /**
+   * Disconnecting is one click and the workbook is shared by everyone, so it offers Undo, which
+   * connects the same URL again (the API revives the row). R1-24.
+   */
+  const doDisconnect = async (w: Workbook) => {
     try {
-      const result = await connect.mutateAsync(newUrl.trim());
-      setNewUrl("");
-      toast.success(`Connected ${result.name}`);
-      if (result.share_request) toast.message(result.share_request, { duration: 12_000 });
+      await disconnect.mutateAsync(w.id);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not connect that workbook");
+      toast.error(error instanceof Error ? error.message : "Could not disconnect");
+      return;
+    }
+    toast.message(`Disconnected ${w.name}`, {
+      duration: 10_000,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          connect.mutateAsync(w.url).then(
+            () => toast.success(`Connected ${w.name} again`),
+            (error: unknown) => toast.error(error instanceof Error ? error.message : "Could not reconnect"),
+          );
+        },
+      },
+    });
+  };
+
+  /** Undo from the log itself, while the server says the ten-minute window is open (R1-20). */
+  const doUndo = async (t: Transfer) => {
+    try {
+      await undoTransfer.mutateAsync(t.batch_id);
+      toast.success("Transfer undone, the points are back");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Undo failed");
     }
   };
 
   const tableRows = Math.max(0, layout.lastTableRow - layout.headerRow);
   const transfersHere = (transfers.data ?? []).filter((t) => t.sheet_id === tabMeta?.sheet_id).slice(0, 5);
+  const filtering = filter !== "all" || !!q.trim();
+  const noMatch = filtering && values.length > 0 && rowIndexes.every((r) => r === layout.headerRow);
   const pick = (v: string) => {
+    if (v === CONNECT_OPTION) {
+      setConnectOpen(true);
+      return;
+    }
     const [w, t] = v.split("|");
+    setConnectOpen(false);
     onSelect({ wb: w, tab: t });
   };
 
@@ -204,7 +254,9 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
     // whatever is left, which is why every slot below is `shrink-0` and the grid's is `min-h-0`.
     <div className="flex min-h-0 flex-col gap-4 md:h-full md:flex-row md:gap-8">
       <aside className="flex w-full shrink-0 flex-col gap-3 md:w-[260px]">
-        <div className="flex items-baseline gap-2">
+        {/* R2-06: on a phone the select says all this; the heading, the Connect field and five
+            filter buttons used to push the grid below the first screen. */}
+        <div className="hidden items-baseline gap-2 md:flex">
           <h2 className="text-[15px] font-semibold">Sheets</h2>
           <span className="text-xs text-muted-foreground">{books.length} workbooks</span>
         </div>
@@ -215,21 +267,24 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
           aria-label="Workbook and tab"
         >
           {books.map((w) => w.tabs.map((t) => <option key={`${w.id}|${t.sheet_id}`} value={`${w.id}|${t.sheet_id}`}>{w.name} › {t.title}</option>))}
+          <option value={CONNECT_OPTION}>Connect another workbook…</option>
         </select>
-        <div className="hidden min-h-0 flex-1 overflow-y-auto border-y md:block" data-testid="workbook-tree">
+        {/* R3-02: with nothing connected the tree was an empty box between two rules. */}
+        <div className={cn("hidden min-h-0 flex-1 overflow-y-auto border-y", books.length > 0 && "md:block")} data-testid="workbook-tree">
           {books.map((w) => (
             <div key={w.id} className="border-b py-1.5 last:border-b-0">
               <div className="flex items-start gap-2 px-1 py-1">
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-[13px] font-medium">{w.name}</div>
                   <div className="text-[11px] text-muted-foreground">
-                    {shortName(w.connected_by)} · {(w.connected_at ?? "").slice(0, 10)}{w.can_edit ? "" : " · read-only"}
+                    {shortName(w.connected_by)} · {fmtDate((w.connected_at ?? "").slice(0, 10))}{w.can_edit ? "" : " · read-only"}
                   </div>
                 </div>
                 <button
                   className="text-muted-foreground hover:text-foreground"
                   aria-label="Disconnect"
-                  onClick={async () => { await disconnect.mutateAsync(w.id); toast.message(`Disconnected ${w.name}`); }}
+                  title={`Disconnect ${w.name}`}
+                  onClick={() => void doDisconnect(w)}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -249,15 +304,23 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
             </div>
           ))}
         </div>
-        <div className="flex gap-2">
-          <Input id="wburl" value={newUrl} onChange={(e) => setNewUrl(e.target.value)} placeholder="Google Sheets URL" className="h-8 text-xs" />
-          <Button size="sm" variant="outline" className="h-8" onClick={() => void doConnect()} disabled={!newUrl.trim() || connect.isPending}>Connect</Button>
-        </div>
+        {books.length > 0 && (
+          <ConnectWorkbook
+            className={connectOpen ? "" : "hidden md:flex"}
+            autoFocus={connectOpen}
+            onConnected={() => setConnectOpen(false)}
+          />
+        )}
       </aside>
 
       <section className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
         {!wb || !tabMeta ? (
-          <div className="border-y py-8 text-center text-xs text-muted-foreground">Connect a workbook to start.</div>
+          // R1-17: the empty state used to say "Connect a workbook to start." with the field at the
+          // far bottom of the sidebar. The field is here now.
+          <div className="mx-auto w-full max-w-[480px] border-y py-6" data-testid="sheets-empty">
+            <p className="mb-3 text-[13px]">No workbook is connected yet. Paste a Google Sheets URL to connect one; everyone on the allow-list will see it.</p>
+            <ConnectWorkbook autoFocus />
+          </div>
         ) : (
           <>
             <div className="flex shrink-0 flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -267,24 +330,42 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
               </span>
               <button className="text-xs text-muted-foreground underline-offset-2 hover:underline" onClick={() => void tab.refetch()}>Refresh</button>
               <a className="text-xs text-muted-foreground underline-offset-2 hover:underline" href={wb.url} target="_blank" rel="noreferrer">Open in Google Sheets</a>
+              {/* The sidebar, and its disconnect, is a select on a phone (R1-24). */}
+              <button className="text-xs text-muted-foreground underline-offset-2 hover:underline md:hidden" onClick={() => void doDisconnect(wb)}>
+                Disconnect
+              </button>
               {!wb.can_edit && <span className="text-xs font-medium">read-only: no admin connection can edit it</span>}
             </div>
 
-            <div className="flex shrink-0 flex-wrap items-center gap-1">
+            <div className="flex shrink-0 items-center gap-1 md:flex-wrap">
+              <select
+                className="h-11 w-28 shrink-0 rounded border bg-background px-2 text-[13px] md:hidden"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value as Filter)}
+                aria-label="Filter rows"
+              >
+                {FILTERS.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
+              </select>
               {FILTERS.map((f) => (
                 <button
                   key={f.key}
                   onClick={() => setFilter(f.key)}
-                  className={cn("h-7 border px-2.5 text-xs", filter === f.key ? "border-foreground bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
+                  aria-pressed={filter === f.key}
+                  className={cn("hidden h-7 border px-2.5 text-xs md:inline-block", filter === f.key ? "border-foreground bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
                 >
                   {f.label}
                 </button>
               ))}
-              <Input id="sheetq" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Find" className="ml-auto h-7 w-40 text-xs" />
+              <Input id="sheetq" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Find" className="h-7 min-w-0 flex-1 text-xs md:ml-auto md:w-40 md:flex-none" />
               <Button size="sm" variant="outline" className="h-7 text-xs" data-testid="add-row-toggle" onClick={() => setAddOpen((v) => !v)}>{addOpen ? "Close" : "Add row"}</Button>
             </div>
 
             {tab.isError && <div className="shrink-0 border px-2 py-1.5 text-xs font-medium">{tab.error.message}</div>}
+            {noMatch && (
+              <div className="shrink-0 text-xs text-muted-foreground" data-testid="no-match">
+                No rows match. <button className="underline underline-offset-2" onClick={() => { setFilter("all"); setQ(""); }}>Show all rows</button>
+              </div>
+            )}
 
             <div className="h-[52vh] min-h-[200px] shrink-0 overflow-hidden md:h-auto md:min-h-0 md:flex-1 md:shrink" data-testid="grid-slot">
               <Grid
@@ -300,6 +381,7 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
                   dropdowns: numericDropdowns(tab.data?.dropdowns),
                   fromRow: layout.headerRow + 1,
                   onChange: stageEdit,
+                  onLocked: explainLocked,
                 }}
               />
             </div>
@@ -331,23 +413,39 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
             )}
 
             <div className="flex shrink-0 flex-wrap items-center gap-3 text-xs" data-testid="save-bar">
-              <span className="text-muted-foreground">Click a cell to change it. Dropdown columns use the sheet's values. The key column{(server?.formula_cols.length ?? 0) > 0 ? " and formula columns are" : " is"} fixed.</span>
-              <span className={cn("ml-auto", pending.size ? "text-foreground" : "text-muted-foreground")}>{pending.size} unsaved</span>
-              <Button size="sm" variant="outline" className="h-8" disabled={!pending.size} onClick={() => { setPending(new Map()); setClashes([]); }}>Discard</Button>
-              <Button size="sm" className="h-8" disabled={!pending.size || save.isPending} onClick={() => void runSave()}>Save to Sheet</Button>
+              <span className="text-muted-foreground">
+                {narrow ? "Tap" : "Click"} a cell to edit it. The key column{(server?.formula_cols.length ?? 0) > 0 ? " and formula columns are" : " is"} fixed.
+              </span>
+              {/* R3-04: one group, kept to the right when the hint pushes it onto its own line. */}
+              <div className="ml-auto flex items-center gap-3" data-testid="save-actions">
+                <span className={pending.size ? "text-foreground" : "text-muted-foreground"}>{pending.size} unsaved</span>
+                <Button size="sm" variant="outline" className="h-8" disabled={!pending.size} onClick={() => { setPending(new Map()); setClashes([]); }}>Discard</Button>
+                <Button size="sm" className="h-8" disabled={!pending.size || save.isPending} onClick={() => void runSave()}>Save to Sheet</Button>
+              </div>
             </div>
 
             {transfersHere.length > 0 && (
               <div className="shrink-0 border-t pt-2 text-xs">
                 <div className="mb-1 text-muted-foreground">Recent transfers into this tab</div>
-                <ul className="flex flex-col gap-0.5">
-                  {transfersHere.map((t) => (
-                    <li key={t.id} className="flex gap-2">
-                      <span className="mono text-muted-foreground">{t.cells[0] || ""}</span>
-                      <span className="truncate">{t.point_text}</span>
-                      <span className="ml-auto hidden shrink-0 text-muted-foreground sm:inline">{t.meeting_title} · {shortName(t.actor)}</span>
-                    </li>
-                  ))}
+                <ul className="flex flex-col gap-0.5" data-testid="recent-transfers">
+                  {transfersHere.map((t, i) => {
+                    // One Undo per batch, on its first line.
+                    const firstOfBatch = transfersHere.findIndex((x) => x.batch_id === t.batch_id) === i;
+                    return (
+                      <li key={t.id} className="flex min-w-0 items-center gap-2">
+                        <span className="mono shrink-0 text-muted-foreground">{t.cells[0] || ""}</span>
+                        <span className="min-w-0 flex-1 truncate">{t.point_text}</span>
+                        <span className="hidden min-w-0 max-w-[45%] shrink truncate text-muted-foreground sm:inline">
+                          {fmtClock(t.at)} · {t.meeting_title} · {shortName(t.actor)}
+                        </span>
+                        {firstOfBatch && t.can_undo && (
+                          <button className="shrink-0 underline underline-offset-2" onClick={() => void doUndo(t)} disabled={undoTransfer.isPending}>
+                            Undo
+                          </button>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}

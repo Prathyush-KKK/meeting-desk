@@ -9,10 +9,21 @@ import { SheetsPage } from "@/pages/SheetsPage";
 import { AdminPage } from "@/pages/AdminPage";
 import { NotAllowed, SignIn } from "@/pages/SignIn";
 import { cn } from "@/lib/utils";
+import { useNarrow } from "@/lib/overlay";
 import { ApiError, apiUrl } from "@/api/client";
-import { useConnections, useMe, useMeetings } from "@/api/hooks";
+import { useConnectionStatus, useMe, useMeetings } from "@/api/hooks";
 
 type Page = "capture" | "sheets" | "admin";
+
+/**
+ * Screen review R2-01: bottom right is where every step keeps its primary button (Continue,
+ * Transfer, Insert and write, Save to Sheet), and a toast with Undo sat on it for ten seconds. From
+ * 768 px the bottom centre only ever covers hint text; on a phone the bottom is all buttons, so the
+ * toast goes to the top, over the page tabs for as long as it lasts.
+ */
+export function toastPosition(narrow: boolean): "top-center" | "bottom-center" {
+  return narrow ? "top-center" : "bottom-center";
+}
 type WizardStep = "meeting" | "notes" | "points" | "transfer";
 
 const STEPS: { key: WizardStep; label: string }[] = [
@@ -38,6 +49,7 @@ function readUrl() {
 
 export default function App() {
   const me = useMe();
+  const narrow = useNarrow();
   const initial = readUrl();
   const [page, setPage] = useState<Page>(initial.page);
   const [step, setStep] = useState<WizardStep>(initial.step);
@@ -49,10 +61,10 @@ export default function App() {
   );
 
   const meetings = useMeetings();
-  // Review 1, finding 28: `/admin/connections` is admin-only now. A member asking for it gets a
-  // 403 every 15 s and no banner either way, so the question is only asked when the answer can
-  // come back - which the role on `/auth/me` settles.
-  const connections = useConnections(me.data?.is_admin === true);
+  // Review 1, finding 28 made `/admin/connections` admin-only, and with it the banner: a member saw
+  // none (screen review R1-23). The banner has its own route that anyone signed in may read; it is
+  // asked for once `/auth/me` has answered.
+  const status = useConnectionStatus(!!me.data);
   const items = meetings.data?.items ?? [];
   const meeting = meetingId ? (items.find((m) => m.id === meetingId) ?? null) : null;
   const activePoints = items.reduce((total, m) => total + (m.points_count || 0), 0);
@@ -133,13 +145,15 @@ export default function App() {
         )}
       </header>
 
-      {connections.data?.banner && (
-        <div className="shrink-0 border-b px-4 py-1.5 text-xs font-medium md:px-6" data-testid="connection-banner">{connections.data.banner}</div>
+      {status.data?.banner && (
+        <div className="shrink-0 border-b px-4 py-1.5 text-xs font-medium md:px-6" data-testid="connection-banner">{status.data.banner}</div>
       )}
-      {!connections.data?.banner && connections.data?.first_run && (
+      {!status.data?.banner && status.data?.first_run && (
         <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-b px-4 py-1.5 text-xs md:px-6" data-testid="first-run-banner">
-          <span>{connections.data.first_run_notice}</span>
-          <a className="font-medium underline underline-offset-2" href={apiUrl("/admin/connections/connect?next=/")}>Connect Google account</a>
+          <span>{status.data.first_run_notice}</span>
+          {status.data.can_connect && (
+            <a className="font-medium underline underline-offset-2" href={apiUrl("/admin/connections/connect?next=/")}>Connect Google account</a>
+          )}
         </div>
       )}
 
@@ -187,7 +201,7 @@ export default function App() {
         {page === "sheets" && <SheetsPage selection={sheetSel} onSelect={setSheetSel} me={me.data} />}
         {page === "admin" && <AdminPage me={me.data} />}
       </main>
-      <Toaster position="bottom-right" />
+      <Toaster position={toastPosition(narrow)} />
     </div>
   );
 }

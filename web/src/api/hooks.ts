@@ -17,7 +17,9 @@ import type {
   AllowEntry,
   Conflict,
   ConnectedWorkbook,
+  ConnectionStatus,
   Connections,
+  ExtractionRecord,
   ExtractionResult,
   ExtractionStatus,
   Lifecycle,
@@ -54,6 +56,8 @@ export const qk = {
   connections: ["connections"] as const,
   allowList: ["allow-list"] as const,
   activity: ["activity"] as const,
+  extractions: (meetingId: string) => ["extractions", meetingId] as const,
+  connectionStatus: ["connection-status"] as const,
 };
 
 type ListOptions<T> = Omit<UseQueryOptions<T, ApiError, T>, "queryKey" | "queryFn">;
@@ -146,6 +150,15 @@ export function useDeleteMeeting() {
   });
 }
 
+/** The Undo on a deleted manual meeting's toast: the delete is soft, so this brings it back. */
+export function useRestoreMeeting() {
+  const client = useQueryClient();
+  return useMutation<MeetingItem, ApiError, string>({
+    mutationFn: (id) => api.post<MeetingItem>(`/meetings/${id}/restore`),
+    onSuccess: () => void client.invalidateQueries({ queryKey: qk.meetings }),
+  });
+}
+
 export function useResyncMeeting() {
   const client = useQueryClient();
   return useMutation<MeetingItem, ApiError, string>({
@@ -232,6 +245,18 @@ export function usePatchNote(meetingId: string) {
       if (context?.previous) client.setQueryData(qk.notes(meetingId), context.previous);
     },
     onSettled: () => void client.invalidateQueries({ queryKey: qk.notes(meetingId) }),
+  });
+}
+
+/** Pasted onto the wrong meeting: move the note rather than retype it (spec section 7, R1-22). */
+export function useMoveNote(meetingId: string) {
+  const client = useQueryClient();
+  return useMutation<Note, ApiError, { id: string; meeting_id: string }>({
+    mutationFn: ({ id, meeting_id }) => api.post<Note>(`/notes/${id}/move`, { meeting_id }),
+    onSuccess: (_note, { meeting_id }) => {
+      notesInvalidation(client, meetingId);
+      notesInvalidation(client, meeting_id);
+    },
   });
 }
 
@@ -550,6 +575,7 @@ export function useExtract(meetingId: string) {
       void client.invalidateQueries({ queryKey: ["points"] });
       void client.invalidateQueries({ queryKey: qk.meetings });
       void client.invalidateQueries({ queryKey: qk.activity });
+      void client.invalidateQueries({ queryKey: qk.extractions(meetingId) });
     },
   });
 
@@ -560,6 +586,15 @@ export function useExtract(meetingId: string) {
     /** True while the job is on the queue: that is when Cancel is worth offering. */
     isPolling: phase === "queued",
   };
+}
+
+/** Who extracted this meeting's points, newest first: the label on Step 3 reads it (R1-11). */
+export function useExtractions(meetingId: string | null) {
+  return useQuery<ExtractionRecord[], ApiError>({
+    queryKey: qk.extractions(meetingId ?? ""),
+    queryFn: () => api.get<ExtractionRecord[]>(`/meetings/${meetingId}/extractions`),
+    enabled: !!meetingId,
+  });
 }
 
 // --- workbooks and the live tab -------------------------------------------------------------------
@@ -706,6 +741,17 @@ export function useAddRow() {
 export function useConnections(enabled = true) {
   return useQuery<Connections, ApiError>({
     ...list(qk.connections, () => api.get<Connections>("/admin/connections")),
+    enabled,
+  });
+}
+
+/**
+ * The banner on every page (spec section 7). Its own route, readable by members, because the
+ * connection list above is admin-only and a member used to see no banner at all (R1-23).
+ */
+export function useConnectionStatus(enabled = true) {
+  return useQuery<ConnectionStatus, ApiError>({
+    ...list(qk.connectionStatus, () => api.get<ConnectionStatus>("/admin/connections/status")),
     enabled,
   });
 }

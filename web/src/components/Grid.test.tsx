@@ -81,8 +81,8 @@ describe("grid marks", () => {
       const cell = container.querySelector(`[data-cell="${i + 1},1"]`) as HTMLElement;
       for (const cls of MARK_CLASS[kind].split(" ")) expect(cell.className).toContain(cls);
     }
-    // The anchor is the same hue as an outline, not a sixth colour.
-    expect((container.querySelector('[data-cell="1,3"]') as HTMLElement).className).toContain("outline-sel");
+    // The anchor is the same hue as an outline, not a sixth colour (index.css: .sel-anchor).
+    expect((container.querySelector('[data-cell="1,3"]') as HTMLElement).className).toContain("sel-anchor");
   });
 
   it("names no hue but the selection one", () => {
@@ -217,5 +217,68 @@ describe("the cell editor from 768 px up", () => {
     window.history.replaceState({ probe: "page" }, "");
     await userEvent.click(container.querySelector('[data-cell="2,2"]') as HTMLElement);
     expect(window.history.state).toEqual({ probe: "page" });
+  });
+});
+
+// Screen review round 1, R1-13: a Smart append's rows landed below the grid's visible window, so the
+// preview did not show the one thing it is for. jsdom has no layout; the rectangles the grid reads
+// are given here - the box is 300 px high and each row 28 px under a 28 px header.
+describe("Grid revealCell", () => {
+  const rect = (top: number, height: number, left = 0, width = 800) =>
+    ({ top, bottom: top + height, left, right: left + width, height, width, x: left, y: top, toJSON: () => ({}) }) as DOMRect;
+
+  afterEach(() => vi.restoreAllMocks());
+
+  function withLayout() {
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+      if (this.dataset.rows !== undefined) return rect(0, 300);
+      if (this.dataset.cell) {
+        const [r, c] = this.dataset.cell.split(",").map(Number);
+        return rect(28 + r * 28, 28, 40 + c * 108, 108);
+      }
+      return rect(0, 0);
+    });
+  }
+
+  it("scrolls the box to a planned cell below the fold", () => {
+    withLayout();
+    const rows = sheet(60);
+    const { container } = render(<Grid rows={rows} layout={detectLayout(rows)} revealCell={{ r: 45, c: 1 }} />);
+    const box = container.querySelector("[data-rows]") as HTMLElement;
+    expect(box.scrollTop).toBeGreaterThan(28 + 45 * 28 - 300);
+  });
+
+  it("leaves the box alone when the cell is already in view", () => {
+    withLayout();
+    const rows = sheet(60);
+    const { container } = render(<Grid rows={rows} layout={detectLayout(rows)} revealCell={{ r: 3, c: 1 }} />);
+    const box = container.querySelector("[data-rows]") as HTMLElement;
+    expect(box.scrollTop).toBe(0);
+  });
+});
+
+// R1-46: cn() (tailwind-merge) dropped `outline` beside `outline-2`, so an anchor on a cell with no
+// conflict mark had no outline at all.
+describe("Grid anchor", () => {
+  it("outlines the anchor cell whatever mark it carries", () => {
+    const rows = sheet(5);
+    const { container } = render(<Grid rows={rows} layout={detectLayout(rows)} anchor={{ r: 3, c: 1 }} />);
+    const cell = container.querySelector('[data-cell="3,1"]') as HTMLElement;
+    expect(cell.className.split(/\s+/)).toContain("sel-anchor");
+  });
+});
+
+// R1-18: the row picked for Add row's "above row N" was marked only by a darker number (its tint
+// lost to the header grey). The number wears the tint over the grey and every cell a top line.
+describe("Grid picked row", () => {
+  it("marks the whole row an insert lands above", () => {
+    const rows = sheet(8);
+    const { container } = render(<Grid rows={rows} layout={detectLayout(rows)} onRowClick={() => {}} activeRow={4} />);
+    const number = container.querySelector('th[data-row="4"]') as HTMLElement;
+    expect(number.className).toContain("sel-row-picked");
+    const cells = [...container.querySelectorAll<HTMLElement>('td[data-cell^="4,"]')];
+    expect(cells.length).toBeGreaterThan(0);
+    for (const td of cells) expect(td.className).toContain("sel-insert-above");
+    expect((container.querySelector('td[data-cell="5,1"]') as HTMLElement).className).not.toContain("sel-insert-above");
   });
 });

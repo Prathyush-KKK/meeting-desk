@@ -68,11 +68,11 @@ describe("MeetingList", () => {
     renderList();
     const [calendarRow, manualRow] = screen.getAllByTestId("meeting-row");
 
-    expect(within(calendarRow).getByText("Calendar")).toBeInTheDocument();
+    expect(within(calendarRow).getByText("· Calendar")).toBeInTheDocument();
     expect(within(calendarRow).queryByLabelText("Edit meeting")).not.toBeInTheDocument();
     expect(within(calendarRow).getByLabelText("Show meeting details")).toBeInTheDocument();
 
-    expect(within(manualRow).getByText("Manual")).toBeInTheDocument();
+    expect(within(manualRow).getByText("· Manual")).toBeInTheDocument();
     expect(within(manualRow).getByLabelText("Edit meeting")).toBeInTheDocument();
   });
 
@@ -103,5 +103,34 @@ describe("MeetingList", () => {
   it("keys a calendar card on its event until it is captured", () => {
     expect(itemKey(CALENDAR)).toBe("event:evt-1");
     expect(itemKey(MANUAL)).toBe("m-1");
+  });
+
+  // Screen review round 1, R1-02: the rows' negative margins made each row wider than the list's
+  // scroll box, so on a phone the box scrolled sideways and cut the first letters of every title.
+  it("keeps every row inside the list box", () => {
+    renderList();
+    for (const row of screen.getAllByTestId("meeting-row")) {
+      expect(row.className).not.toMatch(/(^|\s)-m[lrx]-/);
+    }
+  });
+
+  // R1-39: a separator on its own could end a wrapped line.
+  it("keeps each separator with the item after it", () => {
+    renderList({ items: [meeting({ points_count: 1, attendees: [] })] });
+    const meta = screen.getByTestId("meeting-meta");
+    const parts = Array.from(meta.children).map((el) => el.textContent);
+    expect(parts).not.toContain("·");
+    expect(parts.slice(1)).toEqual(["· 0 people", "· Calendar", "· 1 point"]);
+  });
+
+  it("picks a card with Space and continues with Enter, from the keyboard (R1-45)", async () => {
+    const props = renderList();
+    const calendarRow = screen.getAllByTestId("meeting-row")[0];
+    await userEvent.tab();
+    expect(calendarRow).toHaveFocus();
+    await userEvent.keyboard(" ");
+    expect(props.onSelect).toHaveBeenCalledWith(CALENDAR);
+    await userEvent.keyboard("{Enter}");
+    expect(props.onContinue).toHaveBeenCalledWith(CALENDAR);
   });
 });

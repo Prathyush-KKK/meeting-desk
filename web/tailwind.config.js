@@ -1,6 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
+  // Screen review round 1, R1-28: on a phone a tapped row kept its hover tint, so two rows looked
+  // selected. Hover styles now apply only where there is a pointer that hovers.
+  future: { hoverOnlyWhenSupported: true },
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",

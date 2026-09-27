@@ -214,11 +214,13 @@ export function AddRowPanel({ tab, aboveRow, onPickRow, onDone }: Props) {
         </div>
       )}
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="text-xs text-muted-foreground" data-testid="add-row-lands">
+      {/* R1-36: on a phone the two buttons share a line under the sentence; Add row used to wrap
+          alone to the left. */}
+      <div className="mt-3 grid grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center">
+        <span className="col-span-2 text-xs text-muted-foreground" data-testid="add-row-lands">
           {aboveRow === null ? `Lands after row ${tab.layout.last_table_row + 1}` : `Lands at row ${aboveRow + 1}, pushing the rest down`}
         </span>
-        <Button size="sm" variant="outline" className="ml-auto h-11 md:h-8" onClick={onDone}>Cancel</Button>
+        <Button size="sm" variant="outline" className="h-11 md:ml-auto md:h-8" onClick={onDone}>Cancel</Button>
         <Button size="sm" className="h-11 md:h-8" data-testid="add-row-submit" disabled={disabled} onClick={() => void submit()}>Add row</Button>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Button } from "@/components/ui/button";
 import { a1, colLetter, type Layout } from "@/lib/sheet";
@@ -40,16 +40,33 @@ interface Props {
   marks?: Map<string, { kind: CellMark; value?: string }>;
   anchor?: { r: number; c: number } | null;
   onCellClick?: (r: number, c: number) => void;
-  editable?: { cols: Set<number>; dropdowns: Record<number, string[]>; onChange: (r: number, c: number, value: string) => void; fromRow: number };
+  editable?: {
+    cols: Set<number>;
+    dropdowns: Record<number, string[]>;
+    onChange: (r: number, c: number, value: string) => void;
+    fromRow: number;
+    /**
+     * A table cell that cannot be edited here was tapped - the key column, a formula column, a
+     * read-only workbook. Spec section 7: such cells "say why they are not editable on tap"
+     * (screen review R1-19); before, the tap did nothing at all.
+     */
+    onLocked?: (r: number, c: number) => void;
+  };
   maxHeight?: string;
   dim?: boolean;
   rowIndexes?: number[];
   /** Clicking a row number picks the row an Add row insert lands above. */
   onRowClick?: (r: number) => void;
   activeRow?: number | null;
+  /**
+   * Brought into the box's view whenever it changes - the first cell a transfer plan writes, so the
+   * rows being added are on screen rather than below the fold (screen review R1-13). It moves the
+   * box only when the cell changes, never on a poll, so it does not fight the person's scrolling.
+   */
+  revealCell?: { r: number; c: number } | null;
 }
 
-export function Grid({ rows, layout, marks, anchor, onCellClick, editable, maxHeight = "100%", dim, rowIndexes, onRowClick, activeRow }: Props) {
+export function Grid({ rows, layout, marks, anchor, onCellClick, editable, maxHeight = "100%", dim, rowIndexes, onRowClick, activeRow, revealCell }: Props) {
   const width = Math.max(8, ...rows.map((r) => r.length));
   const [editing, setEditing] = useState<{ r: number; c: number; value: string } | null>(null);
   const [draft, setDraft] = useState("");
@@ -99,6 +116,35 @@ export function Grid({ rows, layout, marks, anchor, onCellClick, editable, maxHe
     </tr>
   );
 
+  const revealKey = revealCell ? `${revealCell.r},${revealCell.c}` : "";
+  // Read inside the effect without being its dependencies: only a new cell moves the box, and
+  // `order` and the virtualizer are new objects on every render.
+  const current = useRef({ order, virtualised, virtualizer });
+  current.current = { order, virtualised, virtualizer };
+  useEffect(() => {
+    if (!revealKey) return;
+    const box = scrollRef.current;
+    if (!box) return;
+    const [r, c] = revealKey.split(",").map(Number);
+    if (current.current.virtualised) {
+      const index = current.current.order.indexOf(r);
+      if (index >= 0) current.current.virtualizer.scrollToIndex(index, { align: "center" });
+      return;
+    }
+    const cell = box.querySelector<HTMLElement>(`[data-cell="${r},${c}"]`);
+    if (!cell) return;
+    const b = box.getBoundingClientRect();
+    const k = cell.getBoundingClientRect();
+    const letters = ROW_HEIGHT; // the sticky column letters cover the top of the box
+    const numbers = 40; // and the sticky row numbers its left edge
+    if (k.top < b.top + letters || k.bottom > b.bottom) {
+      box.scrollTop += k.top - b.top - Math.max(letters, (box.clientHeight - k.height) / 3);
+    }
+    if (k.left < b.left + numbers || k.right > b.right) {
+      box.scrollLeft += k.left - b.left - numbers;
+    }
+  }, [revealKey]);
+
   const columnName = (c: number) => {
     const header = layout.headerRow >= 0 ? (rows[layout.headerRow]?.[c] ?? "").trim() : "";
     return header || `Column ${colLetter(c)}`;
@@ -138,7 +184,11 @@ export function Grid({ rows, layout, marks, anchor, onCellClick, editable, maxHe
                     className={cn(
                       "sticky left-0 z-10 h-7 border-b border-r bg-grid-header text-center font-medium text-muted-foreground mono",
                       onRowClick && "cursor-pointer hover:text-foreground",
-                      activeRow === r && "sel-tint text-foreground",
+                      // R1-18: `sel-tint` lost to bg-grid-header, so the picked row showed as nothing
+                      // but a darker number. The number now wears the tint over its opaque ground
+                      // (the column is sticky, so a see-through tint would show the cells under it)
+                      // and every cell of the row a line across its top.
+                      activeRow === r && "sel-row-picked text-foreground",
                     )}
                   >
                     {r + 1}
@@ -149,6 +199,8 @@ export function Grid({ rows, layout, marks, anchor, onCellClick, editable, maxHe
                     const value = mark?.value !== undefined ? mark.value : row[c] || "";
                     const isAnchor = anchor && anchor.r === r && anchor.c === c;
                     const canEdit = !!editable && r >= editable.fromRow && editable.cols.has(c) && !isHeader;
+                    const locked =
+                      !!editable && !canEdit && !isHeader && r >= editable.fromRow && r <= layout.lastTableRow && c >= layout.firstCol && c <= layout.lastCol;
                     const isEditing = editing && editing.r === r && editing.c === c;
                     const dd = editable?.dropdowns[c];
                     return (
@@ -158,13 +210,15 @@ export function Grid({ rows, layout, marks, anchor, onCellClick, editable, maxHe
                         onClick={() => {
                           onCellClick?.(r, c);
                           if (canEdit) openEditor(r, c, value);
+                          else if (locked) editable?.onLocked?.(r, c);
                         }}
                         title={value}
                         className={cn(
                           "h-7 max-w-[320px] truncate border-b border-r px-1.5 align-middle",
                           isHeader && "bg-grid-header",
                           mark && MARK_CLASS[mark.kind],
-                          isAnchor && "outline outline-2 -outline-offset-2 outline-sel",
+                          isAnchor && "sel-anchor",
+                          activeRow === r && "sel-insert-above",
                           (onCellClick || canEdit) && "cursor-pointer hover:bg-accent/60",
                           dim && !mark && !isHeader && "text-muted-foreground",
                         )}
@@ -186,6 +240,7 @@ export function Grid({ rows, layout, marks, anchor, onCellClick, editable, maxHe
                           ) : (
                             <input
                               autoFocus
+                              spellCheck={false}
                               className="h-6 w-full rounded border bg-background px-1 text-[12px]"
                               defaultValue={value}
                               onBlur={(e) => commit(e.target.value)}
@@ -240,6 +295,7 @@ export function Grid({ rows, layout, marks, anchor, onCellClick, editable, maxHe
           ) : (
             <input
               autoFocus
+              spellCheck={false}
               aria-label={columnName(editing.c)}
               className="h-11 w-full rounded border bg-background px-2 text-sm"
               value={draft}

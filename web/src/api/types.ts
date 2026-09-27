@@ -230,6 +230,8 @@ export interface Transfer {
   snapshot: Record<string, unknown>;
   previous: Record<string, string>;
   undone_at: string | null;
+  /** From `GET /transfers`: the ten-minute undo window is still open, by the server's clock. */
+  can_undo?: boolean;
 }
 
 export interface TransferResult {
@@ -297,6 +299,15 @@ export interface Connections {
   first_run_notice?: string;
 }
 
+/** `GET /admin/connections/status`: what the banner says, readable by everyone signed in. */
+export interface ConnectionStatus {
+  banner: string;
+  first_run: boolean;
+  first_run_notice: string;
+  /** An admin: the first-run notice carries the Connect link. */
+  can_connect: boolean;
+}
+
 export interface AllowEntry {
   email: string;
   role: "admin" | "member";
@@ -321,6 +332,18 @@ export interface ExtractionResult {
   /** With JOBS_ENABLED=1 the API answers `queued` and this is the path to poll. */
   poll?: string;
   job_id?: number | null;
+}
+
+/** One row of `GET /meetings/{id}/extractions`: who answered, newest first. */
+export interface ExtractionRecord {
+  id: string;
+  meeting_id: string;
+  provider: string;
+  model: string;
+  region: string | null;
+  status: ExtractionJobStatus;
+  fallback_from: string | null;
+  error: string | null;
 }
 
 /** `GET /extractions/{id}` - what the polling loop reads. */

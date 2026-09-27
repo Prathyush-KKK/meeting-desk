@@ -1,0 +1,521 @@
+{
+  "round": "final",
+  "failures": [],
+  "checks": [
+    {
+      "check": "390 point text",
+      "textIntact": true,
+      "caretKept": true,
+      "focused": true,
+      "grew": "64 -> 84 px",
+      "innerScroll": false,
+      "savedToApi": true
+    }
+  ],
+  "metrics": [
+    {
+      "file": "1280-01-step1-list.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-02-step1-detail-calendar.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-03-step1-detail-manual.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-04-step1-manual-edit.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-05-step1-selected-focus-hover.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-06-step1-paste.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-07-step2-notes-paste.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-08-step2-sources.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-09-step3-points.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-10-step3-bulk.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-11-step3-deferred-open.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-12-step3-removed-undo-toast.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-13-step4-smart-append.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "1280-14-step4-custom-fill-pick.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "1280-15-step4-custom-fill-header-anchor.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "1280-16-step4-custom-fill-anchor-plan.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "1280-17-step4-prereq-no-workbook.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-18-step4-reload.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "1280-19-step1-empty.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "390-01-step1-list.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "390-02-step1-detail-overlay.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "390-03-step1-manual-edit-overlay.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "390-04-step1-paste.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "390-05-step2-notes.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "390-06-step3-points.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "390-07-step3-deferred-open.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "390-08-step4-smart-append.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "390-09-step4-custom-fill-anchor.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "1280-20-sheets-after-transfer-toast.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "1280-21-sheets-registry-grid.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "1280-22-sheets-filter-search.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "1280-23-sheets-staged-edit.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "1280-24-sheets-addrow-after-table.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "1280-25-sheets-addrow-above-row.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "1280-26-sheets-addrow-from-point.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "1280-27-sheets-key-cell-explains.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "1280-28-sheets-no-match.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "1280-29-member-reconnect-banner.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-30-member-admin-page.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-31-sheets-no-workbook.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-32-admin.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-33-admin-first-run-banner.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-34-step1-first-run-banner.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-35-admin-reconnect-banner.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-36-sheets-reconnect-banner.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "1280-37-signin-401.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-38-not-on-list-403.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "390-10-sheets-select-grid.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "390-11-sheets-grid-scrolled-sticky.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "390-12-sheets-bottom-editor.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "390-13-sheets-staged-edit.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "390-14-sheets-addrow-above-row.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "390-15-admin.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "390-16-step1-reconnect-banner.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "390-17-signin-401.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "390-18-not-on-list-403.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "768-01-sheets-grid.png",
+      "width": 768,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "768-02-step1-detail.png",
+      "width": 768,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-39-dark-step3-points.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-40-dark-step1-detail.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 0
+    },
+    {
+      "file": "1280-41-dark-sheets.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "1280-42-dark-step4.png",
+      "width": 1280,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    },
+    {
+      "file": "390-19-dark-sheets-bottom-editor.png",
+      "width": 390,
+      "overflow": 0,
+      "small": [],
+      "sideways": [],
+      "gridsScrollingInTheirBox": 1
+    }
+  ]
+}

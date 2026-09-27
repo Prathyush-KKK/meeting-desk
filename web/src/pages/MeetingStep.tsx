@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Plus, X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MeetingList, itemKey } from "@/components/MeetingList";
 import { cn } from "@/lib/utils";
 import { useCloseOnBack } from "@/lib/overlay";
+import { useAutoGrow } from "@/lib/autogrow";
 import { ago, fmtDate, mergeWorkstreams } from "@/lib/display";
 import {
   useCaptureCalendarEvent,
@@ -17,6 +18,7 @@ import {
   usePatchMeeting,
   useQuickPaste,
   useRefreshMeetings,
+  useRestoreMeeting,
   type ManualMeetingIn,
 } from "@/api/hooks";
 import type { MeetingItem } from "@/api/types";
@@ -39,6 +41,8 @@ export function MeetingStep({ selectedKey, onSelectKey, onContinue }: Props) {
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [paste, setPaste] = useState("");
+  const pasteRef = useRef<HTMLTextAreaElement>(null);
+  useAutoGrow(pasteRef, paste);
 
   const items = meetings.data?.items ?? [];
   const selected = items.find((m) => itemKey(m) === selectedKey) ?? null;
@@ -93,6 +97,19 @@ export function MeetingStep({ selectedKey, onSelectKey, onContinue }: Props) {
   };
   const closePanel = useCallback(() => { setOpenKey(null); setEditing(false); }, []);
 
+  /**
+   * A click on another card while the detail is open moves the detail to that card (R1-04). It used
+   * to stay on the first one, so the panel's Continue and the list's Continue meant two meetings.
+   */
+  const select = (m: MeetingItem) => {
+    const key = itemKey(m);
+    onSelectKey(key);
+    if (openKey && openKey !== key) {
+      setOpenKey(key);
+      setEditing(false);
+    }
+  };
+
   // Spec section 7: the detail is a full-screen overlay under 768 px, so Back has to close it
   // rather than leave the app (Review 1, finding 23). Above the breakpoint the same entry makes
   // Back close the side panel, which is also where a person expects to land.
@@ -100,31 +117,22 @@ export function MeetingStep({ selectedKey, onSelectKey, onContinue }: Props) {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4 md:flex-row md:gap-8">
-      <section className={cn("flex min-h-0 flex-col transition-[width] duration-200", open ? "md:w-[380px] md:shrink-0" : "mx-auto w-full md:max-w-[640px]")}>
+      <section className={cn("flex min-h-0 flex-col transition-[width] duration-200", open ? "md:w-[320px] md:shrink-0 lg:w-[380px]" : "mx-auto w-full md:max-w-[640px]")}>
         <div className="mb-2 flex items-center gap-3">
           <h2 className="text-[15px] font-semibold">Meetings</h2>
           <span className="text-xs text-muted-foreground">{items.length}</span>
-          {meetings.data && (
-            <span className="hidden text-xs text-muted-foreground sm:inline">updated {ago(meetings.data.age_minutes)}</span>
-          )}
-          <button
-            className="text-xs text-muted-foreground underline-offset-2 hover:underline"
-            onClick={() => refresh.mutate()}
-            disabled={refresh.isPending}
-          >
-            {refresh.isPending ? "Refreshing…" : "Refresh"}
-          </button>
           <Button size="sm" variant="outline" className="ml-auto h-8" onClick={addMeeting} disabled={createManual.isPending}>
             <Plus className="mr-1 h-3.5 w-3.5" /> Add meeting
           </Button>
         </div>
 
-        <div className="mb-3 border-b pb-3">
+        <div className="mb-3">
           <Textarea
             id="quickpaste"
+            ref={pasteRef}
             value={paste}
             onChange={(e) => setPaste(e.target.value)}
-            rows={paste ? 6 : 2}
+            rows={2}
             placeholder={selected ? `Paste notes for "${selected.title || selected.key}"` : "Paste notes here. With no meeting selected, a manual meeting is created from the first line."}
             className="min-h-0 resize-none text-[13px]"
           />
@@ -139,20 +147,40 @@ export function MeetingStep({ selectedKey, onSelectKey, onContinue }: Props) {
         <div className="min-h-0 flex-1 overflow-y-auto">
           {meetings.isLoading && <div className="border-y py-6 text-center text-xs text-muted-foreground">Reading the calendars…</div>}
           {meetings.isError && <div className="border-y py-6 text-center text-xs font-medium">{meetings.error.message}</div>}
-          {!meetings.isLoading && items.length === 0 && (
-            <div className="border-y py-6 text-center text-xs text-muted-foreground">{meetings.data?.empty_hint || "No meetings yet."}</div>
+          {!meetings.isLoading && !meetings.isError && items.length === 0 && (
+            <div className="border-y py-6 text-center text-xs text-muted-foreground">
+              {meetings.data?.empty_hint || "No meeting here? Add one, or paste the notes straight into the box above."}
+            </div>
           )}
-          <MeetingList
-            items={items}
-            selectedKey={selectedKey}
-            onSelect={(m) => onSelectKey(itemKey(m))}
-            onOpen={openPanel}
-            onContinue={(m) => void go(m)}
-          />
+          {items.length > 0 && (
+            <MeetingList
+              items={items}
+              selectedKey={selectedKey}
+              onSelect={select}
+              onOpen={openPanel}
+              onContinue={(m) => void go(m)}
+            />
+          )}
         </div>
-        <div className="mt-3 flex items-center gap-3">
-          <span className="hidden text-xs text-muted-foreground sm:inline">Select, then continue.</span>
-          <Button className="ml-auto h-9" disabled={!selected || capture.isPending} onClick={() => selected && void go(selected)}>Continue</Button>
+        {/* Spec section 7: "Calendar cache: 'updated N min ago' and an explicit Refresh" - at every
+            width (R1-03: it was hidden under 640 px and wrapped in the narrow column). */}
+        <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+          {meetings.data && <span data-testid="calendar-age">updated {ago(meetings.data.age_minutes)}</span>}
+          <button
+            className="underline-offset-2 hover:text-foreground hover:underline"
+            onClick={() => refresh.mutate()}
+            disabled={refresh.isPending}
+          >
+            {refresh.isPending ? "Refreshing…" : "Refresh"}
+          </button>
+          {/* With the detail open, its own Continue is the one; one button, one meeting. */}
+          <Button
+            className={cn("ml-auto h-9", open && "md:hidden")}
+            disabled={!selected || capture.isPending}
+            onClick={() => selected && void go(selected)}
+          >
+            Continue
+          </Button>
         </div>
       </section>
 
@@ -162,7 +190,7 @@ export function MeetingStep({ selectedKey, onSelectKey, onContinue }: Props) {
             <div className="min-w-0">
               <h3 className="truncate text-[15px] font-semibold">{open.title || "New manual meeting"}</h3>
               <div className="text-xs text-muted-foreground">
-                <span className="mono">{open.key || "not captured yet"}</span> · {open.source === "calendar" ? "Google Calendar, read-only" : editing ? "Manual, editing" : "Manual"}
+                {open.key ? <span className="mono">{open.key}</span> : "Not captured yet"} · {open.source === "calendar" ? "Google Calendar, read-only" : editing ? "Manual, editing" : "Manual"}
               </div>
             </div>
             <div className="ml-auto flex gap-1">
@@ -179,7 +207,7 @@ export function MeetingStep({ selectedKey, onSelectKey, onContinue }: Props) {
               onDeleted={() => { closePanel(); onSelectKey(null); }}
             />
           ) : (
-            <dl className="grid flex-1 content-start grid-cols-[96px_minmax(0,1fr)] gap-x-4 gap-y-2.5 text-[13px] md:grid-cols-[120px_minmax(0,1fr)]">
+            <dl className="grid flex-1 content-start grid-cols-[96px_minmax(0,1fr)] gap-x-4 gap-y-2.5 text-[13px] lg:grid-cols-[120px_minmax(0,1fr)]">
               <dt className="text-muted-foreground">When</dt><dd>{fmtDate(open.date)} · {open.start}-{open.end} IST</dd>
               <dt className="text-muted-foreground">Organizer</dt><dd className="break-all">{open.organizer_email}</dd>
               <dt className="text-muted-foreground">Attendees</dt>
@@ -219,6 +247,7 @@ function ManualForm({
 }) {
   const patch = usePatchMeeting();
   const remove = useDeleteMeeting();
+  const restore = useRestoreMeeting();
   const [f, setF] = useState({
     title: meeting.title,
     date: meeting.date ?? today(),
@@ -249,7 +278,9 @@ function ManualForm({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
+      {/* content-start: the fields sit together at the top instead of spreading over the panel's
+          height (R1-05). */}
+      <div className="grid flex-1 grid-cols-1 content-start gap-3 sm:grid-cols-2">
         <Field id="mt" label="Title" full><Input id="mt" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Meeting title" /></Field>
         <Field id="md" label="Date"><Input id="md" type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></Field>
         <div className="grid grid-cols-2 gap-2">
@@ -271,8 +302,14 @@ function ManualForm({
           size="sm"
           className="h-8 text-destructive"
           onClick={async () => {
-            await remove.mutateAsync(meeting.id!);
-            toast.message("Removed, recoverable for 30 days");
+            const id = meeting.id!;
+            await remove.mutateAsync(id);
+            // Spec section 7: "Accidental delete: soft delete with a 10-second undo toast" (R1-21).
+            toast.message(`Deleted ${meeting.title || "the meeting"}`, {
+              description: "10 seconds to undo; recoverable for 30 days.",
+              duration: 10_000,
+              action: { label: "Undo", onClick: () => restore.mutate(id) },
+            });
             onDeleted();
           }}
         >

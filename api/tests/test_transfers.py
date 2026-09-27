@@ -456,3 +456,81 @@ def test_the_meeting_step_becomes_done_when_the_last_point_leaves(client: TestCl
     )
     assert response.status_code == 200
     assert client.get(f"/meetings/{meeting_id}").json()["step"] == "done"
+
+
+def test_the_log_says_which_lines_can_still_be_undone(client: TestClient) -> None:
+    """Screen review R1-20: the Sheets page offers Undo on the recent-transfer lines, which needs the
+    server's word on the ten-minute window - the toast that carried Undo is gone after ten seconds."""
+    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    tab = _tab(client, workbook["id"], "t1")
+    batch = client.post(
+        "/transfers/execute",
+        json={
+            "workbook_id": workbook["id"],
+            "sheet_id": "t1",
+            "mode": "append",
+            "point_ids": _points(client, 1),
+            "region_hash": tab["region_hash"],
+        },
+    ).json()["batch_id"]
+
+    log = client.get("/transfers", params={"workbook_id": workbook["id"]}).json()
+    assert [(t["batch_id"], t["can_undo"]) for t in log] == [(batch, True)]
+
+    client.app.state.clock.advance(minutes=11)
+    log = client.get("/transfers", params={"workbook_id": workbook["id"]}).json()
+    assert log[0]["can_undo"] is False
+
+
+def test_an_undone_transfer_cannot_be_undone_again_from_the_log(client: TestClient) -> None:
+    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    tab = _tab(client, workbook["id"], "t1")
+    batch = client.post(
+        "/transfers/execute",
+        json={
+            "workbook_id": workbook["id"],
+            "sheet_id": "t1",
+            "mode": "append",
+            "point_ids": _points(client, 1),
+            "region_hash": tab["region_hash"],
+        },
+    ).json()["batch_id"]
+    assert client.post(f"/transfers/{batch}/undo").status_code == 200
+
+    log = client.get("/transfers", params={"workbook_id": workbook["id"]}).json()
+    assert log[0]["undone_at"]
+    assert log[0]["can_undo"] is False
+
+
+def test_the_preview_counts_in_words_not_with_brackets(client: TestClient) -> None:
+    """Screen review R3-01: "11 cell(s) already have content" and "1 point(s)" on screen."""
+    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    one = _points(client, 1)
+    fill = client.post(
+        "/transfers/preview",
+        json={
+            "workbook_id": workbook["id"],
+            "sheet_id": "t1",
+            "mode": "fill",
+            "point_ids": one,
+            "anchor": {"r": 14, "c": 1},
+            "conflict": "skip",
+        },
+    ).json()
+    warning = next(w for w in fill["warnings"] if "content" in w)
+    assert "(s)" not in warning
+    assert warning.endswith("cells already have content.") or warning == "1 cell already has content."
+
+    tab = client.get(f"/workbooks/{workbook['id']}/tabs/t1").json()
+    client.post(
+        "/transfers/execute",
+        json={
+            "workbook_id": workbook["id"],
+            "sheet_id": "t1",
+            "mode": "append",
+            "point_ids": one,
+            "region_hash": tab["region_hash"],
+        },
+    )
+    activity = client.get("/admin/activity").json()
+    assert activity[0]["text"].startswith("Transferred 1 point to ")

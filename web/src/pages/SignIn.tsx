@@ -20,7 +20,7 @@ export function NotAllowed({ message }: { message: string }) {
       <p className="max-w-[46ch] text-[13px] text-muted-foreground">
         {message || "This Google account is not on the Meeting Desk allow-list. Ask an admin to add it."}
       </p>
-      <a className="mt-4 text-[13px] underline-offset-2 hover:underline" href={apiUrl("/auth/login")}>
+      <a className="mt-4 text-[13px] underline underline-offset-2" href={apiUrl("/auth/login")}>
         Try another account
       </a>
     </Shell>

@@ -6,7 +6,18 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { shortName } from "@/lib/display";
-import { ExtractionCancelled, useDeleteNote, useExtract, useImportNote, useNotes, usePasteNote, usePatchNote, useSources } from "@/api/hooks";
+import {
+  ExtractionCancelled,
+  useDeleteNote,
+  useExtract,
+  useImportNote,
+  useMeetings,
+  useMoveNote,
+  useNotes,
+  usePasteNote,
+  usePatchNote,
+  useSources,
+} from "@/api/hooks";
 import type { MeetingItem, NoteSource } from "@/api/types";
 
 interface Props {
@@ -32,7 +43,21 @@ export function NotesStep({ meeting, onBack, onExtracted }: Props) {
   const patchNote = usePatchNote(meetingId);
   const deleteNote = useDeleteNote(meetingId);
   const extract = useExtract(meetingId);
+  const moveNote = useMoveNote(meetingId);
+  const meetings = useMeetings();
   const [paste, setPaste] = useState("");
+  // Only saved meetings can hold a note; a calendar card that was never opened has no row yet.
+  const targets = (meetings.data?.items ?? []).filter((m) => m.id && m.id !== meetingId);
+
+  const move = async (noteId: string, targetId: string) => {
+    if (!targetId) return;
+    try {
+      await moveNote.mutateAsync({ id: noteId, meeting_id: targetId });
+      toast.success(`Moved to ${targets.find((m) => m.id === targetId)?.title || "the other meeting"}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not move the note");
+    }
+  };
 
   const rows = notes.data ?? [];
   const imported = (source: string) => rows.some((n) => n.source === source);
@@ -140,6 +165,21 @@ export function NotesStep({ meeting, onBack, onExtracted }: Props) {
                   <span className="min-w-0 flex-1 truncate">
                     {n.title} <span className="text-muted-foreground">· {n.word_count} words · {shortName(n.created_by)}</span>
                   </span>
+                  {/* Spec section 7: "a note can be moved to another meeting afterwards" (R1-22). */}
+                  {targets.length > 0 && (
+                    <select
+                      className="h-7 w-20 shrink-0 rounded border bg-background px-1 text-xs text-muted-foreground md:w-24"
+                      aria-label="Move to another meeting"
+                      value=""
+                      disabled={moveNote.isPending}
+                      onChange={(e) => void move(n.id, e.target.value)}
+                    >
+                      <option value="">Move…</option>
+                      {targets.map((m) => (
+                        <option key={m.id} value={m.id!}>{m.title || "Untitled"}</option>
+                      ))}
+                    </select>
+                  )}
                   <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" aria-label="Delete note" onClick={() => deleteNote.mutate(n.id)}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
@@ -158,16 +198,15 @@ export function NotesStep({ meeting, onBack, onExtracted }: Props) {
             id="paste"
             value={paste}
             onChange={(e) => setPaste(e.target.value)}
-            placeholder={"The Next Steps\nDraft food upload UX: Ansul S to create options for displaying food image routing on the main app.\n..."}
+            placeholder="Paste notes, a transcript or a summary"
             className="min-h-[180px] flex-1 resize-none text-[13px] leading-relaxed md:min-h-[220px]"
           />
         </div>
 
         <div className="flex items-center gap-2">
           <Button variant="outline" className="h-9" onClick={onBack}>Back</Button>
-          <span className="hidden text-xs text-muted-foreground sm:inline">
-            {extract.isPending ? "Extracting… you can leave this page." : "Extraction runs on Gemini 2.5 Flash."}
-          </span>
+          {/* R1-11: no fixed model name here; Step 3 names whoever actually answered. */}
+          {extract.isPending && <span className="hidden text-xs text-muted-foreground sm:inline">Extracting… you can leave this page.</span>}
           {extract.isPolling && (
             <Button variant="outline" className="ml-auto h-9" data-testid="cancel-extract" onClick={extract.cancel}>
               Cancel

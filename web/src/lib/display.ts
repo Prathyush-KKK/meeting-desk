@@ -41,20 +41,27 @@ export function mergeWorkstreams(extra: (string | null | undefined)[]): string[]
   return out;
 }
 
-/** "2026-09-22" -> "Tue 22 Sep". */
+/**
+ * "2026-09-22" -> "Tue 22 Sep". A calendar date, not an instant: it is read and written in UTC so
+ * no zone can move it to the day before.
+ */
 export function fmtDate(iso: string | null | undefined): string {
   if (!iso) return "";
-  const d = new Date(`${iso}T00:00:00`);
+  const d = new Date(`${iso}T00:00:00Z`);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+  return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
 }
 
-/** An ISO timestamp -> "16:58", the way the header shows "read HH:MM". */
+/**
+ * An ISO timestamp -> "16:58" in Asia/Kolkata, the way the header shows "read HH:MM". Spec section
+ * 7: "Times shown in Asia/Kolkata everywhere" - it used the browser's zone, so a laptop set to
+ * another zone read the same sheet at a different time (screen review R1-25).
+ */
 export function fmtClock(iso: string | null | undefined): string {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
+  return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: IST });
 }
 
 export function shortName(email: string | null | undefined): string {
@@ -70,7 +77,7 @@ export function ago(minutes: number): string {
 /** The label that keeps a transferred row tied to its meeting, mirroring the API's meeting_label. */
 export function meetingLabel(title: string, date: string | null | undefined): string {
   if (!date) return title;
-  const d = new Date(`${date}T00:00:00`);
+  const d = new Date(`${date}T00:00:00Z`);
   if (Number.isNaN(d.getTime())) return title;
-  return `${title} · ${d.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`;
+  return `${title} · ${d.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" })}`;
 }

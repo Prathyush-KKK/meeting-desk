@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Grid, MARK_CLASS, type CellMark } from "@/components/Grid";
+import { ConnectWorkbook } from "@/components/ConnectWorkbook";
 import {
   a1,
   applyPlan,
@@ -63,24 +64,32 @@ export function TransferStep({ meeting, pointIds, onBack, onDone }: Props) {
   const undo = useUndoTransfer();
   const batch = useBatchId();
 
-  const wanted = new Set(pointIds);
+  // A reload lands here with no ids in hand (they are not in the URL): the points ticked on Step 3
+  // are the ones meant, so they stand in rather than a dead end (R1-16).
+  const ids = pointIds.length ? pointIds : (active.data ?? []).filter((p) => p.selected).map((p) => p.id);
+  const wanted = new Set(ids);
   const points: Point[] = [...(active.data ?? []), ...(deferred.data ?? [])].filter((p) => wanted.has(p.id));
 
+  const values = tab.data?.values ?? [];
+  const headerRow = useMemo(() => detectLayout(values).headerRow, [values]);
+  // Spec section 7: "Anchor in or above the header is blocked with a one-line message." The API
+  // refuses it too; blocking here keeps the side panel from offering a plan for it (R1-14).
+  const anchorBlocked = mode === "fill" && !!anchor && headerRow >= 0 && anchor.r <= headerRow;
+
   const previewInput: PreviewIn | null =
-    wb && tabMeta && pointIds.length
+    wb && tabMeta && ids.length
       ? {
           workbook_id: wb.id,
           sheet_id: tabMeta.sheet_id,
           mode,
-          point_ids: pointIds,
+          point_ids: ids,
           anchor: mode === "fill" ? anchor : null,
           conflict,
           write_keys: writeKeys,
         }
       : null;
-  const preview = useTransferPreview(mode === "fill" && !anchor ? null : previewInput);
+  const preview = useTransferPreview(mode === "fill" && (!anchor || anchorBlocked) ? null : previewInput);
 
-  const values = tab.data?.values ?? [];
   const dropdowns = useMemo(() => numericDropdowns(tab.data?.dropdowns), [tab.data?.dropdowns]);
 
   const label = meetingLabel(meeting.title, meeting.date);
@@ -114,7 +123,9 @@ export function TransferStep({ meeting, pointIds, onBack, onDone }: Props) {
       }
       return { layout: detected, plan: built, previewRows: applyPlan(values, built), marks: cellMarks };
     }
-    if (!anchor) return { layout: detected, plan: null, previewRows: values, marks: cellMarks };
+    if (!anchor || (detected.headerRow >= 0 && anchor.r <= detected.headerRow)) {
+      return { layout: detected, plan: null, previewRows: values, marks: cellMarks };
+    }
     const built = planFill(values, dropdowns, sheetPoints, anchor, writeKeys, conflict);
     for (const w of built.writes) {
       const skipped = w.kind === "conflict" && w.existing !== undefined && w.value === w.existing;
@@ -181,12 +192,45 @@ export function TransferStep({ meeting, pointIds, onBack, onDone }: Props) {
     }
   };
 
-  if (workbooks.isLoading) return <div className="p-6 text-sm text-muted-foreground">Loading workbooks…</div>;
-  if (!wb || !tabMeta) return <div className="p-6 text-sm text-muted-foreground">Connect a workbook on the Sheets page first.</div>;
-  if (!pointIds.length) return <div className="p-6 text-sm text-muted-foreground">Select points on the previous step.</div>;
+  if (workbooks.isLoading || active.isLoading) return <div className="py-6 text-sm text-muted-foreground">Loading…</div>;
+  // Spec section 7: "Transfer prerequisites screen with Connect when there is no workbook" (R1-16).
+  // It used to be one line pointing at another page, or "Select points on the previous step" with
+  // no way there.
+  if (!wb || !tabMeta || !ids.length) {
+    return (
+      <div className="mx-auto w-full max-w-[560px] py-2" data-testid="transfer-prerequisites">
+        <h2 className="mb-1 text-[15px] font-semibold">Before the transfer</h2>
+        <p className="mb-3 text-xs text-muted-foreground">Both of these are needed to write to a sheet.</p>
+        <ul className="divide-y border-y text-[13px]">
+          <li className="flex flex-col gap-2 py-3">
+            <div className="flex items-baseline gap-2">
+              <span className="font-medium">Workbook</span>
+              <span className="text-muted-foreground">{wb ? `${wb.name} is connected` : "none connected yet"}</span>
+            </div>
+            {!wb && <ConnectWorkbook autoFocus />}
+          </li>
+          <li className="flex flex-wrap items-center gap-2 py-3">
+            <span className="font-medium">Points</span>
+            <span className="text-muted-foreground">{ids.length ? `${ids.length} selected` : "none selected"}</span>
+            {!ids.length && (
+              <Button variant="outline" size="sm" className="ml-auto h-8" onClick={onBack}>
+                Back to points
+              </Button>
+            )}
+          </li>
+        </ul>
+      </div>
+    );
+  }
 
-  const anchorHeader = anchor && layout.headerRow >= 0 ? values[layout.headerRow]?.[anchor.c] || "" : "";
+  const header = (c: number) => (layout.headerRow >= 0 ? (values[layout.headerRow]?.[c] ?? "").trim() : "");
+  const columnLabel = (c: number, field: string) => `${colLetter(c)} ${header(c) || field}`;
+  const anchorHeader = anchor ? header(anchor.c) : "";
   const serverCells = preview.data?.plan.cells ?? [];
+  // The first cell the plan writes: the grid scrolls it into view (R1-13).
+  const firstWrite = plan && plan.writes.length ? plan.writes.reduce((a, w) => (w.r < a.r || (w.r === a.r && w.c < a.c) ? w : a)) : null;
+  const cellCount = plan && plan.mode === "fill" ? serverCells.length || planCells(plan).length : 0;
+  const moved = plan && plan.mode === "append" ? plan.moved : [];
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
@@ -210,6 +254,11 @@ export function TransferStep({ meeting, pointIds, onBack, onDone }: Props) {
         </div>
       </div>
 
+      {!wb.can_edit && (
+        <div className="border px-2 py-1.5 text-xs font-medium" data-testid="read-only-notice">
+          {wb.name} is read-only: no admin connection can edit it. Share it with an admin account, then Refresh.
+        </div>
+      )}
       {staleNotice && <div className="border px-2 py-1.5 text-xs font-medium">{staleNotice}</div>}
       {repeat && (
         <div className="flex flex-wrap items-center gap-2 border px-2 py-1.5 text-xs">
@@ -224,40 +273,53 @@ export function TransferStep({ meeting, pointIds, onBack, onDone }: Props) {
       {preview.isError && <div className="border px-2 py-1.5 text-xs font-medium">{preview.error.message}</div>}
 
       <div className="flex min-h-0 flex-1 flex-col gap-4 md:flex-row">
-        <div className="min-w-0 flex-1">
-          <Grid
-            rows={previewRows}
-            layout={detectLayout(previewRows)}
-            marks={marks}
-            anchor={anchor}
-            onCellClick={mode === "fill" ? (r, c) => setAnchor({ r, c }) : undefined}
-            maxHeight="min(55vh, calc(100vh - 300px))"
-          />
+        {/* R1-13: the grid takes the height the step has (a fixed 55vh on a phone, where the page
+            scrolls) instead of a 55vh cap with empty space under it. */}
+        <div className="flex min-w-0 flex-1 flex-col md:min-h-0">
           {/* Review 1, finding 29: no swatches. Each label wears the variant it names, so the
-              legend is the rule the grid follows rather than a second copy of it. */}
-          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground" data-testid="transfer-legend">
+              legend is the rule the grid follows rather than a second copy of it. Above the grid
+              (R2-03): under it, it floated at the bottom of the slot when the tab was short. */}
+          <div className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground" data-testid="transfer-legend">
             <Legend kind="new" text={mode === "append" ? "inserted rows" : "cells to write"} />
             <Legend kind="key" text="key column" />
             <Legend kind="moved" text="moves down" />
             {mode === "fill" && <Legend kind="conflict" text="non-empty cell in the way" />}
           </div>
+          <div className="h-[55vh] min-h-[200px] md:h-auto md:min-h-0 md:flex-1" data-testid="transfer-grid-slot">
+            <Grid
+              rows={previewRows}
+              layout={detectLayout(previewRows)}
+              marks={marks}
+              anchor={anchor}
+              onCellClick={mode === "fill" ? (r, c) => setAnchor({ r, c }) : undefined}
+              maxHeight="100%"
+              revealCell={firstWrite ? { r: firstWrite.r, c: firstWrite.c } : null}
+            />
+          </div>
         </div>
 
         <aside className="flex w-full shrink-0 flex-col gap-2.5 text-[13px] md:w-[300px] md:border-l md:pl-4">
+          {/* R1-30: labels, not the planner's working ("most known header words"), and the sheet's
+              own column names rather than the internal field names. */}
           {mode === "append" && plan && plan.mode === "append" ? (
             <>
-              <Row k={`Header row ${layout.headerRow + 1}`} v="most known header words" />
-              <Row k={`Last table row ${layout.lastTableRow + 1}`} v="last key or task value, any status" />
-              <Row k={`Insert ${plan.count} after row ${layout.lastTableRow + 1}`} v={plan.moved.length ? `${plan.moved.slice(0, 3).join(", ")}${plan.moved.length > 3 ? "…" : ""} move down` : "nothing moves"} />
-              {layout.keyCol >= 0 && <Row k={`Keys ${plan.keys[0]}${plan.keys.length > 1 ? ` to ${plan.keys[plan.keys.length - 1]}` : ""}`} v="allocated at write time, after the re-read" />}
-              <Row k="Columns" v={Object.entries(layout.columns).map(([f, c]) => `${colLetter(c as number)} ${f}`).join(", ") || "no header, default order from A"} />
+              <Row k="Header" v={`row ${layout.headerRow + 1}`} />
+              <Row k="Table ends" v={`row ${layout.lastTableRow + 1}`} />
+              <Row
+                k={`Insert ${plan.count} after row ${layout.lastTableRow + 1}`}
+                v={moved.length ? `${moved.slice(0, 3).join(", ")}${moved.length > 3 ? "…" : ""} ${moved.length === 1 ? "moves" : "move"} down` : "nothing below moves"}
+              />
+              {layout.keyCol >= 0 && <Row k="Keys" v={`${plan.keys[0]}${plan.keys.length > 1 ? ` to ${plan.keys[plan.keys.length - 1]}` : ""}, assigned when written`} />}
+              <Row k="Columns" v={Object.entries(layout.columns).map(([f, c]) => columnLabel(c as number, f)).join(", ") || "no header; A onwards in the default order"} />
             </>
           ) : mode === "fill" && !anchor ? (
-            <p className="text-muted-foreground">Click a cell. Fields fill rightward from it following the headers above; each point takes the next row.</p>
+            <p className="text-muted-foreground">Click the cell where the first point starts. Its fields fill rightward under the headers; each point takes the next row.</p>
+          ) : anchorBlocked ? (
+            <p className="font-medium" data-testid="anchor-blocked">Pick a cell below the header row (row {headerRow + 1}).</p>
           ) : plan && plan.mode === "fill" ? (
             <>
               <Row k={`From ${a1(anchor!.r, anchor!.c)}`} v={anchorHeader ? `under "${anchorHeader}"` : "no known header, default order"} />
-              <div className="mono text-xs leading-relaxed text-muted-foreground">{plan.fieldOrder.map((f) => `${colLetter(f.c)} ${f.field}`).join(" · ")}</div>
+              <div className="text-xs leading-relaxed text-muted-foreground">{plan.fieldOrder.map((f) => columnLabel(f.c, f.field)).join(" · ")}</div>
               <Row k={`${plan.count} point${plan.count === 1 ? "" : "s"}`} v={`rows ${anchor!.r + 1}-${anchor!.r + plan.count}`} />
               {layout.keyCol >= 0 && layout.keyCol < anchor!.c && (
                 <label className="flex items-center gap-2"><Checkbox checked={writeKeys} onCheckedChange={(v) => setWriteKeys(!!v)} /> Write keys in column {colLetter(layout.keyCol)}</label>
@@ -279,13 +341,13 @@ export function TransferStep({ meeting, pointIds, onBack, onDone }: Props) {
             <div className="text-xs text-muted-foreground">
               {points.length} point{points.length === 1 ? "" : "s"} · {points.map((p) => STATUS_LABEL[p.status]).filter((v, i, a) => a.indexOf(v) === i).join(", ")}
             </div>
-            <Button className="h-9" disabled={!plan || !preview.data || execute.isPending} onClick={() => void write()}>
+            <Button className="h-9" disabled={!plan || !preview.data || execute.isPending || !wb.can_edit} onClick={() => void write()}>
               {execute.isPending
                 ? "Writing…"
                 : plan
                   ? plan.mode === "append"
-                    ? `Insert ${plan.count} rows and write`
-                    : `Write ${(serverCells.length || planCells(plan).length)} cells`
+                    ? `Insert ${plan.count} row${plan.count === 1 ? "" : "s"} and write`
+                    : `Write ${cellCount} cell${cellCount === 1 ? "" : "s"}`
                   : "Pick a cell"}
             </Button>
             <Button variant="outline" className="h-9" onClick={onBack}>Back</Button>

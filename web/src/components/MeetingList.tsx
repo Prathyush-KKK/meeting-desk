@@ -38,7 +38,23 @@ export function MeetingList({ items, selectedKey, onSelect, onOpen, onContinue }
             data-source={m.source}
             onClick={() => onSelect(m)}
             onDoubleClick={() => onContinue(m)}
-            className={cn("group relative cursor-pointer py-2.5 pl-3 pr-20 -ml-3 -mr-3 md:-mx-0 md:pl-2", isSel ? "bg-secondary" : "hover:bg-secondary/60")}
+            // R1-45: a card could only be picked with a mouse. Tab reaches it, Space picks it, Enter
+            // continues with it - the keyboard's click and double-click.
+            tabIndex={0}
+            aria-current={isSel ? "true" : undefined}
+            onKeyDown={(e) => {
+              if (e.target !== e.currentTarget) return;
+              if (e.key === "Enter") {
+                e.preventDefault();
+                onContinue(m);
+              } else if (e.key === " ") {
+                e.preventDefault();
+                onSelect(m);
+              }
+            }}
+            // No negative margins: inside the list's scroll box they made the row wider than the box,
+            // so on a phone the box scrolled sideways and clipped the titles (R1-02).
+            className={cn("group relative cursor-pointer py-2.5 pl-2 pr-24 focus-visible:-outline-offset-2 md:pr-20", isSel ? "bg-secondary" : "hover:bg-secondary/60")}
           >
             <div className="flex items-baseline gap-2">
               <span className={cn("truncate text-[14px]", !m.title && "italic text-muted-foreground", isSel && "font-medium")}>
@@ -47,16 +63,21 @@ export function MeetingList({ items, selectedKey, onSelect, onOpen, onContinue }
               {step && <span className="shrink-0 text-xs text-muted-foreground">· {step}</span>}
               {m.in_progress_by && <span className="shrink-0 text-xs text-muted-foreground">· {m.in_progress_by.split("@")[0]} here</span>}
             </div>
-            <div className="mt-0.5 flex flex-wrap gap-x-2 text-xs text-muted-foreground">
+            {/* Each separator travels with the item after it, so a wrapped line never ends on a dot. */}
+            <div className="mt-0.5 flex flex-wrap gap-x-1.5 text-xs text-muted-foreground" data-testid="meeting-meta">
               <span className="mono">{fmtDate(m.date)} {m.start}</span>
-              <span>·</span>
-              <span>{m.attendees.length} people</span>
-              <span>·</span>
-              <span>{m.source === "calendar" ? "Calendar" : "Manual"}</span>
-              {m.attachments.some((a) => a.kind === "doc") && <><span>·</span><span>Gemini notes</span></>}
-              {m.points_count > 0 && <><span>·</span><span>{m.points_count} points</span></>}
+              {[
+                m.attendees.length === 1 ? "1 person" : `${m.attendees.length} people`,
+                m.source === "calendar" ? "Calendar" : "Manual",
+                m.attachments.some((a) => a.kind === "doc") ? "Gemini notes" : "",
+                m.points_count > 0 ? (m.points_count === 1 ? "1 point" : `${m.points_count} points`) : "",
+              ]
+                .filter(Boolean)
+                .map((part) => (
+                  <span key={part} className="whitespace-nowrap">· {part}</span>
+                ))}
             </div>
-            <div className="absolute right-1 top-1.5 flex gap-0.5">
+            <div className="absolute right-0 top-1 flex gap-0.5">
               {m.editable && (
                 <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" aria-label="Edit meeting" onClick={(e) => { e.stopPropagation(); onOpen(m, true); }}>
                   <Pencil className="h-3.5 w-3.5" />
