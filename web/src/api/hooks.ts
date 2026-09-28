@@ -53,6 +53,8 @@ export const qk = {
   workbooks: ["workbooks"] as const,
   tab: (workbookId: string, sheetId: string) => ["tab", workbookId, sheetId] as const,
   transfers: (workbookId?: string) => ["transfers", workbookId ?? "all"] as const,
+  // Under "transfers" so invalidateAfterWrite reaches it; "meeting" keeps it off any workbook's key.
+  meetingTransfers: (meetingId: string) => ["transfers", "meeting", meetingId] as const,
   connections: ["connections"] as const,
   allowList: ["allow-list"] as const,
   activity: ["activity"] as const,
@@ -640,6 +642,14 @@ export function useTransfers(workbookId?: string) {
   return useQuery<Transfer[], ApiError>(
     list(qk.transfers(workbookId), () => api.get<Transfer[]>("/transfers", { workbook_id: workbookId })),
   );
+}
+
+/** What left one meeting, for which sheet and whether it came back: its history, newest first. */
+export function useMeetingTransfers(meetingId: string | null) {
+  return useQuery<Transfer[], ApiError>({
+    ...list(qk.meetingTransfers(meetingId ?? ""), () => api.get<Transfer[]>("/transfers", { meeting_id: meetingId ?? "" })),
+    enabled: !!meetingId,
+  });
 }
 
 // --- step 4: transfer -----------------------------------------------------------------------------

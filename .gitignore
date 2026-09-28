@@ -26,3 +26,4 @@ web/e2e/last-run.png
 
 # per-round screenshot sets stay local; docs/review/shots/final is committed
 docs/review/shots/round-*/
+.api.log

@@ -88,6 +88,9 @@ def test_transferred_points_are_removed_from_the_tool(client: TestClient) -> Non
     log = client.get("/transfers", params={"workbook_id": workbook["id"]}).json()
     assert len(log) == 2
     assert log[0]["snapshot"]["point"]["id"] in point_ids
+    # and the meeting's own history is the same two lines, asked for by meeting
+    mine = client.get("/transfers", params={"meeting_id": meeting_id}).json()
+    assert [t["id"] for t in mine] == [t["id"] for t in log]
 
 
 def test_a_changed_tab_between_preview_and_write_gives_409_with_the_fresh_grid(client: TestClient) -> None:

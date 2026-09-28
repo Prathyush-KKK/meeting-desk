@@ -343,7 +343,12 @@ export interface ExtractionRecord {
   region: string | null;
   status: ExtractionJobStatus;
   fallback_from: string | null;
+  /** A failed run is kept on record with the provider's message; newest first puts it on top. */
   error: string | null;
+  /** Kept on the run: a transferred point is deleted, so a count taken later would shrink. */
+  created_points?: number;
+  /** When it ran (ISO). */
+  at?: string | null;
 }
 
 /** `GET /extractions/{id}` - what the polling loop reads. */

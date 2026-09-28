@@ -1,14 +1,18 @@
 // Screen review round 1, Step 2:
 //   R1-22  a saved note can be moved to another meeting (spec section 7; POST /notes/{id}/move).
-//   R1-11  no fixed model name on the page.
+//   R1-11  no fixed model name on the page, except the wait hint while a run is pending.
+//   wait   an extraction takes one to two minutes, so the button counts the seconds.
 
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NotesStep } from "@/pages/NotesStep";
 import type { MeetingItem, Note } from "@/api/types";
 
-const h = vi.hoisted(() => ({ move: vi.fn(() => Promise.resolve({})) }));
+const h = vi.hoisted(() => ({
+  move: vi.fn(() => Promise.resolve({})),
+  extract: { isPending: false, isPolling: false, phase: "idle" },
+}));
 
 vi.mock("@/api/hooks", () => ({
   ExtractionCancelled: class extends Error {},
@@ -18,7 +22,7 @@ vi.mock("@/api/hooks", () => ({
   usePasteNote: () => ({ mutateAsync: vi.fn(), isPending: false }),
   usePatchNote: () => ({ mutate: vi.fn() }),
   useDeleteNote: () => ({ mutate: vi.fn() }),
-  useExtract: () => ({ mutateAsync: vi.fn(), isPending: false, isPolling: false, phase: "idle", cancel: vi.fn() }),
+  useExtract: () => ({ mutateAsync: vi.fn(), cancel: vi.fn(), ...h.extract }),
   useMoveNote: () => ({ mutateAsync: h.move, isPending: false }),
   useMeetings: () => ({
     data: {
@@ -45,7 +49,10 @@ const NOTE = {
 
 const MEETING = { id: "m-1", title: "Vendor call with Madhu" } as unknown as MeetingItem;
 
-beforeEach(() => h.move.mockClear());
+beforeEach(() => {
+  h.move.mockClear();
+  h.extract = { isPending: false, isPolling: false, phase: "idle" };
+});
 
 describe("NotesStep", () => {
   it("moves a note to another saved meeting", async () => {
@@ -61,5 +68,38 @@ describe("NotesStep", () => {
   it("names no model before anything has been extracted", () => {
     render(<NotesStep meeting={MEETING} onBack={vi.fn()} onExtracted={vi.fn()} />);
     expect(screen.queryByText(/Gemini 2\.5 Flash/)).not.toBeInTheDocument();
+  });
+
+  it("names no model and shows no wait hint while idle", () => {
+    render(<NotesStep meeting={MEETING} onBack={vi.fn()} onExtracted={vi.fn()} />);
+    expect(screen.getByRole("button", { name: "Extract points" })).toBeInTheDocument();
+    expect(screen.queryByTestId("extract-hint")).not.toBeInTheDocument();
+  });
+});
+
+describe("NotesStep while extracting", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("counts the seconds on the button and says how long it usually takes", () => {
+    vi.useFakeTimers();
+    h.extract = { isPending: true, isPolling: false, phase: "running" };
+    render(<NotesStep meeting={MEETING} onBack={vi.fn()} onExtracted={vi.fn()} />);
+    expect(screen.getByRole("button", { name: "Extracting… 0s" })).toBeDisabled();
+    act(() => vi.advanceTimersByTime(3_000));
+    expect(screen.getByRole("button", { name: "Extracting… 3s" })).toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(62_000));
+    expect(screen.getByRole("button", { name: "Extracting… 65s" })).toBeInTheDocument();
+    expect(screen.getByTestId("extract-hint")).toHaveTextContent(
+      "The model usually takes one to two minutes. You can leave this page; the points appear on step 3.",
+    );
+  });
+
+  it("keeps Cancel while the run is queued, with the same counter", () => {
+    vi.useFakeTimers();
+    h.extract = { isPending: true, isPolling: true, phase: "queued" };
+    render(<NotesStep meeting={MEETING} onBack={vi.fn()} onExtracted={vi.fn()} />);
+    act(() => vi.advanceTimersByTime(2_000));
+    expect(screen.getByRole("button", { name: "Queued… 2s" })).toBeDisabled();
+    expect(screen.getByTestId("cancel-extract")).toBeInTheDocument();
   });
 });

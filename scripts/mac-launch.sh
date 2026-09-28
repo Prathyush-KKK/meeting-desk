@@ -4,6 +4,7 @@
 #
 #   scripts/mac-launch.sh            build (if needed), start, wait for /healthz
 #   scripts/mac-launch.sh logs       follow the API log
+#   scripts/mac-launch.sh snapshot   write the last 400 API log lines to .api.log (no terminal needed)
 #   scripts/mac-launch.sh down       stop (the database volume stays)
 #   scripts/mac-launch.sh reset      stop and delete the database volume
 #
@@ -17,10 +18,11 @@ ENV_FILE=.env
 
 case "${1:-up}" in
   logs) exec "${COMPOSE[@]}" logs -f --tail=200 api ;;
+  snapshot) "${COMPOSE[@]}" logs --no-color --tail=400 api > .api.log 2>&1; echo "wrote .api.log ($(wc -l < .api.log) lines)"; exit 0 ;;
   down) exec "${COMPOSE[@]}" down ;;
   reset) exec "${COMPOSE[@]}" down -v ;;
   up) ;;
-  *) echo "usage: $0 [up|logs|down|reset]" >&2; exit 2 ;;
+  *) echo "usage: $0 [up|logs|snapshot|down|reset]" >&2; exit 2 ;;
 esac
 
 if ! docker info >/dev/null 2>&1; then

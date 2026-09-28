@@ -124,3 +124,55 @@ def test_a_lost_race_on_the_first_sign_in_recovers_instead_of_500(
 
     with db.session() as check:
         assert len(list(check.query(User).all())) == 1
+
+
+def test_last_seen_is_written_once_a_minute_not_once_a_request(tmp_path: Path) -> None:
+    """Every request used to UPDATE users.last_seen_at inside its own transaction. The row lock
+    that takes is held until the request answers - and an inline extraction answers a minute or
+    two later, so every other request of the same person queued behind it and the app looked dead.
+    """
+    from datetime import datetime, timedelta, timezone
+
+    from app.auth import deps
+    from app.db import Database
+
+    sub, email = "dev|steady@simpleo.ai", "steady@simpleo.ai"
+    db = Database(f"sqlite:///{tmp_path / 'seen.db'}")
+    db.create_all()
+    with db.session() as first:
+        user = deps._ensure_user(first, sub, email, "Steady", "admin")
+        first.commit()
+        stamped = user.last_seen_at
+    assert stamped is not None
+
+    with db.session() as second:  # seconds later: read, not written
+        user = deps._ensure_user(second, sub, email, "Steady", "admin")
+        assert user.last_seen_at.replace(tzinfo=None) == stamped.replace(tzinfo=None)
+        assert not second.is_modified(user), "nothing to UPDATE, so no row lock to hold"
+
+    with db.session() as aged:  # a minute later: written
+        row = aged.get(deps.User, user.id)
+        row.last_seen_at = datetime.now(timezone.utc) - timedelta(seconds=deps.LAST_SEEN_INTERVAL_SECONDS + 1)
+        aged.commit()
+    with db.session() as third:
+        user = deps._ensure_user(third, sub, email, "Steady", "admin")
+        assert user.last_seen_at.replace(tzinfo=None) > stamped.replace(tzinfo=None)
+
+
+def test_sign_in_commits_before_the_route_runs(client: TestClient) -> None:
+    """``authenticate`` ends its own transaction, so a long route holds no lock on the users row."""
+    from app.auth import deps
+
+    seen: list[bool] = []
+    original = deps.Session.commit
+
+    def spy(self):
+        seen.append(True)
+        return original(self)
+
+    deps.Session.commit = spy  # type: ignore[method-assign]
+    try:
+        assert client.get("/auth/me").status_code == 200
+    finally:
+        deps.Session.commit = original  # type: ignore[method-assign]
+    assert len(seen) >= 2, "one commit inside authenticate, one when the request ends"

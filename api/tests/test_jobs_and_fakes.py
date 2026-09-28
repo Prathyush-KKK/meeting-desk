@@ -156,3 +156,18 @@ def test_fetch_doc_returns_nothing_when_there_is_no_doc(client: TestClient) -> N
     with client.app.state.db.session() as session:
         meeting = session.query(Meeting).filter_by(title="Sprinto call prep").one()
         assert fetch_notes_doc(client.app.state.google, meeting, ["prathyush.kodhanpur@simpleo.ai"]) is None
+
+
+def test_the_calendar_window_reaches_ahead_as_well_as_back() -> None:
+    """The list used to end at midnight tonight: a meeting later this week could not be prepared,
+    and one older than seven days could not be captured. Both windows are settings now."""
+    from datetime import datetime
+
+    from app.routes.meetings import _window
+
+    now = datetime(2026, 9, 29, 10, 30)
+    start, end = _window(now, 30, 14)
+    assert (start.year, start.month, start.day, start.hour) == (2026, 8, 30, 0)
+    assert (end.year, end.month, end.day, end.hour, end.minute) == (2026, 10, 13, 23, 59)
+    _, today = _window(now, 7)
+    assert (today.month, today.day, today.hour) == (9, 29, 23)

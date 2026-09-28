@@ -87,12 +87,36 @@ export default function App() {
     }
   }, [page, step, meetingId, sheetSel]);
 
-  const go = useCallback(
-    (s: WizardStep) => {
-      if (s !== "meeting" && !meetingId) return;
+  /** A saved meeting straight at a step, from its card or its detail panel, whatever its date. */
+  const openAt = useCallback(
+    (id: string, s: "notes" | "points") => {
+      // Picked points belong to the meeting they were picked on.
+      if (id !== meetingId) setTransferIds([]);
+      setMeetingId(id);
+      setSelectedKey(id);
       setStep(s);
     },
     [meetingId],
+  );
+
+  // On Step 1 the step bar follows the highlighted card when it is a saved meeting: it used to need
+  // a Continue first (or the meeting from an earlier visit, kept in the URL), so Notes and Points
+  // stayed shut, or opened a meeting other than the one highlighted.
+  const selectedSaved = step === "meeting" && selectedKey && items.some((m) => m.id === selectedKey) ? selectedKey : null;
+  const target = selectedSaved ?? meetingId;
+  // Transfer carries the points picked on Step 3, so it stays with the meeting they came from.
+  const reachable = useCallback(
+    (s: WizardStep) => s === "meeting" || (s === "transfer" ? !!meetingId && target === meetingId : !!target),
+    [meetingId, target],
+  );
+
+  const go = useCallback(
+    (s: WizardStep) => {
+      if (!reachable(s)) return;
+      if ((s === "notes" || s === "points") && target && target !== meetingId) openAt(target, s);
+      else setStep(s);
+    },
+    [reachable, target, meetingId, openAt],
   );
 
   if (me.isLoading) return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
@@ -124,13 +148,13 @@ export default function App() {
             <ol className="hidden items-center gap-1 md:flex">
               {STEPS.map((s, i) => {
                 const on = i === stepIndex;
-                const reachable = i === 0 || !!meetingId;
+                const canGo = reachable(s.key);
                 return (
                   <li key={s.key} className="flex items-center">
                     <button
-                      disabled={!reachable}
+                      disabled={!canGo}
                       onClick={() => go(s.key)}
-                      className={cn("px-1", on ? "text-foreground" : "text-muted-foreground", reachable && !on && "hover:text-foreground")}
+                      className={cn("px-1", on ? "text-foreground" : "text-muted-foreground", canGo && !on && "hover:text-foreground")}
                     >
                       <span className="mono mr-1.5 text-xs">{i + 1}</span>{s.label}
                     </button>
@@ -162,11 +186,8 @@ export default function App() {
           <MeetingStep
             selectedKey={selectedKey}
             onSelectKey={setSelectedKey}
-            onContinue={(id) => {
-              setMeetingId(id);
-              setSelectedKey(id);
-              setStep("notes");
-            }}
+            onContinue={(id) => openAt(id, "notes")}
+            onOpenStep={openAt}
           />
         )}
         {page === "capture" && step === "notes" && meeting && (

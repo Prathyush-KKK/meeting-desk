@@ -5,19 +5,24 @@
 //          list's own Continue steps aside for the panel's.
 //   R1-21  deleting a manual meeting offers Undo for ten seconds (spec section 7).
 //   empty  the empty list says what to do.
+//   history a saved meeting's detail shows its extraction runs and transfers, and opens its pages.
 
 import { useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MeetingStep } from "@/pages/MeetingStep";
-import type { MeetingItem } from "@/api/types";
+import type { ExtractionRecord, MeetingItem, Transfer } from "@/api/types";
 
 const h = vi.hoisted(() => ({
   items: [] as MeetingItem[],
   remove: vi.fn(() => Promise.resolve({ ok: true, id: "m-1" })),
   restore: vi.fn(),
   refresh: vi.fn(),
+  openStep: vi.fn(),
+  extractions: [] as ExtractionRecord[],
+  transfers: [] as Transfer[],
+  historyFor: [] as (string | null)[],
 }));
 
 vi.mock("@/api/hooks", () => ({
@@ -29,6 +34,8 @@ vi.mock("@/api/hooks", () => ({
   usePatchMeeting: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useDeleteMeeting: () => ({ mutateAsync: h.remove }),
   useRestoreMeeting: () => ({ mutate: h.restore }),
+  useExtractions: (id: string | null) => { h.historyFor.push(id); return { data: h.extractions, isLoading: false }; },
+  useMeetingTransfers: () => ({ data: h.transfers, isLoading: false }),
 }));
 
 const toast = vi.hoisted(() => Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn(), message: vi.fn() }));
@@ -83,7 +90,7 @@ const MANUAL = meeting({
 /** The selection lives above the page, as it does in App. */
 function Harness() {
   const [key, setKey] = useState<string | null>(null);
-  return <MeetingStep selectedKey={key} onSelectKey={setKey} onContinue={() => {}} />;
+  return <MeetingStep selectedKey={key} onSelectKey={setKey} onContinue={() => {}} onOpenStep={h.openStep} />;
 }
 
 beforeEach(() => {
@@ -91,7 +98,35 @@ beforeEach(() => {
   h.remove.mockClear();
   h.restore.mockClear();
   toast.message.mockClear();
+  h.openStep.mockClear();
+  h.extractions = [];
+  h.transfers = [];
+  h.historyFor = [];
 });
+
+function run(over: Partial<ExtractionRecord>): ExtractionRecord {
+  return { id: "e-1", meeting_id: "m-1", provider: "bedrock", model: "gemma-4", region: "us-east-1", status: "done", fallback_from: null, error: null, ...over };
+}
+
+function transfer(over: Partial<Transfer>): Transfer {
+  return {
+    id: "t-1",
+    batch_id: "b-1",
+    at: "2026-09-22T17:02:00+05:30",
+    actor: "ansul.s@simpleo.ai",
+    meeting_id: "m-1",
+    meeting_title: "Sprinto call prep",
+    point_text: "Send the Sprinto questionnaire",
+    workbook_id: "wb-1",
+    sheet_id: "1234",
+    mode: "append",
+    cells: ["A5"],
+    snapshot: {},
+    previous: {},
+    undone_at: null,
+    ...over,
+  };
+}
 
 describe("MeetingStep", () => {
   it("moves the open detail to the card that was clicked", async () => {
@@ -142,5 +177,66 @@ describe("MeetingStep", () => {
     render(<Harness />);
     expect(screen.getByText("No meeting here? Add one, or paste the notes straight into the box above.")).toBeInTheDocument();
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
+  });
+
+  it("shows a saved meeting's history and opens its notes or points from the detail", async () => {
+    h.items = [CALENDAR, { ...MANUAL, notes_count: 2, points_count: 1 }];
+    const longError = `Bedrock timed out reading the model answer. ${"x".repeat(300)}`;
+    h.extractions = [
+      run({ id: "e-3", status: "error", error: longError }),
+      run({ id: "e-2", provider: "fake", model: "rule-based", created_points: 4 }),
+      run({ id: "e-1" }),
+    ];
+    h.transfers = [
+      transfer({ id: "t-2", point_text: "Share the deck", undone_at: "2026-09-22T17:05:00+05:30", snapshot: { sheet_title: "Roadmap" } }),
+      transfer({}),
+    ];
+    render(<Harness />);
+    await userEvent.click(within(screen.getAllByTestId("meeting-row")[1]).getByLabelText("Show meeting details"));
+    const history = within(screen.getByTestId("meeting-history"));
+    expect(h.historyFor).toContain("m-1");
+    expect(screen.getByTestId("meeting-history")).toHaveTextContent(/^2 notes1 point/);
+
+    const runs = history.getAllByTestId("extraction-line");
+    expect(runs.map((r) => r.dataset.status)).toEqual(["error", "done", "done"]); // newest first, as the API sends them
+    const error = runs[0].querySelector("[title]")!;
+    expect(error.getAttribute("title")).toBe(longError);
+    expect(error.textContent!.length).toBeLessThanOrEqual(160);
+    expect(error.textContent).toMatch(/^Bedrock timed out.*…$/);
+    expect(runs[1]).toHaveTextContent("rule-based fake · done · 4 new");
+    expect(runs[2]).toHaveTextContent("gemma-4 · done · 0 new");
+
+    const lines = history.getAllByTestId("transfer-line");
+    // ICU writes "Sep" or "Sept" for en-GB depending on its version.
+    expect(lines[0]).toHaveTextContent(/^Share the deck → Roadmap · Tue 22 Sept? 17:02 · ansul\.s · undone$/);
+    expect(lines[1]).toHaveTextContent("Send the Sprinto questionnaire → sheet 1234");
+    expect(lines[1]).not.toHaveTextContent("undone");
+
+    await userEvent.click(history.getByRole("button", { name: "Open points" }));
+    expect(h.openStep).toHaveBeenCalledWith("m-1", "points");
+    await userEvent.click(history.getByRole("button", { name: "Open notes" }));
+    expect(h.openStep).toHaveBeenCalledWith("m-1", "notes");
+  });
+
+  it("says when nothing has been extracted or transferred yet", async () => {
+    render(<Harness />);
+    await userEvent.click(within(screen.getAllByTestId("meeting-row")[1]).getByLabelText("Show meeting details"));
+    const history = screen.getByTestId("meeting-history");
+    expect(history).toHaveTextContent("No extraction yet.");
+    expect(history).toHaveTextContent("Nothing transferred yet.");
+  });
+
+  it("has no history for a calendar card that was never captured", async () => {
+    render(<Harness />);
+    await userEvent.click(within(screen.getAllByTestId("meeting-row")[0]).getByLabelText("Show meeting details"));
+    expect(screen.queryByTestId("meeting-history")).not.toBeInTheDocument();
+    expect(screen.getByTestId("meeting-detail")).toHaveTextContent("Not captured yet. Continue captures it.");
+  });
+
+  it("opens a saved meeting's points from its card", async () => {
+    h.items = [CALENDAR, { ...MANUAL, points_count: 3 }];
+    render(<Harness />);
+    await userEvent.click(screen.getByTestId("open-points"));
+    expect(h.openStep).toHaveBeenCalledWith("m-1", "points");
   });
 });

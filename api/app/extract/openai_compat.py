@@ -19,6 +19,12 @@ What differs, and why:
 * Not every model behind the endpoint takes ``response_format``. A 400 with it is retried once
   without it; if that works, the endpoint and model are remembered for the process and not asked
   again.
+* The output cap is sent as ``max_completion_tokens``, the name the endpoint is known to take
+  for Gemma 4 (the nutrition service saw ``max_tokens`` refused with 400 "unsupported_parameter"
+  in August 2026). A 400 that names ``max_completion_tokens`` is retried once under the older
+  name, and remembered. ``reasoning_effort: "none"`` pins thinking off: the extraction is a
+  transcription into a schema, and a minute of reasoning tokens is the difference between an
+  answer and a timeout.
 * The status codes are the endpoint's own: 401/403 is the key, 404 is the model, 429 is backed
   off once. Those are answers, not outages - ``EndpointRefusal`` tells the telemetry so, and the
   breaker never moves on them. Timeouts, unreachable hosts and 5xx do count.
@@ -27,6 +33,7 @@ What differs, and why:
 from __future__ import annotations
 
 import json
+import logging
 import re
 import time
 from collections.abc import Callable
@@ -42,12 +49,17 @@ from app.extract.provider import ExtractionContext, ExtractionError, ProviderRes
 from app.extract.schema import EXTRACTION_JSON_SCHEMA
 from app.telemetry.breaker import BreakerOpen
 from app.telemetry.events import FailureReason
+from app.telemetry.logs import get_logger, log_event
 from app.telemetry.providers import BEDROCK, track_provider
+
+log = get_logger("extract.bedrock_openai")
 
 NAME = "bedrock_openai"
 OP = "chat_completions"
 ATTEMPTS = 2  # the call, then one retry with a corrective message
-TIMEOUT_SECONDS = 120.0  # a long document at max_tokens takes a while; this is the read timeout
+TIMEOUT_SECONDS = 180.0  # default read timeout; BEDROCK_TIMEOUT_SECONDS overrides it
+TOKEN_CAP = "max_completion_tokens"  # the OpenAI-current name; the endpoint refused max_tokens for Gemma 4
+TOKEN_CAP_LEGACY = "max_tokens"
 CONNECT_TIMEOUT_SECONDS = 10.0
 BACKOFF_SECONDS = 2.0  # the one wait on a 429 without a usable Retry-After
 MAX_RETRY_AFTER_SECONDS = 8.0  # the request is holding a person's browser open
@@ -59,11 +71,14 @@ _REGION_RE = re.compile(r"\.([a-z]{2}(?:-gov)?-[a-z]+-\d+)\.")
 # it. Process-wide on purpose: the provider is built once per process, and a worker or a test that
 # builds another one should not pay the 400 again.
 _JSON_MODE_REFUSED: set[tuple[str, str]] = set()
+# The same, for (URL, model) pairs that refused ``max_completion_tokens`` and took ``max_tokens``.
+_LEGACY_TOKEN_CAP: set[tuple[str, str]] = set()
 
 
 def forget_json_mode_refusals() -> None:
-    """Tests only: start again from asking for JSON mode everywhere."""
+    """Tests only: start again from asking for JSON mode and the current token cap everywhere."""
     _JSON_MODE_REFUSED.clear()
+    _LEGACY_TOKEN_CAP.clear()
 
 
 # --- refusals ---------------------------------------------------------------------------------------
@@ -153,6 +168,14 @@ def answer_text(body: dict[str, Any]) -> tuple[str | None, str]:
     return content, finish
 
 
+def reasoning_tokens(body: dict[str, Any]) -> int | None:
+    """``usage.completion_tokens_details.reasoning_tokens`` when the endpoint reports it."""
+    raw = body.get("usage") if isinstance(body, dict) else None
+    details = raw.get("completion_tokens_details") if isinstance(raw, dict) else None
+    value = details.get("reasoning_tokens") if isinstance(details, dict) else None
+    return int(value) if isinstance(value, int | float) else None
+
+
 def usage_from(body: dict[str, Any]) -> dict[str, Any]:
     raw = body.get("usage") if isinstance(body, dict) else None
     if not isinstance(raw, dict):
@@ -219,6 +242,7 @@ class OpenAICompatExtractionProvider:
         self.url = chat_completions_url(self.base_url) if self.base_url else ""
         self.region = region_of(self.base_url)
         self._api_key = settings.bedrock_api_key.strip()
+        self.timeout_seconds = float(getattr(settings, "bedrock_timeout_seconds", 0) or TIMEOUT_SECONDS)
         self._transport = transport
         self._client = client
         self._sleep = sleep
@@ -228,7 +252,7 @@ class OpenAICompatExtractionProvider:
         if self._client is None:
             self._client = httpx.Client(
                 transport=self._transport,
-                timeout=httpx.Timeout(TIMEOUT_SECONDS, connect=CONNECT_TIMEOUT_SECONDS),
+                timeout=httpx.Timeout(self.timeout_seconds, connect=CONNECT_TIMEOUT_SECONDS),
             )
         return self._client
 
@@ -285,10 +309,27 @@ class OpenAICompatExtractionProvider:
             finish = ""
             try:
                 content, finish = answer_text(body)
+            except InvalidModelOutput:
+                pass
+            log_event(
+                log,
+                "bedrock_answered",
+                attempt=attempt + 1,
+                json_mode=json_mode,
+                finish_reason=finish,
+                content_chars=len(content or ""),
+                reasoning_tokens=reasoning_tokens(body),
+                duration_ms=(time.perf_counter() - started) * 1000,
+                **{k: v for k, v in usage.items() if k.endswith("_tokens")},
+            )
+            try:
+                if content is None and finish == "":
+                    answer_text(body)  # raises with the reason
                 output = parse_output(content)
             except InvalidModelOutput as exc:
                 cut = f" (finish_reason={finish})" if finish and finish != "stop" else ""
                 last_reason = f"{exc}{cut}"
+                log_event(log, "bedrock_answer_rejected", level=logging.WARNING, attempt=attempt + 1, reason=last_reason[:DETAIL_CHARS])
                 # The bad answer goes back as the assistant's turn - a placeholder when it was
                 # empty, so user and assistant still alternate for chat templates that insist.
                 messages = [
@@ -312,40 +353,66 @@ class OpenAICompatExtractionProvider:
         )
 
     def _complete(self, messages: list[dict[str, str]]) -> tuple[dict[str, Any], bool]:
-        """One logical completion: at most one 429 backoff and one retry without JSON mode."""
-        json_mode = (self.url, self.model) not in _JSON_MODE_REFUSED
+        """One logical completion: at most one 429 backoff, one retry under the older token-cap
+        name, and one retry without JSON mode."""
+        key = (self.url, self.model)
+        json_mode = key not in _JSON_MODE_REFUSED
+        legacy_cap = key in _LEGACY_TOKEN_CAP
         backed_off = False
         dropped_json_mode = False
+        switched_cap = False
         while True:
+            started = time.perf_counter()
             response = self._http().post(
-                self.url, headers=self._headers(), json=self._body(messages, json_mode)
+                self.url, headers=self._headers(), json=self._body(messages, json_mode, legacy_cap)
             )
             status = response.status_code
+            detail = "" if response.is_success else self._scrub(error_detail(response))
+            log_event(
+                log,
+                "bedrock_round",
+                level=logging.INFO if response.is_success else logging.WARNING,
+                status=status,
+                json_mode=json_mode,
+                token_cap=TOKEN_CAP_LEGACY if legacy_cap else TOKEN_CAP,
+                duration_ms=(time.perf_counter() - started) * 1000,
+                detail=detail,
+            )
             if status == 429 and not backed_off:
                 backed_off = True
                 self._sleep(retry_after(response))
+                continue
+            if status == 400 and not legacy_cap and TOKEN_CAP in detail:
+                # "Unsupported parameter: 'max_completion_tokens'": the endpoint wants the older
+                # name for this model. Retried under it before anything else is given up.
+                legacy_cap = True
+                switched_cap = True
                 continue
             if status == 400 and json_mode:
                 json_mode = False
                 dropped_json_mode = True
                 continue
             if response.is_success:
+                # Only now: a 400 that was about something else fails on the retry too, and must
+                # not switch JSON mode (or the token-cap name) for good.
                 if dropped_json_mode:
-                    # Only now: a 400 that was about something else (max_tokens, say) fails
-                    # without JSON mode too, and must not switch JSON mode off for good.
-                    _JSON_MODE_REFUSED.add((self.url, self.model))
+                    _JSON_MODE_REFUSED.add(key)
+                if switched_cap:
+                    _LEGACY_TOKEN_CAP.add(key)
                 return self._json(response), json_mode
             raise self._refusal(response)
 
     def _headers(self) -> dict[str, str]:
         return {"Authorization": f"Bearer {self._api_key}", "Accept": "application/json"}
 
-    def _body(self, messages: list[dict[str, str]], json_mode: bool) -> dict[str, Any]:
+    def _body(self, messages: list[dict[str, str]], json_mode: bool, legacy_cap: bool = False) -> dict[str, Any]:
         body: dict[str, Any] = {
             "model": self.model,
             "messages": messages,
             "temperature": 0,
-            "max_tokens": self.settings.extraction_max_output_tokens,
+            (TOKEN_CAP_LEGACY if legacy_cap else TOKEN_CAP): self.settings.extraction_max_output_tokens,
+            # Thinking off, explicitly (see the module docstring); a model that ignores it is unharmed.
+            "reasoning_effort": "none",
         }
         if json_mode:
             body["response_format"] = {"type": "json_object"}

@@ -1,6 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { MeetingList, itemKey } from "./MeetingList";
 import type { MeetingItem } from "@/api/types";
 
@@ -57,6 +57,8 @@ function renderList(overrides: Partial<Parameters<typeof MeetingList>[0]> = {}) 
     onSelect: vi.fn(),
     onOpen: vi.fn(),
     onContinue: vi.fn(),
+    onOpenNotes: vi.fn(),
+    onOpenPoints: vi.fn(),
     ...overrides,
   };
   render(<MeetingList {...props} />);
@@ -132,5 +134,76 @@ describe("MeetingList", () => {
     expect(props.onSelect).toHaveBeenCalledWith(CALENDAR);
     await userEvent.keyboard("{Enter}");
     expect(props.onContinue).toHaveBeenCalledWith(CALENDAR);
+  });
+
+  it("opens a saved meeting's points or notes straight from its counts, without picking the row", async () => {
+    const saved = { ...MANUAL, notes_count: 2, points_count: 3 };
+    const props = renderList({ items: [saved] });
+    const row = screen.getByTestId("meeting-row");
+    expect(within(row).getByTestId("meeting-meta")).toHaveTextContent("· 2 notes· 3 points");
+
+    await userEvent.click(within(row).getByRole("button", { name: "Open points" }));
+    expect(props.onOpenPoints).toHaveBeenCalledWith(saved);
+    await userEvent.click(within(row).getByTestId("open-notes"));
+    expect(props.onOpenNotes).toHaveBeenCalledWith(saved);
+    await userEvent.dblClick(within(row).getByTestId("open-points"));
+    expect(props.onSelect).not.toHaveBeenCalled();
+    expect(props.onContinue).not.toHaveBeenCalled();
+  });
+
+  it("leaves a calendar card's counts as plain text: there is no record to open yet", () => {
+    renderList({ items: [meeting({ points_count: 2, notes_count: 1 })] });
+    expect(screen.queryByTestId("open-points")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("open-notes")).not.toBeInTheDocument();
+    expect(screen.getByTestId("meeting-meta")).toHaveTextContent("· 2 points");
+    expect(screen.getByTestId("meeting-meta")).not.toHaveTextContent("note");
+  });
+});
+
+// The calendar window runs 30 days back and 14 ahead; the list says which side of today each is on.
+describe("MeetingList groups", () => {
+  afterEach(() => vi.useRealTimers());
+
+  const at = (date: string) => {
+    // Only the clock: user-event needs real timers.
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const [y, m, d] = date.split("-").map(Number);
+    vi.setSystemTime(new Date(y, m - 1, d, 0, 30)); // 00:30 local: in IST, UTC is still the day before
+  };
+
+  it("splits the rows into Upcoming, Today and Earlier, keeping the order inside each", () => {
+    at("2026-09-22");
+    const items = [
+      meeting({ id: "u-2", title: "Later still", date: "2026-10-01" }),
+      meeting({ id: "u-1", title: "Tomorrow", date: "2026-09-23" }),
+      meeting({ id: "t-1", title: "This afternoon", date: "2026-09-22" }),
+      meeting({ id: "e-1", title: "Last week", date: "2026-09-15" }),
+      meeting({ id: "e-2", title: "No date", date: null }),
+    ];
+    renderList({ items });
+    const groups = screen.getAllByTestId("meeting-group");
+    expect(groups.map((g) => g.dataset.group)).toEqual(["upcoming", "today", "earlier"]);
+    const titles = (g: HTMLElement) => within(g).getAllByTestId("meeting-row").map((r) => r.querySelector("span")?.textContent);
+    expect(groups[0]).toHaveTextContent(/^Upcoming/);
+    expect(titles(groups[0])).toEqual(["Later still", "Tomorrow"]);
+    expect(titles(groups[1])).toEqual(["This afternoon"]);
+    expect(titles(groups[2])).toEqual(["Last week", "No date"]);
+  });
+
+  it("skips a group with nothing in it", () => {
+    at("2026-09-22");
+    renderList({ items: [meeting({ date: "2026-09-10" })] });
+    expect(screen.getAllByTestId("meeting-group").map((g) => g.dataset.group)).toEqual(["earlier"]);
+    expect(screen.queryByText("Today")).not.toBeInTheDocument();
+  });
+
+  it("keeps Tab, Space and Enter on the rows across groups (R1-45)", async () => {
+    at("2026-09-22");
+    const upcoming = meeting({ id: "u-1", title: "Tomorrow", date: "2026-09-23" });
+    const props = renderList({ items: [upcoming, CALENDAR] });
+    await userEvent.tab();
+    expect(screen.getAllByTestId("meeting-row")[0]).toHaveFocus();
+    await userEvent.keyboard(" ");
+    expect(props.onSelect).toHaveBeenCalledWith(upcoming);
   });
 });

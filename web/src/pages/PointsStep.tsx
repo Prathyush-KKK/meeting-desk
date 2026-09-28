@@ -3,8 +3,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PointRow, SELECT_CLASS, ROW_GRID } from "@/components/PointRow";
+import { TransferLines } from "@/components/History";
 import { cn } from "@/lib/utils";
-import { KIND_ORDER, KIND_TITLE, STATUSES, STATUS_LABEL, fmtClock, mergeWorkstreams } from "@/lib/display";
+import { useElapsedSeconds } from "@/lib/elapsed";
+import { KIND_ORDER, KIND_TITLE, STATUSES, STATUS_LABEL, clip, fmtClock, mergeWorkstreams } from "@/lib/display";
 import {
   useAddPoint,
   useBulkPatchPoints,
@@ -13,6 +15,7 @@ import {
   useDeletePoint,
   useExtract,
   useExtractions,
+  useMeetingTransfers,
   usePointEditor,
   usePoints,
   useRestorePoint,
@@ -31,6 +34,9 @@ export function PointsStep({ meeting, onBack, onTransfer, onKeep }: Props) {
   const active = usePoints(meetingId, "active");
   const [showDeferred, setShowDeferred] = useState(false);
   const deferred = usePoints(meetingId, "deferred", showDeferred);
+  const [showTransferred, setShowTransferred] = useState(false);
+  // Asked for only once opened, like the deferred list.
+  const transfers = useMeetingTransfers(showTransferred ? meetingId : null);
 
   const editor = usePointEditor(meetingId, "active");
   const bulk = useBulkPatchPoints(meetingId, "active");
@@ -42,6 +48,11 @@ export function PointsStep({ meeting, onBack, onTransfer, onKeep }: Props) {
   const extract = useExtract(meetingId);
   const extractions = useExtractions(meetingId);
   const lastExtraction = extractions.data?.find((e) => e.status === "done") ?? null;
+  // A failed run is kept on record now. Newest on top and failed: say so, or an empty page after
+  // Extract reads as "the model found nothing".
+  const newest = extractions.data?.[0];
+  const failed = newest?.status === "error" ? newest : null;
+  const elapsed = useElapsedSeconds(extract.isPending);
 
   const [bulkOwner, setBulkOwner] = useState("");
   const [bulkStatus, setBulkStatus] = useState("");
@@ -105,21 +116,36 @@ export function PointsStep({ meeting, onBack, onTransfer, onKeep }: Props) {
           </span>
         )}
         <span>{editor.pending ? `saving ${editor.pending}…` : editor.savedAt ? `saved ${fmtClock(editor.savedAt)}` : "autosaves"}</span>
+        {failed && (
+          <span className="font-medium text-foreground" data-testid="extraction-error" title={failed.error ?? undefined}>
+            Last extraction failed{failed.error ? `: ${clip(failed.error, 200)}` : "."}
+          </span>
+        )}
         <button
           className="underline-offset-2 hover:underline"
           disabled={extract.isPending}
           onClick={async () => {
-            const result = await extract.mutateAsync();
-            toast.success(result.points.length ? `${result.points.length} new points` : "Nothing new");
+            try {
+              const result = await extract.mutateAsync();
+              toast.success(result.points.length ? `${result.points.length} new points` : "Nothing new");
+            } catch (error) {
+              toast.error(error instanceof Error ? error.message : "Extraction failed");
+            }
           }}
         >
-          Re-extract
+          {extract.isPending ? `Extracting… ${elapsed}s` : "Re-extract"}
         </button>
         <button
           className={cn("underline-offset-2 hover:underline", showDeferred && "text-foreground")}
           onClick={() => setShowDeferred((v) => !v)}
         >
           {showDeferred ? "Hide deferred" : "See deferred"}
+        </button>
+        <button
+          className={cn("underline-offset-2 hover:underline", showTransferred && "text-foreground")}
+          onClick={() => setShowTransferred((v) => !v)}
+        >
+          {showTransferred ? "Hide transferred" : "See transferred"}
         </button>
         {/* R4-02: on a phone the six bulk controls are two rows of three - count, Assign to, Set
             status; Apply, Defer, Add point. Round 2 made them one strip that scrolled sideways (R2-05)
@@ -206,6 +232,21 @@ export function PointsStep({ meeting, onBack, onTransfer, onKeep }: Props) {
                 onTransfer={() => onTransfer([p.id])}
               />
             ))}
+          </div>
+        )}
+
+        {/* Read-only: a transferred point has left this tool; the sheet is where it is edited. */}
+        {showTransferred && (
+          <div data-testid="transferred">
+            <div className="px-2 pb-1 pt-4 text-[11px] uppercase tracking-wide text-muted-foreground">
+              Transferred · {(transfers.data ?? []).length}
+            </div>
+            <TransferLines
+              className="px-2 pb-2"
+              transfers={transfers.data ?? []}
+              loading={transfers.isLoading}
+              empty="Nothing transferred from this meeting."
+            />
           </div>
         )}
       </div>

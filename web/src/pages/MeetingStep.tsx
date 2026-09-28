@@ -6,15 +6,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MeetingList, itemKey } from "@/components/MeetingList";
+import { ExtractionLines, TransferLines } from "@/components/History";
 import { cn } from "@/lib/utils";
 import { useCloseOnBack } from "@/lib/overlay";
 import { useAutoGrow } from "@/lib/autogrow";
-import { ago, fmtDate, mergeWorkstreams } from "@/lib/display";
+import { ago, fmtDate, mergeWorkstreams, plural } from "@/lib/display";
 import {
   useCaptureCalendarEvent,
   useCreateManualMeeting,
   useDeleteMeeting,
+  useExtractions,
   useMeetings,
+  useMeetingTransfers,
   usePatchMeeting,
   useQuickPaste,
   useRefreshMeetings,
@@ -27,11 +30,13 @@ interface Props {
   selectedKey: string | null;
   onSelectKey: (key: string | null) => void;
   onContinue: (meetingId: string) => void;
+  /** Straight to a saved meeting's notes or points, whatever its date and however far it got. */
+  onOpenStep: (meetingId: string, step: "notes" | "points") => void;
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-export function MeetingStep({ selectedKey, onSelectKey, onContinue }: Props) {
+export function MeetingStep({ selectedKey, onSelectKey, onContinue, onOpenStep }: Props) {
   const meetings = useMeetings();
   const refresh = useRefreshMeetings();
   const capture = useCaptureCalendarEvent();
@@ -159,6 +164,8 @@ export function MeetingStep({ selectedKey, onSelectKey, onContinue }: Props) {
               onSelect={select}
               onOpen={openPanel}
               onContinue={(m) => void go(m)}
+              onOpenNotes={(m) => m.id && onOpenStep(m.id, "notes")}
+              onOpenPoints={(m) => m.id && onOpenStep(m.id, "points")}
             />
           )}
         </div>
@@ -207,20 +214,27 @@ export function MeetingStep({ selectedKey, onSelectKey, onContinue }: Props) {
               onDeleted={() => { closePanel(); onSelectKey(null); }}
             />
           ) : (
-            <dl className="grid flex-1 content-start grid-cols-[96px_minmax(0,1fr)] gap-x-4 gap-y-2.5 text-[13px] lg:grid-cols-[120px_minmax(0,1fr)]">
-              <dt className="text-muted-foreground">When</dt><dd>{fmtDate(open.date)} · {open.start}-{open.end} IST</dd>
-              <dt className="text-muted-foreground">Organizer</dt><dd className="break-all">{open.organizer_email}</dd>
-              <dt className="text-muted-foreground">Attendees</dt>
-              <dd>{open.attendees.length ? open.attendees.map((a) => `${a.name || a.email} (${a.response})`).join(", ") : "none"}</dd>
-              <dt className="text-muted-foreground">Meet</dt><dd className="break-all">{open.conference?.meet_link || "none"}</dd>
-              <dt className="text-muted-foreground">Location</dt><dd>{open.location || "none"}</dd>
-              <dt className="text-muted-foreground">Recurrence</dt><dd>{open.recurring_event_id ? "part of a series" : "single event"}</dd>
-              <dt className="text-muted-foreground">Description</dt><dd className="whitespace-pre-wrap">{open.description || "none"}</dd>
-              <dt className="text-muted-foreground">Attachments</dt><dd>{open.attachments.length ? open.attachments.map((a) => a.title).join(", ") : "none"}</dd>
-              <dt className="text-muted-foreground">Workstream</dt><dd>{open.workstream || "not set"}</dd>
-              <dt className="text-muted-foreground">Shown in</dt><dd>Asia/Kolkata{open.timezone && open.timezone !== "Asia/Kolkata" ? ` (organizer: ${open.timezone})` : ""}</dd>
-              {open.calendar_event_id && <><dt className="text-muted-foreground">Event id</dt><dd className="mono break-all">{open.calendar_event_id}</dd></>}
-            </dl>
+            <div className="flex-1">
+              <dl className="grid content-start grid-cols-[96px_minmax(0,1fr)] gap-x-4 gap-y-2.5 text-[13px] lg:grid-cols-[120px_minmax(0,1fr)]">
+                <dt className="text-muted-foreground">When</dt><dd>{fmtDate(open.date)} · {open.start}-{open.end} IST</dd>
+                <dt className="text-muted-foreground">Organizer</dt><dd className="break-all">{open.organizer_email}</dd>
+                <dt className="text-muted-foreground">Attendees</dt>
+                <dd>{open.attendees.length ? open.attendees.map((a) => `${a.name || a.email} (${a.response})`).join(", ") : "none"}</dd>
+                <dt className="text-muted-foreground">Meet</dt><dd className="break-all">{open.conference?.meet_link || "none"}</dd>
+                <dt className="text-muted-foreground">Location</dt><dd>{open.location || "none"}</dd>
+                <dt className="text-muted-foreground">Recurrence</dt><dd>{open.recurring_event_id ? "part of a series" : "single event"}</dd>
+                <dt className="text-muted-foreground">Description</dt><dd className="whitespace-pre-wrap">{open.description || "none"}</dd>
+                <dt className="text-muted-foreground">Attachments</dt><dd>{open.attachments.length ? open.attachments.map((a) => a.title).join(", ") : "none"}</dd>
+                <dt className="text-muted-foreground">Workstream</dt><dd>{open.workstream || "not set"}</dd>
+                <dt className="text-muted-foreground">Shown in</dt><dd>Asia/Kolkata{open.timezone && open.timezone !== "Asia/Kolkata" ? ` (organizer: ${open.timezone})` : ""}</dd>
+                {open.calendar_event_id && <><dt className="text-muted-foreground">Event id</dt><dd className="mono break-all">{open.calendar_event_id}</dd></>}
+              </dl>
+              {open.id ? (
+                <MeetingHistory meeting={open} onOpenStep={onOpenStep} />
+              ) : (
+                <p className="mt-5 border-t pt-3 text-xs text-muted-foreground">Not captured yet. Continue captures it.</p>
+              )}
+            </div>
           )}
 
           {!editing && (
@@ -230,6 +244,34 @@ export function MeetingStep({ selectedKey, onSelectKey, onContinue }: Props) {
           )}
         </aside>
       )}
+    </div>
+  );
+}
+
+const LABEL = "mb-1 mt-3 text-[11px] uppercase tracking-wide text-muted-foreground";
+
+/**
+ * What already happened on a saved meeting, so a past one is somewhere to look things up rather
+ * than only something to continue. No headings here: the panel's one heading is its title.
+ */
+function MeetingHistory({ meeting, onOpenStep }: { meeting: MeetingItem; onOpenStep: Props["onOpenStep"] }) {
+  const id = meeting.id!;
+  const extractions = useExtractions(id);
+  const transfers = useMeetingTransfers(id);
+  return (
+    <div data-testid="meeting-history" className="mt-5 border-t pt-3 text-[13px]">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <span>{plural(meeting.notes_count, "note")}</span>
+        <span>{plural(meeting.points_count, "point")}</span>
+        <div className="ml-auto flex gap-2">
+          <Button variant="outline" size="sm" className="h-8" onClick={() => onOpenStep(id, "notes")}>Open notes</Button>
+          <Button variant="outline" size="sm" className="h-8" onClick={() => onOpenStep(id, "points")}>Open points</Button>
+        </div>
+      </div>
+      <div className={LABEL}>Extractions</div>
+      <ExtractionLines runs={extractions.data ?? []} loading={extractions.isLoading} />
+      <div className={LABEL}>Transfers</div>
+      <TransferLines transfers={transfers.data ?? []} loading={transfers.isLoading} empty="Nothing transferred yet." />
     </div>
   );
 }

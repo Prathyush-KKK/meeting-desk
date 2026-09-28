@@ -6,7 +6,7 @@ bind the entry to the Google ``sub`` on first sign-in so a changed email keeps w
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy import select
@@ -16,6 +16,8 @@ from sqlalchemy.orm import Session
 from app.config import Settings, get_settings
 from app.db import get_session
 from app.models import AllowListEntry, User
+
+LAST_SEEN_INTERVAL_SECONDS = 60
 
 NOT_ALLOWED = (
     "This Google account is not on the Meeting Desk allow-list. Ask an admin to add it: " "{admins}."
@@ -52,7 +54,17 @@ def _ensure_user(db: Session, google_sub: str, email: str, name: str, role: str)
     if name:
         user.name = name
     user.role = role
-    user.last_seen_at = datetime.now()
+    now = datetime.now(timezone.utc)
+    # Once a minute, not once a request: every request used to write this column, and that
+    # UPDATE took a row lock the request's transaction held until it answered. An extraction
+    # holds its transaction across the whole model call, so for that minute every other request
+    # from the same person queued behind it on their own users row (the list, the notes, the
+    # points), and the app looked dead. See also ``authenticate``, which commits before the route.
+    seen = user.last_seen_at
+    if seen is not None and seen.tzinfo is None:  # SQLite hands the column back naive
+        seen = seen.replace(tzinfo=timezone.utc)
+    if seen is None or (now - seen).total_seconds() >= LAST_SEEN_INTERVAL_SECONDS:
+        user.last_seen_at = now
     return user
 
 
@@ -97,6 +109,10 @@ def authenticate(
     user = _ensure_user(db, google_sub, email, name, entry.role)
     if entry.matched_user_id is None:
         entry.matched_user_id = user.id
+    # What sign-in wrote is its own short transaction: the route's transaction starts after this,
+    # so a route that holds its transaction for a long time (an inline extraction) holds no lock on
+    # the users row that every other request of the same person has to touch.
+    db.commit()
     return user
 
 

@@ -102,7 +102,11 @@ class Settings(BaseSettings):
     # Refresh skips the cache, but not more often than this: a held-down button must not become one
     # Calendar call per click per connection.
     calendar_refresh_min_seconds: int = 10
-    calendar_lookback_days: int = 7
+    # The list shows the calendar from this many days back to this many days ahead. Meetings that
+    # were captured stay on the list whatever their date; this window is only for the calendar's
+    # own events, so an upcoming meeting can be prepared and an older one still captured.
+    calendar_lookback_days: int = 30
+    calendar_lookahead_days: int = 14
     tab_read_max_age_seconds: int = 300
     transfer_undo_minutes: int = 10
     point_undo_seconds: int = 10
@@ -130,6 +134,8 @@ class Settings(BaseSettings):
         False, validation_alias=_alias("bedrock_fallback_enabled", "EXTRACT_FALLBACK_TO_BEDROCK")
     )
     extraction_max_output_tokens: int = 8192
+    # Read timeout on one chat completion. The nutrition service's name for the same knob.
+    bedrock_timeout_seconds: float = Field(180.0, validation_alias=_alias("bedrock_timeout_seconds", "BEDROCK_TIMEOUT_SECONDS"))
 
     @model_validator(mode="after")
     def _bedrock_model_id_wins(self) -> Settings:

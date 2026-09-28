@@ -34,6 +34,7 @@ from app.routes.common import (
     TabState,
     get_clock,
     get_config,
+    get_meeting,
     get_point,
     get_workbook,
     meeting_label,
@@ -290,6 +291,9 @@ def execute(
                 "text_norm": point.text_norm,
                 "written": written,
                 "row": row,
+                # Names, for the meeting's history: a sheet id means nothing to a person.
+                "workbook_name": workbook.name,
+                "sheet_title": fresh.read.title,
                 "row_hash": row_hash(fresh.read.values, row, fresh.layout) if inserted else "",
             },
             workbook_id=workbook.id,
@@ -355,6 +359,7 @@ def _already_transferred(db: Session, points: list[Point], workbook_id: uuid.UUI
 @router.get("")
 def list_transfers(
     workbook_id: str | None = None,
+    meeting_id: str | None = None,
     limit: int = 50,
     db: Session = Depends(get_session),
     clock: Clock = Depends(get_clock),
@@ -367,6 +372,9 @@ def list_transfers(
     query = select(Transfer).order_by(Transfer.at.desc()).limit(limit)
     if workbook_id:
         query = query.where(Transfer.workbook_id == get_workbook(db, workbook_id).id)
+    if meeting_id:
+        # A meeting's own history: what left it, for which sheet, and whether it came back.
+        query = query.where(Transfer.meeting_id == get_meeting(db, meeting_id).id)
     now = clock.now()
     window = timedelta(minutes=settings.transfer_undo_minutes)
     return [

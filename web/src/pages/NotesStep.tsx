@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { shortName } from "@/lib/display";
+import { useElapsedSeconds } from "@/lib/elapsed";
 import {
   ExtractionCancelled,
   useDeleteNote,
@@ -44,6 +45,7 @@ export function NotesStep({ meeting, onBack, onExtracted }: Props) {
   const deleteNote = useDeleteNote(meetingId);
   const extract = useExtract(meetingId);
   const moveNote = useMoveNote(meetingId);
+  const elapsed = useElapsedSeconds(extract.isPending);
   const meetings = useMeetings();
   const [paste, setPaste] = useState("");
   // Only saved meetings can hold a note; a calendar card that was never opened has no row yet.
@@ -95,12 +97,13 @@ export function NotesStep({ meeting, onBack, onExtracted }: Props) {
     }
   };
 
-  // With the queue on, the API answers `queued` and the hook polls /extractions/{id} every 2 s.
+  // With the queue on, the API answers `queued` and the hook polls /extractions/{id} every 2 s. The
+  // counter runs from the click through both phases: it is one wait to the person.
   const extractLabel =
     extract.phase === "queued"
-      ? "Queued…"
+      ? `Queued… ${elapsed}s`
       : extract.isPending
-        ? "Extracting…"
+        ? `Extracting… ${elapsed}s`
         : "Extract points";
 
   return (
@@ -205,8 +208,14 @@ export function NotesStep({ meeting, onBack, onExtracted }: Props) {
 
         <div className="flex items-center gap-2">
           <Button variant="outline" className="h-9" onClick={onBack}>Back</Button>
-          {/* R1-11: no fixed model name here; Step 3 names whoever actually answered. */}
-          {extract.isPending && <span className="hidden text-xs text-muted-foreground sm:inline">Extracting… you can leave this page.</span>}
+          {/* R1-11: Step 3 names whoever actually answered. The one model named here is only a
+              guide to the wait, shown while a run is pending: a bare "Extracting…" for two minutes
+              reads as stuck. */}
+          {extract.isPending && (
+            <span className="hidden min-w-0 text-xs text-muted-foreground sm:inline" data-testid="extract-hint">
+              The model usually takes one to two minutes. You can leave this page; the points appear on step 3.
+            </span>
+          )}
           {extract.isPolling && (
             <Button variant="outline" className="ml-auto h-9" data-testid="cancel-extract" onClick={extract.cancel}>
               Cancel

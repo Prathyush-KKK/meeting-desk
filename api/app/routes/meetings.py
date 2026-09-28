@@ -33,9 +33,9 @@ router = APIRouter(prefix="/meetings", tags=["meetings"])
 # --- calendar merge -------------------------------------------------------------------------------
 
 
-def _window(now: datetime, lookback_days: int) -> tuple[datetime, datetime]:
+def _window(now: datetime, lookback_days: int, lookahead_days: int = 0) -> tuple[datetime, datetime]:
     start = (now - timedelta(days=lookback_days)).replace(hour=0, minute=0, second=0, microsecond=0)
-    end = now.replace(hour=23, minute=59, second=59, microsecond=0)
+    end = (now + timedelta(days=lookahead_days)).replace(hour=23, minute=59, second=59, microsecond=0)
     return start, end
 
 
@@ -88,7 +88,7 @@ def calendar_events(
     if force:
         cache["forced_at"] = now
 
-    time_min, time_max = _window(now, settings.calendar_lookback_days)
+    time_min, time_max = _window(now, settings.calendar_lookback_days, settings.calendar_lookahead_days)
     merged: dict[str, CalendarEvent] = {}
     for connection in healthy_connections(db):
         try:

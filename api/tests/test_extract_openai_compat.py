@@ -184,11 +184,15 @@ def test_the_request_is_the_nutrition_credential_the_prompt_and_json_mode() -> N
     body = endpoint.bodies()[0]
     assert body["model"] == MODEL
     assert body["temperature"] == 0
-    assert body["max_tokens"] == 8192
+    # The OpenAI-current name: the endpoint refused ``max_tokens`` for Gemma 4 (the nutrition
+    # service, August 2026), and thinking is pinned off rather than trusted to stay off.
+    assert body["max_completion_tokens"] == 8192
+    assert "max_tokens" not in body
+    assert body["reasoning_effort"] == "none"
     assert body["response_format"] == {"type": "json_object"}
     assert [m["role"] for m in body["messages"]] == ["system", "user"]
     assert "Anushka Mohanty: Review dataset for weight information by 3 Oct" in body["messages"][1]["content"]
-    assert set(body) == {"model", "messages", "temperature", "max_tokens", "response_format"}
+    assert set(body) == {"model", "messages", "temperature", "max_completion_tokens", "reasoning_effort", "response_format"}
 
 
 def test_the_answer_is_the_same_extraction_output_as_the_recorded_fixtures() -> None:
@@ -338,13 +342,40 @@ def test_a_400_to_response_format_is_retried_without_it_and_remembered() -> None
     assert breaker_state() == "closed"
 
 
+def test_a_400_naming_max_completion_tokens_is_retried_under_the_older_name_and_remembered() -> None:
+    endpoint = Endpoint(
+        error(400, "Unsupported parameter: 'max_completion_tokens' is not supported with this model."),
+        completion(),
+    )
+    result = provider_for(endpoint).extract("notes", CONTEXT)
+    first, second = endpoint.bodies()
+    assert first["max_completion_tokens"] == 8192 and "max_tokens" not in first
+    assert second["max_tokens"] == 8192 and "max_completion_tokens" not in second
+    # JSON mode was not the problem, so it was kept on the retry and is still asked for.
+    assert second["response_format"] == {"type": "json_object"}
+    assert result.output.total() == 7
+
+    again = Endpoint(completion())
+    provider_for(again).extract("notes", CONTEXT)
+    assert len(again.requests) == 1
+    assert again.bodies()[0]["max_tokens"] == 8192
+    assert again.bodies()[0]["response_format"] == {"type": "json_object"}
+    assert breaker_state() == "closed"
+
+
+def test_the_timeout_comes_from_bedrock_timeout_seconds() -> None:
+    provider = provider_for(Endpoint(completion()), bedrock_timeout_seconds=45)
+    assert provider.timeout_seconds == 45
+    assert provider._http().timeout.read == 45
+
+
 def test_a_400_that_is_not_about_response_format_is_reported_and_not_remembered() -> None:
-    endpoint = Endpoint(error(400, "max_tokens must be at most 4096"))
+    endpoint = Endpoint(error(400, "temperature must be at most 1"))
     with pytest.raises(EndpointRefusal) as err:
         provider_for(endpoint).extract("notes", CONTEXT)
     assert len(endpoint.requests) == 2  # the one retry without response_format, which also failed
     assert "400" in str(err.value)
-    assert "max_tokens must be at most 4096" in str(err.value)
+    assert "temperature must be at most 1" in str(err.value)
     assert isinstance(err.value, ExtractionError)
 
     again = Endpoint(completion())
@@ -702,6 +733,14 @@ def test_the_route_extracts_points_through_the_endpoint(tmp_path: Path) -> None:
     assert ("action", "Finish the alert emission standard v1.2") in kinds
     assert ("decision", "The Owner column holds a person, not a team") in kinds
     assert ("question", "Do we fund the payments spike this quarter?") in kinds
+    # The meeting's history says the same: when it ran and how many points it created, kept on
+    # the row rather than counted (a transferred point is deleted, so a count would shrink).
+    with TestClient(app) as client:
+        runs = client.get(f"/meetings/{meeting_id}/extractions").json()
+    assert runs[0]["status"] == "done"
+    assert runs[0]["created_points"] == 6
+    assert runs[0]["at"] and runs[0]["at"][:4] == "2026" or runs[0]["at"]
+    assert "created_points" not in runs[0]["usage"]
 
 
 def test_a_refusal_reaches_the_person_as_a_502_with_the_reason(tmp_path: Path) -> None:
@@ -712,6 +751,12 @@ def test_a_refusal_reaches_the_person_as_a_502_with_the_reason(tmp_path: Path) -
         meeting_id = saved_meeting_id(client, "Nutrition roadmap review")
         client.post("/notes/paste", json={"meeting_id": meeting_id, "text": "Nishchay: ship it by Friday"})
         response = client.post(f"/meetings/{meeting_id}/extract")
-    assert response.status_code == 502
-    assert "credentials refused" in response.json()["detail"]
-    assert TOKEN not in response.text
+        assert response.status_code == 502
+        assert "credentials refused" in response.json()["detail"]
+        assert TOKEN not in response.text
+        # The failed run is on the record: the 502 rolled the route's session back, and the
+        # extraction row with its error used to go with it, so the meeting showed no attempt.
+        runs = client.get(f"/meetings/{meeting_id}/extractions").json()
+        assert [r["status"] for r in runs] == ["error"]
+        assert "credentials refused" in runs[0]["error"]
+        assert TOKEN not in runs[0]["error"]

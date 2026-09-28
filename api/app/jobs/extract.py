@@ -174,7 +174,10 @@ def _perform_extraction(
         return []
 
     extraction.usage = {"job": {"status": "running", "started_at": clock.now().isoformat()}}
-    db.flush()
+    # Committed, not flushed: the row says "running" to ``GET /meetings/{id}/extractions`` while the
+    # model is still answering, and it stays as the record of a failed run - the route's session
+    # rolls back on the 502, and used to take the row and its error message with it.
+    db.commit()
 
     # The fake provider recognises owner lines by name, so it sees the demo directory up front; the
     # real one asks the People API afterwards, only for owners the attendee list did not settle.
@@ -186,7 +189,7 @@ def _perform_extraction(
     except ExtractionError as exc:
         extraction.error = str(exc)
         extraction.usage = {}
-        db.flush()
+        db.commit()
         log_event(
             log,
             events.EXTRACTION_FAILED,
@@ -198,12 +201,12 @@ def _perform_extraction(
     except NotImplementedError as exc:
         extraction.error = str(exc)
         extraction.usage = {}
-        db.flush()
+        db.commit()
         raise ExtractionError(str(exc)) from exc
     except Exception as exc:  # pragma: no cover - defensive; notes are never lost
         extraction.error = str(exc)
         extraction.usage = {}
-        db.flush()
+        db.commit()
         raise ExtractionError(str(exc)) from exc
 
     extraction.provider = result.provider
@@ -248,6 +251,8 @@ def _perform_extraction(
 
     if created and meeting.step in ("meeting", "notes"):
         meeting.step = "points"
+    # On the record: points are deleted when they transfer, so a count taken later would shrink.
+    extraction.usage = {**(extraction.usage or {}), "created_points": len(created)}
     db.flush()
     return created
 
@@ -292,6 +297,7 @@ def extraction_status(extraction: Extraction) -> str:
 def extraction_out(extraction: Extraction, created: list[Point]) -> dict[str, Any]:
     usage = dict(extraction.usage or {})
     usage.pop("job", None)
+    stored = int(usage.pop("created_points", 0) or 0)
     return {
         "id": str(extraction.id),
         "meeting_id": str(extraction.meeting_id),
@@ -304,6 +310,7 @@ def extraction_out(extraction: Extraction, created: list[Point]) -> dict[str, An
         "fallback_from": usage.get("fallback_from"),
         "error": extraction.error,
         "note_ids": extraction.note_ids or [],
-        "created_points": len(created),
+        "created_points": len(created) if created else stored,
         "status": extraction_status(extraction),
+        "at": extraction.created_at.isoformat() if extraction.created_at else None,
     }
