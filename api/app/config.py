@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from pydantic import AliasChoices, Field
+from pydantic import AliasChoices, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -109,17 +109,38 @@ class Settings(BaseSettings):
     soft_delete_retention_days: int = 30
 
     # --- extraction -------------------------------------------------------------------------
-    extraction_provider: str = "fake"  # fake | vertex | bedrock
+    extraction_provider: str = "fake"  # fake | vertex | bedrock | bedrock_openai
     vertex_project: str = ""
     vertex_location: str = "asia-south1"
     vertex_model: str = "gemini-2.5-flash"
     bedrock_region: str = "ap-south-1"
     # Bedrock has no Gemini; the fallback runs a Claude model in Mumbai. Confirm the id per account.
     bedrock_model: str = "anthropic.claude-3-5-sonnet-20240620-v1:0"
+    # Bedrock's OpenAI-compatible endpoint with a Bedrock API key - the credential the nutrition
+    # service already runs on, under the names its .env uses, so that block pastes as it is. With
+    # both set, EXTRACTION_PROVIDER=bedrock goes here instead of the Converse API.
+    bedrock_base_url: str = ""
+    bedrock_api_key: str = Field("", validation_alias=_alias("bedrock_api_key", "AWS_BEARER_TOKEN_BEDROCK"))
+    # BEDROCK_MODEL_ID is the nutrition name for ``bedrock_model``. It is its own field rather than
+    # a second alias because an alias loses to BEDROCK_MODEL whenever that is present - even empty -
+    # and an .env copied from the earlier example still carries the Claude id there. Filled in, it
+    # wins; empty (what docker-compose.live.yml passes when it is not given) counts as unset.
+    bedrock_model_id: str = Field("", validation_alias=_alias("bedrock_model_id", "BEDROCK_MODEL_ID"))
     bedrock_fallback_enabled: bool = Field(
         False, validation_alias=_alias("bedrock_fallback_enabled", "EXTRACT_FALLBACK_TO_BEDROCK")
     )
     extraction_max_output_tokens: int = 8192
+
+    @model_validator(mode="after")
+    def _bedrock_model_id_wins(self) -> Settings:
+        if self.bedrock_model_id.strip():
+            self.bedrock_model = self.bedrock_model_id.strip()
+        return self
+
+    @property
+    def bedrock_bearer_configured(self) -> bool:
+        """Both halves of the OpenAI-compatible credential: the endpoint and the Bedrock API key."""
+        return bool(self.bedrock_api_key.strip() and self.bedrock_base_url.strip())
 
     # --- telemetry (docs/ALERT-EMISSION-STANDARD-SUMMARY.md) --------------------------------
     # /metrics is served by a second ASGI app on its own port, never on the API's router, so the

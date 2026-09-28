@@ -83,7 +83,7 @@ Two flags pick the implementation. Everything else below only matters when the f
 | flag | on (`1`, the default) | off (`0`) |
 | --- | --- | --- |
 | `FAKE_GOOGLE` | Calendar, Drive, Docs, Gmail, Sheets and People come from `api/app/google/fake.py`, built from the seed and the sheet fixtures; the clock is pinned to the demo world. | The real clients under `api/app/google/` (`calendar.py`, `drive.py`, `docs.py`, `gmail.py`, `sheets.py`, `people.py`) run as the admin connections' refresh tokens, through one HTTP layer (`http.py`: bearer tokens, 401 refresh, 429 backoff, error mapping). Needs the **admin connections** block below. |
-| `FAKE_LLM` | The rule-based provider ported from the prototype's `lib/extract.ts`. | `EXTRACTION_PROVIDER` picks Vertex or Bedrock; needs the **extraction** block below and `make install-llm`. |
+| `FAKE_LLM` | The rule-based provider ported from the prototype's `lib/extract.ts`. | `EXTRACTION_PROVIDER` picks Vertex or Bedrock; needs the **extraction** block below and `make install-llm` (not for Bedrock's OpenAI-compatible endpoint, which is plain `httpx`). |
 
 ### Admin connections (`FAKE_GOOGLE=0`)
 
@@ -126,11 +126,12 @@ What each client calls, and which connection it runs as:
 
 | variable | used by | what it is |
 | --- | --- | --- |
-| `EXTRACTION_PROVIDER` | provider selection | `fake`, `vertex` or `bedrock`. |
+| `EXTRACTION_PROVIDER` | provider selection | `fake`, `vertex`, `bedrock` or `bedrock_openai`. `bedrock` is the OpenAI-compatible endpoint when `BEDROCK_BASE_URL` and `AWS_BEARER_TOKEN_BEDROCK` are both set, and the Converse API otherwise; `bedrock_openai` forces the OpenAI-compatible endpoint. `GET /health` reports the one running as `extraction_provider` (`bedrock_openai` or `bedrock`). |
 | `VERTEX_PROJECT`, `VERTEX_LOCATION`, `VERTEX_MODEL` | Vertex | The GCP project, `asia-south1`, `gemini-2.5-flash`. Credentials come from Application Default Credentials (a service account on the pod). The call is schema-constrained: `response_mime_type=application/json`, `response_schema` from `schema.py`, temperature 0, one retry on invalid output. |
-| `BEDROCK_REGION`, `BEDROCK_MODEL` | Bedrock | `ap-south-1` and the model id (Bedrock has no Gemini; a Claude id is the default - confirm it is enabled in the account). Credentials come from the AWS chain (IRSA on the pod). The schema is enforced through a forced tool call on the Converse API. |
-| `EXTRACT_FALLBACK_TO_BEDROCK` | provider selection | With `EXTRACTION_PROVIDER=vertex`, a Vertex failure is retried on Bedrock; the extraction record and the response carry `fallback_from=vertex` so the UI can say who answered. |
-| `EXTRACTION_MAX_OUTPUT_TOKENS` | both | 8192. |
+| `BEDROCK_BASE_URL`, `AWS_BEARER_TOKEN_BEDROCK`, `BEDROCK_MODEL_ID` | Bedrock, OpenAI-compatible endpoint | The nutrition service's Bedrock access under its own names, pasted as they are: e.g. `https://bedrock-mantle.us-east-1.api.aws/openai/v1`, a Bedrock API key (sent as `Authorization: Bearer`), `google.gemma-4-26b-a4b`. One `POST {BEDROCK_BASE_URL}/chat/completions` with plain `httpx` (`app/extract/openai_compat.py`): the `prompt.py` prompt with the schema appended to the system message, temperature 0, `max_tokens` from `EXTRACTION_MAX_OUTPUT_TOKENS`, `response_format: json_object` - dropped (and remembered for the process) if the model answers 400 to it. One retry on an answer that is not the schema, telling the model what was wrong. 401/403 is "credentials refused", 404 names the model, 429 is backed off once; none of them moves the breaker. The region is read off the URL. `BEDROCK_API_KEY` also works for the key. |
+| `BEDROCK_REGION`, `BEDROCK_MODEL` | Bedrock, Converse API | `ap-south-1` and the model id (Bedrock has no Gemini; a Claude id is the default - confirm it is enabled in the account). Credentials come from the AWS chain (IRSA on the pod, or `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`). The schema is enforced through a forced tool call on the Converse API. A non-empty `BEDROCK_MODEL_ID` wins over `BEDROCK_MODEL` for either path. |
+| `EXTRACT_FALLBACK_TO_BEDROCK` | provider selection | With `EXTRACTION_PROVIDER=vertex`, a Vertex failure is retried on Bedrock (picked by the same rule as `bedrock`); the extraction record and the response carry `fallback_from=vertex` so the UI can say who answered. |
+| `EXTRACTION_MAX_OUTPUT_TOKENS` | all three | 8192. |
 
 ### Jobs (`JOBS_ENABLED=1`)
 
@@ -217,7 +218,7 @@ Per `docs/ALERT-EMISSION-STANDARD-SUMMARY.md`, condensed from
 | --- | --- |
 | `http_requests_total{route,method,status_class}` | `app/telemetry/middleware.py`; `route` is the matched route's declared path, `status_class` the bucket |
 | `http_request_duration_seconds{route,method}` | the same middleware; buckets 0.05 … 10 |
-| `external_provider_requests_total{provider,op,outcome}` | `track_provider()` in `app/telemetry/providers.py`, wrapped around `app/google/http.py` (every Google REST call), the token refresh, the Vertex and Bedrock calls, and every Postgres statement |
+| `external_provider_requests_total{provider,op,outcome}` | `track_provider()` in `app/telemetry/providers.py`, wrapped around `app/google/http.py` (every Google REST call), the token refresh, the Vertex and Bedrock calls (`op` `converse` or `chat_completions`), and every Postgres statement |
 | `external_provider_last_success_timestamp_seconds{provider}` | the same wrapper, **only** on success |
 | `external_provider_breaker_state{provider}` | `app/telemetry/breaker.py`; 0 closed, 1 half-open, 2 open, initialised to 0 for every provider at startup |
 | `background_job_total{job_name,outcome}` | `track_job()` around `perform_extraction`, `fetch_missing_docs`, `check_connection_health` - so both the queued and the inline path are counted |
@@ -475,7 +476,7 @@ api/
                        calendar.py drive.py docs.py gmail.py sheets.py people.py, real.py (the suite)
   app/sheets/          layout.py and planner.py - the port of lib/sheet.ts, plus add-row, hashes, dates
   app/extract/         schema.py, provider.py, fake.py, postprocess.py, prompt.py, parse.py,
-                       vertex.py, bedrock.py, fallback.py
+                       vertex.py, bedrock.py (Converse), openai_compat.py (Bedrock API key), fallback.py
   app/routes/          meetings, notes, extract, points, workbooks, transfers, sheets, admin
   app/jobs/            extract, fetch_doc, token_health (plain functions), queue.py (procrastinate)
   app/telemetry/       metrics.py (the six + app_build_info), providers.py (track_provider),

@@ -21,7 +21,7 @@ from contextlib import contextmanager
 
 from app.telemetry import events
 from app.telemetry.breaker import BreakerOpen, BreakerRegistry
-from app.telemetry.events import FailureReason
+from app.telemetry.events import FAILURE_REASONS, FailureReason
 from app.telemetry.logs import get_logger, log_event
 from app.telemetry.metrics import Metrics, metrics
 
@@ -52,7 +52,7 @@ OPS: dict[str, tuple[str, ...]] = {
     GOOGLE_OAUTH: ("token_refresh", "token_exchange", "userinfo"),
     GOOGLE_API: (),
     VERTEX: ("generate_content",),
-    BEDROCK: ("converse",),
+    BEDROCK: ("converse", "chat_completions"),  # the Converse API; the OpenAI-compatible endpoint
     POSTGRES: ("query",),
 }
 OTHER_OP = "other"
@@ -127,6 +127,12 @@ def classify_failure(exc: BaseException) -> tuple[str, str, bool]:
     name = type(exc).__name__
     if isinstance(exc, BreakerOpen):
         return "rejected_by_breaker", FailureReason.BREAKER_OPEN, False
+    # An exception may say what it is: ``failure_reason`` from the closed enum, and
+    # ``counts_against_breaker`` - False for an answer (a 4xx from an LLM endpoint), not an outage.
+    # See ``EndpointRefusal`` in app/extract/openai_compat.py.
+    declared = getattr(exc, "failure_reason", None)
+    if isinstance(declared, str) and declared in FAILURE_REASONS:
+        return "error", declared, bool(getattr(exc, "counts_against_breaker", True))
     if name in _TIMEOUTS:
         return "timeout", FailureReason.TIMEOUT, True
     if name in _ANSWER_NOT_OUTAGE:

@@ -68,24 +68,66 @@ if [ ${#missing[@]} -gt 0 ]; then
 fi
 
 # --- the model: which extra to build, and is it configured --------------------------------------
+# A value from .env, else from the shell: docker-compose.live.yml passes the credentials through
+# from either.
+setting() {
+  local v
+  v="$(value_of "$1")"
+  [ -n "$v" ] || v="${!1:-}"
+  printf '%s' "$v"
+}
+
 provider="$(value_of EXTRACTION_PROVIDER)"
 if [ "$(value_of FAKE_LLM)" = "0" ]; then
   case "$provider" in
-    bedrock)
-      export EXTRAS="[bedrock]"
-      if [ -z "$(value_of AWS_ACCESS_KEY_ID)" ] && [ -z "${AWS_ACCESS_KEY_ID:-}" ]; then
-        echo "EXTRACTION_PROVIDER=bedrock needs AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY (in $ENV_FILE or the shell)." >&2
+    bedrock | bedrock_openai)
+      # Two credentials, the app picks the same way (app/extract/__init__.py):
+      #   AWS_BEARER_TOKEN_BEDROCK + BEDROCK_BASE_URL - the nutrition service's Bedrock API key on
+      #     the OpenAI-compatible endpoint. Plain HTTP: no SDK in the image.
+      #   AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY - the Converse API in BEDROCK_REGION, which
+      #     needs boto3 (the [bedrock] extra). EXTRACTION_PROVIDER=bedrock only.
+      # BEDROCK_MODEL_ID wins over BEDROCK_MODEL when both are set.
+      token="$(setting AWS_BEARER_TOKEN_BEDROCK)"
+      base_url="$(setting BEDROCK_BASE_URL)"
+      model="$(setting BEDROCK_MODEL_ID)"
+      model="${model:-$(setting BEDROCK_MODEL)}"
+      half=""
+      [ -n "$token" ] || [ -z "$base_url" ] || half=AWS_BEARER_TOKEN_BEDROCK
+      [ -n "$base_url" ] || [ -z "$token" ] || half=BEDROCK_BASE_URL
+      if [ -n "$token" ] && [ -n "$base_url" ]; then
+        path="OpenAI-compatible endpoint"
+      elif [ "$provider" = bedrock_openai ]; then
+        echo "EXTRACTION_PROVIDER=bedrock_openai needs AWS_BEARER_TOKEN_BEDROCK and BEDROCK_BASE_URL (in $ENV_FILE or the shell)." >&2
+        exit 1
+      elif [ -n "$(setting AWS_ACCESS_KEY_ID)" ] && [ -n "$(setting AWS_SECRET_ACCESS_KEY)" ]; then
+        path="Converse API"
+        export EXTRAS="[bedrock]"
+        [ -z "$half" ] || echo "note: $half is empty, so the access key pair (the Converse API) is used."
+      elif [ -n "$half" ]; then
+        echo "$half is empty: EXTRACTION_PROVIDER=bedrock with a Bedrock API key needs both AWS_BEARER_TOKEN_BEDROCK and BEDROCK_BASE_URL." >&2
+        exit 1
+      elif [ -n "$(setting AWS_ACCESS_KEY_ID)" ]; then
+        echo "AWS_SECRET_ACCESS_KEY is empty: the access key pair needs both halves." >&2
+        exit 1
+      else
+        echo "EXTRACTION_PROVIDER=bedrock needs a credential (in $ENV_FILE or the shell), either:" >&2
+        echo "  AWS_BEARER_TOKEN_BEDROCK + BEDROCK_BASE_URL (+ BEDROCK_MODEL_ID) - the nutrition service's values, or" >&2
+        echo "  AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY (+ BEDROCK_MODEL, BEDROCK_REGION) - the Converse API." >&2
         exit 1
       fi
-      [ -n "$(value_of BEDROCK_MODEL)" ] || { echo "BEDROCK_MODEL is empty." >&2; exit 1; }
-      echo "extraction: Bedrock $(value_of BEDROCK_MODEL) in $(value_of BEDROCK_REGION)"
+      [ -n "$model" ] || { echo "BEDROCK_MODEL_ID (or BEDROCK_MODEL) is empty." >&2; exit 1; }
+      if [ "$path" = "Converse API" ]; then
+        echo "extraction: Bedrock ($path) $model in $(setting BEDROCK_REGION)"
+      else
+        echo "extraction: Bedrock ($path) $model at $base_url"
+      fi
       ;;
     vertex)
       export EXTRAS="[vertex]"
       [ -n "$(value_of VERTEX_PROJECT)" ] || { echo "VERTEX_PROJECT is empty." >&2; exit 1; }
       echo "extraction: Vertex $(value_of VERTEX_MODEL) in $(value_of VERTEX_LOCATION), project $(value_of VERTEX_PROJECT)"
       ;;
-    *) echo "FAKE_LLM=0 but EXTRACTION_PROVIDER is '$provider' (bedrock or vertex)." >&2; exit 1 ;;
+    *) echo "FAKE_LLM=0 but EXTRACTION_PROVIDER is '$provider' (bedrock, bedrock_openai or vertex)." >&2; exit 1 ;;
   esac
 else
   echo "extraction: rule-based (FAKE_LLM=1)"

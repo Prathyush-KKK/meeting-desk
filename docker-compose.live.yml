@@ -53,7 +53,13 @@ services:
       GOOGLE_CONNECT_REDIRECT_URI: ${PUBLIC_URL:-http://localhost:8000}/admin/connections/callback
       CORS_ORIGINS: '["${PUBLIC_URL:-http://localhost:8000}"]'
       JOBS_ENABLED: "0" # extraction runs inline; the Doc re-check and token health run from Admin
-      # AWS credentials for Bedrock: from .env, or from the shell that runs the script.
+      # Bedrock credentials: from .env, or from the shell that runs the script. Either the Bedrock
+      # API key on the OpenAI-compatible endpoint (the nutrition service's three names; an empty
+      # value counts as unset in the app) ...
+      AWS_BEARER_TOKEN_BEDROCK: ${AWS_BEARER_TOKEN_BEDROCK:-}
+      BEDROCK_BASE_URL: ${BEDROCK_BASE_URL:-}
+      BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-}
+      # ... or an access key pair for the Converse API.
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
       AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}

@@ -54,6 +54,24 @@ def _no_network(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(socket.socket, "__init__", _guarded_socket_init)
 
 
+# The nutrition service's Bedrock names. A developer shell that exports them (for that service)
+# would otherwise switch ``EXTRACTION_PROVIDER=bedrock`` to the OpenAI-compatible endpoint, or swap
+# the model, in every test that builds ``Settings`` - so no test sees them unless it sets them.
+BEDROCK_ENV = (
+    "AWS_BEARER_TOKEN_BEDROCK",
+    "BEDROCK_API_KEY",
+    "BEDROCK_BASE_URL",
+    "BEDROCK_MODEL_ID",
+    "BEDROCK_MODEL",
+)
+
+
+@pytest.fixture(autouse=True)
+def _no_bedrock_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    for name in BEDROCK_ENV:
+        monkeypatch.delenv(name, raising=False)
+
+
 def make_settings(tmp_path: Path, **overrides) -> Settings:
     values = {
         "environment": "test",
