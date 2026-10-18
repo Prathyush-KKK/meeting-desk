@@ -212,7 +212,8 @@ def test_anthropic_refusals_never_open_the_breaker() -> None:
             provider.extract(FIXTURE["notes"], CONTEXT)
     assert provider_telemetry().breakers[ANTHROPIC].state == "closed"
     errors = metrics().registry.get_sample_value(
-        "external_provider_requests_total", {"provider": ANTHROPIC, "op": "messages_create", "outcome": "error"}
+        "external_provider_requests_total",
+        {"provider": ANTHROPIC, "op": "messages_create", "outcome": "error"},
     )
     assert errors == 8.0
 

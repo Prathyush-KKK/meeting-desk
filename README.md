@@ -115,6 +115,13 @@ Afterwards, the **Sheets** page shows the tab with the new rows, ready for edits
 
 <p align="center"><img src="docs/images/sheets.png" alt="The Google Sheet tab inside Meeting Desk with the new rows" width="800"></p>
 
+It follows your system's dark mode, and the whole flow works on a phone:
+
+<p align="center">
+  <img src="docs/images/dark-mode.png" alt="The review step in dark mode" width="600">
+  <img src="docs/images/mobile.png" alt="The review step on a phone, one card per point" width="195">
+</p>
+
 ## Use it with your own Google account
 
 1. Create a Google OAuth client. [docs/GOOGLE_SETUP.md](docs/GOOGLE_SETUP.md) covers it step by step,

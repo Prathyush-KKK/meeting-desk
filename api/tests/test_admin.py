@@ -99,9 +99,7 @@ def test_activity_records_who_did_what(client: TestClient) -> None:
     assert len(activity) > 1  # the seeded entries are there too
 
 
-def test_review1_28_the_admin_readers_are_admin_only(
-    client: TestClient, member_client: TestClient
-) -> None:
+def test_review1_28_the_admin_readers_are_admin_only(client: TestClient, member_client: TestClient) -> None:
     """Who is connected, who may sign in and what everyone did are the admin page's own data.
 
     A member could read all three before: the allow-list is every colleague's email, the activity

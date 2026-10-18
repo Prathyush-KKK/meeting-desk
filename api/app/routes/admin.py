@@ -99,8 +99,10 @@ def connection_status(
     first_run = not rows
     notice = ""
     if first_run:
-        notice = FIRST_RUN_NOTICE if is_admin else FIRST_RUN_NOTICE_MEMBER.format(
-            admins=", ".join(admins) or "the workspace owner"
+        notice = (
+            FIRST_RUN_NOTICE
+            if is_admin
+            else FIRST_RUN_NOTICE_MEMBER.format(admins=", ".join(admins) or "the workspace owner")
         )
     return {
         "banner": _banner(rows),

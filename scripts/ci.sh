@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Everything that has to be green before a merge, in one command: `make ci`.
 #
-#   ruff            api lint
+#   ruff            api lint and formatting
 #   pytest          api tests (404+; no network, a socket guard makes sure)
 #   tsc -b          web typecheck
 #   vitest run      web tests
@@ -73,6 +73,7 @@ if [[ ! -x "$PY" ]]; then
 fi
 
 step "ruff" "$ROOT/api/.venv/bin/ruff" check "$ROOT/api"
+step "ruff format" "$ROOT/api/.venv/bin/ruff" format --check "$ROOT/api"
 step "pytest" env -C "$ROOT/api" "$PY" -m pytest -q
 
 # --- the web app -------------------------------------------------------------------------------------

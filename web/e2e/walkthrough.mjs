@@ -4,6 +4,11 @@
 //   cd web && pnpm dev
 //   cd web && node e2e/walkthrough.mjs
 //
+// Or against the Docker demo, which serves the app and the API on one port:
+//
+//   docker compose -f docker-compose.demo.yml up -d
+//   cd web && E2E_WEB=http://localhost:8000 node e2e/walkthrough.mjs
+//
 // paste -> extract -> points (defer, restore) -> transfer -> the Sheets page shows the rows ->
 // edit a cell -> save -> Add row above a row.
 //
@@ -465,7 +470,7 @@ async function main() {
 
     const second = await context.newPage();
     await step("401 shows the one-line sign-in page", async () => {
-      await second.route("**/api/auth/me", (route) =>
+      await second.route("**/auth/me", (route) =>
         route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ detail: "Sign in with Google to continue." }) }),
       );
       await second.goto(WEB, { waitUntil: "domcontentloaded" });
@@ -475,8 +480,8 @@ async function main() {
     });
 
     await step("403 shows a plain not-on-the-list page", async () => {
-      await second.unroute("**/api/auth/me");
-      await second.route("**/api/auth/me", (route) =>
+      await second.unroute("**/auth/me");
+      await second.route("**/auth/me", (route) =>
         route.fulfill({
           status: 403,
           contentType: "application/json",

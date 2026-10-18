@@ -30,7 +30,7 @@ def transfer_message(
     meeting_titles: list[str],
     points: list[dict[str, str]],
 ) -> str:
-    """"Daniel Okafor sent 2 points from Vendor call to Roadmap > P1: • text - owner, due"."""
+    """ "Daniel Okafor sent 2 points from Vendor call to Roadmap > P1: • text - owner, due"."""
     count = f"{len(points)} point{'' if len(points) == 1 else 's'}"
     source = f" from {', '.join(meeting_titles)}" if meeting_titles else ""
     lines = [f"{actor} sent {count}{source} to {workbook_name} > {sheet_title}"]
@@ -58,4 +58,3 @@ def post(url: str, text: str, transport: httpx.BaseTransport | None = None) -> b
         return False
     log_event(log, "notify_sent", chars=len(text))
     return True
-

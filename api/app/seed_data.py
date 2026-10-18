@@ -137,9 +137,7 @@ MEETINGS: list[dict[str, Any]] = [
         "start": "11:00",
         "end": "12:10",
         "organizer": "daniel.okafor@example.com",
-        "attendees": attendees(
-            ["Daniel Okafor", "Anna Moreno", "Noah S", "Sofia Silva", "Alex S"]
-        ),
+        "attendees": attendees(["Daniel Okafor", "Anna Moreno", "Noah S", "Sofia Silva", "Alex S"]),
         "description": "Compare expense features against competitors; refine AI receipt analysis workflows.",
         "location": "",
         "meet_link": "meet.google.com/mob-road-rev",

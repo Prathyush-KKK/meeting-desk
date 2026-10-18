@@ -18,7 +18,7 @@ help:
 	@echo "make web-check   - tsc, vitest and the web build"
 	@echo "make web-dev     - the Vite dev server on http://localhost:5173"
 	@echo "make e2e         - the browser walkthrough (needs make run and make web-dev)"
-	@echo "make lint        - ruff check"
+	@echo "make lint        - ruff check and ruff format --check"
 	@echo "make fmt         - ruff format"
 	@echo "make test        - pytest -q"
 	@echo "make run         - uvicorn with FAKE_GOOGLE=1 on http://localhost:8000"
@@ -44,7 +44,7 @@ ci:
 check-api: lint test
 
 lint:
-	cd api && .venv/bin/ruff check .
+	cd api && .venv/bin/ruff check . && .venv/bin/ruff format --check .
 
 fmt:
 	cd api && .venv/bin/ruff format .

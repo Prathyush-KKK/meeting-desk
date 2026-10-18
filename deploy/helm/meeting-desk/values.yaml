@@ -10,8 +10,10 @@ fullnameOverride: ""
 # One image serves the API and the built SPA (deploy/Dockerfile.api builds the web app in an
 # earlier stage and copies web/dist in as WEB_DIST). The worker runs the same image with a
 # different command, so there is exactly one tag to move per release.
+# No pre-built image is published: build deploy/Dockerfile.api, push it to a registry your cluster
+# can pull from, and set image.repository to it (docs/DEPLOY.md, "The image").
 image:
-  repository: ghcr.io/prathyush-kkk/meeting-desk
+  repository: registry.example.com/meeting-desk
   tag: "0.1.0"
   pullPolicy: IfNotPresent
 imagePullSecrets: []

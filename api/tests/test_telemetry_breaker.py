@@ -209,16 +209,31 @@ def test_a_404_from_google_does_not_move_the_breaker() -> None:
     ("url", "expected"),
     [
         (f"https://sheets.googleapis.com/v4/spreadsheets/{BOOK}", ("google_sheets", "spreadsheets_get")),
-        (f"https://sheets.googleapis.com/v4/spreadsheets/{BOOK}/values:batchGet", ("google_sheets", "values_batch_get")),
-        (f"https://sheets.googleapis.com/v4/spreadsheets/{BOOK}:batchUpdate", ("google_sheets", "batch_update")),
-        ("https://www.googleapis.com/calendar/v3/calendars/primary/events", ("google_calendar", "events_list")),
-        ("https://www.googleapis.com/calendar/v3/calendars/primary/events/abc", ("google_calendar", "events_get")),
+        (
+            f"https://sheets.googleapis.com/v4/spreadsheets/{BOOK}/values:batchGet",
+            ("google_sheets", "values_batch_get"),
+        ),
+        (
+            f"https://sheets.googleapis.com/v4/spreadsheets/{BOOK}:batchUpdate",
+            ("google_sheets", "batch_update"),
+        ),
+        (
+            "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+            ("google_calendar", "events_list"),
+        ),
+        (
+            "https://www.googleapis.com/calendar/v3/calendars/primary/events/abc",
+            ("google_calendar", "events_get"),
+        ),
         ("https://www.googleapis.com/drive/v3/files", ("google_drive", "files_list")),
         ("https://www.googleapis.com/drive/v3/files/abc", ("google_drive", "files_get")),
         ("https://docs.googleapis.com/v1/documents/abc", ("google_docs", "documents_get")),
         ("https://gmail.googleapis.com/gmail/v1/users/me/messages", ("google_gmail", "messages_list")),
         ("https://gmail.googleapis.com/gmail/v1/users/me/messages/abc", ("google_gmail", "messages_get")),
-        ("https://people.googleapis.com/v1/people:searchDirectoryPeople", ("google_people", "search_directory_people")),
+        (
+            "https://people.googleapis.com/v1/people:searchDirectoryPeople",
+            ("google_people", "search_directory_people"),
+        ),
         ("https://oauth2.googleapis.com/token", ("google_oauth", "token_refresh")),
         ("https://example.invalid/whatever", ("google_api", "other")),
     ],
@@ -228,7 +243,7 @@ def test_every_google_url_classifies_into_the_closed_enum(url: str, expected: tu
 
 
 def test_the_log_level_for_a_degraded_fallback_is_at_least_warning() -> None:
-    """"A caught exception that degrades to a fallback logs at warn or error." """
+    """ "A caught exception that degrades to a fallback logs at warn or error." """
     capture = _Capture()
     configure_logging("INFO", capture)
     api = MockGoogleApi().on(

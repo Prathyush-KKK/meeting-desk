@@ -68,12 +68,8 @@ def test_a_bad_url_is_rejected(client: TestClient) -> None:
 
 
 def test_reconnecting_updates_in_place(client: TestClient) -> None:
-    first = client.post(
-        "/workbooks/connect", json={"url": "https://docs.google.com/spreadsheets/d/rewards"}
-    )
-    second = client.post(
-        "/workbooks/connect", json={"url": "https://docs.google.com/spreadsheets/d/rewards"}
-    )
+    first = client.post("/workbooks/connect", json={"url": "https://docs.google.com/spreadsheets/d/rewards"})
+    second = client.post("/workbooks/connect", json={"url": "https://docs.google.com/spreadsheets/d/rewards"})
     assert first.json()["id"] == second.json()["id"]
     assert len([w for w in client.get("/workbooks").json() if w["spreadsheet_id"] == "rewards"]) == 1
 

@@ -90,9 +90,7 @@ def oauth_client(settings: Settings, transport: httpx.BaseTransport | None = Non
     )
 
 
-def authorization_url(
-    client: OAuth2Client, settings: Settings, login_hint: str = ""
-) -> tuple[str, str, str]:
+def authorization_url(client: OAuth2Client, settings: Settings, login_hint: str = "") -> tuple[str, str, str]:
     """(url, state, code_verifier). Offline access, forced consent, incremental scopes, the domain.
 
     The verifier is the caller's to keep for the length of the round trip (the connect route puts

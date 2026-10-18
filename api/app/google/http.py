@@ -114,9 +114,7 @@ class GoogleHttp:
     # busy. The key is therefore (connection, provider).
     def backoff_remaining(self, connection_email: str, provider: str = "") -> float:
         keys = [
-            k
-            for k in self._backoff_until
-            if k[0] == connection_email and (not provider or k[1] == provider)
+            k for k in self._backoff_until if k[0] == connection_email and (not provider or k[1] == provider)
         ]
         return max((max(0.0, self._backoff_until[k] - self._now()) for k in keys), default=0.0)
 

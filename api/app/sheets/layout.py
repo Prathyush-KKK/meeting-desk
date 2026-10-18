@@ -311,9 +311,7 @@ def region_hash(
     r0, r1, _, _ = region_bounds(resolved, len(rows))
     outside = sorted({r for r in (touched_rows or ()) if r < r0 or r > r1})
     if outside:
-        body += "\x1d" + "\x1e".join(
-            f"{r}\x1f" + "\x1f".join(row_values(rows, r, resolved)) for r in outside
-        )
+        body += "\x1d" + "\x1e".join(f"{r}\x1f" + "\x1f".join(row_values(rows, r, resolved)) for r in outside)
     return hashlib.sha256(f"{head}\x1d{body}".encode()).hexdigest()
 
 

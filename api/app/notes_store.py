@@ -56,9 +56,7 @@ def save_note(
         db.flush()
     except IntegrityError as exc:
         db.rollback()
-        raise HTTPException(
-            status.HTTP_409_CONFLICT, f"{meeting.title} already has this note."
-        ) from exc
+        raise HTTPException(status.HTTP_409_CONFLICT, f"{meeting.title} already has this note.") from exc
     if meeting.step == "meeting":
         meeting.step = "notes"
     log(db, actor, f"Saved a note on {meeting.title}")
@@ -68,9 +66,7 @@ def save_note(
 def live_note(db: Session, meeting: Meeting, digest: str) -> Note | None:
     """The meeting's note with this text that has not been removed."""
     return db.scalar(
-        select(Note).where(
-            Note.meeting_id == meeting.id, Note.text_hash == digest, Note.deleted_at.is_(None)
-        )
+        select(Note).where(Note.meeting_id == meeting.id, Note.text_hash == digest, Note.deleted_at.is_(None))
     )
 
 

@@ -359,9 +359,7 @@ def move_note(
         db.flush()
     except IntegrityError as exc:  # the same move twice, or a race with a paste on the target
         db.rollback()
-        raise HTTPException(
-            status.HTTP_409_CONFLICT, f"{target.title} already has this note."
-        ) from exc
+        raise HTTPException(status.HTTP_409_CONFLICT, f"{target.title} already has this note.") from exc
     log(db, user.email, f"Moved a note to {target.title}")
     return note_out(note)
 
