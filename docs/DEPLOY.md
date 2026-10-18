@@ -17,6 +17,15 @@ docker build -f deploy/Dockerfile.api -t meeting-desk:dev .                     
 docker build -f deploy/Dockerfile.api --build-arg EXTRAS='[llm]' -t meeting-desk:dev .   # + Vertex, Bedrock, Claude SDKs
 ```
 
+No pre-built image is published, so for a server or a cluster, tag it for your own registry and
+push it:
+
+```bash
+docker build -f deploy/Dockerfile.api --build-arg EXTRAS='[llm]' \
+  -t registry.example.com/meeting-desk:0.1.0 .
+docker push registry.example.com/meeting-desk:0.1.0
+```
+
 Three stages: node + pnpm build `web/dist`, a Python stage builds a venv, and a `python:3.12-slim`
 runtime carries neither toolchain. It runs as uid 10001, has a `HEALTHCHECK` on `/healthz`, and
 exposes 8000 (API + SPA) and 9464 (metrics). `--workers 1` on purpose: the metrics server binds its
@@ -98,10 +107,12 @@ kubectl create namespace meeting-desk
 helm template meeting-desk deploy/helm/meeting-desk \
   -f deploy/helm/meeting-desk/values-production.example.yaml | less
 
-# 2. Install. Copy the example values first and set your host, domain and secret store.
+# 2. Install. Copy the example values first and set your image repository (the one you pushed to
+#    in "The image" above), host, domain and secret store.
 helm upgrade --install meeting-desk deploy/helm/meeting-desk \
   -n meeting-desk -f deploy/helm/meeting-desk/values-production.example.yaml \
-  --set image.tag=0.1.0 --set build.commit=$(git rev-parse --short HEAD) --wait
+  --set image.repository=registry.example.com/meeting-desk --set image.tag=0.1.0 \
+  --set build.commit=$(git rev-parse --short HEAD) --wait
 ```
 
 The chart's pre-install / pre-upgrade hook runs `alembic upgrade head` as a Job before any new pod

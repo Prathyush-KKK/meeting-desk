@@ -6,22 +6,6 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-### Added
-
-- `NOTIFY_WEBHOOK_URL`: each transfer posts a summary to Slack, Google Chat, Mattermost or Discord.
-- `GOOGLE_USE_GMAIL` and `GOOGLE_USE_DIRECTORY`: leave out the restricted Gmail scope and the
-  Workspace-only directory scope, for personal Google accounts.
-
-### Changed
-
-- Dependencies updated: FastAPI 0.136, Starlette 1.8, Authlib 1.7, Uvicorn 0.54, SQLAlchemy 2.0.55,
-  Alembic 1.20, Pydantic 2.14, psycopg 3.3, dateparser 1.4, prometheus-client 0.26.
-
-### Security
-
-- Starlette 0.49.1 or later is required, for the Range-header denial-of-service fix in the static
-  file serving the web app goes through. Authlib moves past the 1.6.4 and 1.6.5 security fixes.
-
 ## [0.1.0] - 2026-10-18
 
 The first public release.
@@ -52,6 +36,14 @@ The first public release.
   launcher (`scripts/live.sh`), and a Helm chart with a worker, migrations, External Secrets,
   a ServiceMonitor and alert rules.
 - Prometheus metrics on a separate port, circuit breakers per provider, and structured JSON logs.
+- `NOTIFY_WEBHOOK_URL`: each transfer posts a summary to Slack, Google Chat, Mattermost or Discord.
+- `GOOGLE_USE_GMAIL` and `GOOGLE_USE_DIRECTORY`: leave out the restricted Gmail scope and the
+  Workspace-only directory scope, for personal Google accounts.
+
+### Security
+
+- Starlette 0.49.1 or later is required, for the Range-header denial-of-service fix in the static
+  file serving the web app goes through. Authlib is past the 1.6.4 and 1.6.5 security fixes.
 
 [Unreleased]: https://github.com/Prathyush-KKK/meeting-desk/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/Prathyush-KKK/meeting-desk/releases/tag/v0.1.0

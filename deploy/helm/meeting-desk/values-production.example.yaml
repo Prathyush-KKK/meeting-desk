@@ -1,13 +1,13 @@
 # An example production overlay: real Google, real extraction, the worker, Prometheus, TLS, and
-# secrets from your secret manager through External Secrets. Copy it, change the host, the domain
-# and the secret store, then:
+# secrets from your secret manager through External Secrets. Copy it, change the image repository,
+# the host, the domain and the secret store, then:
 #
 #   helm template meeting-desk deploy/helm/meeting-desk -f deploy/helm/meeting-desk/values-production.example.yaml
 #
 # Still no credentials: every secret is a path in the secret store, resolved by External Secrets.
 
 image:
-  repository: ghcr.io/prathyush-kkk/meeting-desk
+  repository: registry.example.com/meeting-desk   # the registry you pushed your build to
   tag: "0.1.0"
 
 build:
