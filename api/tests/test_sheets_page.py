@@ -2,8 +2,14 @@
 
 from __future__ import annotations
 
-from fastapi.testclient import TestClient
+import uuid
+from typing import Any
 
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+
+from app.models import SheetLayout
 from tests.conftest import connect_fixture_workbook, meeting_by_title, workbook_by_name
 
 
@@ -318,3 +324,33 @@ def test_add_row_with_nothing_to_write_is_refused(client: TestClient) -> None:
         json={"workbook_id": workbook["id"], "sheet_id": "t1", "region_hash": tab["region_hash"]},
     )
     assert response.status_code == 422
+
+
+# --- the layout row -------------------------------------------------------------------------------
+
+
+def test_a_first_read_that_races_another_takes_the_row_it_wrote(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The Transfer step loads the grid and the preview at once, so a tab's first read is two
+    requests that both find no layout row and both insert one. The loser must not answer 500."""
+    workbook = _roadmap(client)
+    real_get = Session.get
+    raced: list[bool] = []
+
+    def get(self: Session, entity: Any, ident: Any, **kwargs: Any) -> Any:
+        if entity is SheetLayout and not raced:
+            raced.append(True)
+            # The other request writes the row between this one's lookup and its insert.
+            with client.app.state.db.session() as other:
+                other.add(SheetLayout(workbook_id=uuid.UUID(workbook["id"]), sheet_id="t1"))
+                other.commit()
+            return None
+        return real_get(self, entity, ident, **kwargs)
+
+    monkeypatch.setattr(Session, "get", get)
+    response = client.get(f"/workbooks/{workbook['id']}/tabs/t1")
+    assert response.status_code == 200, response.text
+    assert raced
+    with client.app.state.db.session() as db:
+        assert db.get(SheetLayout, (uuid.UUID(workbook["id"]), "t1")).header_row >= 0

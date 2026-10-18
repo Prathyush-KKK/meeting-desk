@@ -13,6 +13,7 @@ from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException, Request, status
 from sqlalchemy import select
+from sqlalchemy.dialects import postgresql, sqlite
 from sqlalchemy.orm import Session
 
 from app.clock import Clock
@@ -28,6 +29,7 @@ SPREADSHEET_URL_RE = re.compile(r"/spreadsheets/d/([a-zA-Z0-9-_]+)")
 # anything with a query string, a fragment, a dot or a path segment in it is a mistyped link, not
 # an id - it must not reach the Sheets API as one.
 BARE_SPREADSHEET_ID_RE = re.compile(r"[A-Za-z0-9_-]{20,}")
+
 
 def aware(value: datetime | None, tz: ZoneInfo | None = None) -> datetime | None:
     """SQLite drops the offset, so datetimes read back naive. Put it back before comparing."""
@@ -238,10 +240,7 @@ def _remember_layout(
     digest: str,
     now: datetime,
 ) -> None:
-    row = db.get(SheetLayout, (workbook.id, sheet_id))
-    if row is None:
-        row = SheetLayout(workbook_id=workbook.id, sheet_id=sheet_id)
-        db.add(row)
+    row = _layout_row(db, workbook, sheet_id)
     row.title = read.title
     row.header_row = layout.header_row
     row.first_col = layout.first_col
@@ -255,6 +254,23 @@ def _remember_layout(
     row.date_cols = list(layout.date_cols)
     row.region_hash = digest
     row.detected_at = now
+
+
+def _layout_row(db: Session, workbook: Workbook, sheet_id: str) -> SheetLayout:
+    """The tab's layout row, created if this is the tab's first read."""
+    key = (workbook.id, sheet_id)
+    row = db.get(SheetLayout, key)
+    if row is None:
+        # A tab's first read is usually two requests at once (the Transfer step loads the grid and
+        # the preview together), so both get here. Insert-if-absent: the one that loses the race
+        # takes the row the other wrote instead of failing on the primary key.
+        insert = postgresql.insert if db.get_bind().dialect.name == "postgresql" else sqlite.insert
+        db.execute(
+            insert(SheetLayout).values(workbook_id=workbook.id, sheet_id=sheet_id).on_conflict_do_nothing()
+        )
+        row = db.get(SheetLayout, key)
+        assert row is not None  # the insert or the request it raced with wrote it
+    return row
 
 
 def require_editable(db: Session, workbook: Workbook, google: GoogleSuite) -> str:
