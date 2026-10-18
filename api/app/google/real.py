@@ -18,9 +18,25 @@ from app.google.docs import RealDocsClient
 from app.google.drive import RealDriveClient
 from app.google.gmail import RealGmailClient
 from app.google.http import AccessTokens, GoogleHttp
+from app.google.interface import DirectoryPerson, GmailMessage
 from app.google.people import RealPeopleClient
 from app.google.sheets import RealSheetsClient
 from app.google.tokens import DbRefreshTokens, TokenBroker, TokenCipher
+
+
+class NoGmail:
+    """``GOOGLE_USE_GMAIL=0``: the scope is never asked for, so there is no mailbox to search."""
+
+    def search_messages(self, connection_email: str, query: str) -> list[GmailMessage]:
+        return []
+
+
+class NoDirectory:
+    """``GOOGLE_USE_DIRECTORY=0`` (a personal account has no directory): owners resolve against
+    the attendees only."""
+
+    def search_directory(self, connection_email: str, query: str) -> list[DirectoryPerson]:
+        return []
 
 
 class RealGoogle:
@@ -34,16 +50,18 @@ class RealGoogle:
         calendar_cache_seconds: float = 60.0,
         sheets_max_rows: int = 5000,
         wall_clock: Any = None,
+        use_gmail: bool = True,
+        use_directory: bool = True,
     ) -> None:
         self.http = http
         self.calendar = RealCalendarClient(http, display_tz, cache_seconds=calendar_cache_seconds)
         self.drive = RealDriveClient(http, display_tz)
         self.docs = RealDocsClient(http)
-        self.gmail = RealGmailClient(http, display_tz)
+        self.gmail: Any = RealGmailClient(http, display_tz) if use_gmail else NoGmail()
         self.sheets = RealSheetsClient(
             http, self.drive, display_tz, max_rows=sheets_max_rows, wall_clock=wall_clock
         )
-        self.people = RealPeopleClient(http)
+        self.people: Any = RealPeopleClient(http) if use_directory else NoDirectory()
 
     @classmethod
     def from_settings(
@@ -84,6 +102,8 @@ class RealGoogle:
             calendar_cache_seconds=settings.calendar_cache_seconds,
             sheets_max_rows=settings.sheets_max_rows,
             wall_clock=wall_clock,
+            use_gmail=settings.google_use_gmail,
+            use_directory=settings.google_use_directory,
         )
 
     def forget_connection(self, connection_email: str) -> None:

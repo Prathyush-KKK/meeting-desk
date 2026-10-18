@@ -52,6 +52,10 @@ too, so your notes never leave your machine.
   dropdown values, and add rows above any row.
 - **Export anywhere else.** Copy as text, or download as **Markdown** or **CSV** for a doc, an
   issue tracker or another spreadsheet.
+- **Tell the team.** Each transfer can post a summary to **Slack**, **Google Chat**, Mattermost or
+  Discord through an incoming webhook (`NOTIFY_WEBHOOK_URL`).
+- **Works with a personal Google account.** `GOOGLE_USE_GMAIL=0` and `GOOGLE_USE_DIRECTORY=0` leave
+  out the Workspace-only and restricted scopes.
 - **Built for a team.** Google sign-in, an allow-list with admin and member roles, and an activity
   log of every change. Optionally limited to your Google Workspace domain.
 - **Production-ready.** It ships as one Docker image, with a Helm chart, Postgres, a background
@@ -170,7 +174,7 @@ Prometheus metrics.
 
 These are ideas, and contributions are welcome:
 
-- More export targets: GitHub Issues, Linear, Jira, Notion, Slack.
+- More export targets: GitHub Issues, Linear, Jira, Notion.
 - More note sources: Zoom and Microsoft Teams cloud transcripts, Otter, Fireflies.
 - Per-user calendars and personal workspaces.
 - Notes and extraction in languages other than English.

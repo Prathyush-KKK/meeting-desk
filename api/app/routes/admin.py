@@ -214,7 +214,7 @@ def connect_callback(
     # The merged meeting list is cached per healthy connection set; this account's calendar is new
     # to it, so the entry filled a moment ago must go.
     clear_calendar_cache(request)
-    missing = connect_flow.missing_scopes(list(connection.scopes or []))
+    missing = connect_flow.missing_scopes(list(connection.scopes or []), settings)
     log(db, user.email, f"{'Connected' if created else 'Reconnected'} Google account {connection.email}")
     # A scope left unticked is worth a look at the Admin page whatever ``next`` said.
     return _back_to_app(

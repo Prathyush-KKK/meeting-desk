@@ -15,9 +15,10 @@ docker-compose.demo.yml up`, or `make run`) uses a built-in fake Google.
 | | Google Workspace (your company domain) | Personal Gmail account |
 | --- | --- | --- |
 | OAuth consent screen | **Internal**: only your domain can use it, no Google review, refresh tokens do not expire on a timer. Recommended. | **External**, left in *Testing* with yourself added as a test user. |
-| Token lifetime | Until revoked | Google expires refresh tokens of apps in *Testing* after **7 days**, so you reconnect on the Admin page weekly. Publishing the app needs Google's verification for the Gmail and Drive scopes. |
+| Token lifetime | Until revoked | Google expires refresh tokens of apps in *Testing* after **7 days**, so you reconnect on the Admin page weekly. Publishing the app needs Google's verification for the sensitive scopes. |
 | Directory lookups (owner names to emails) | Work, through the People API's directory search | Not available (the scope may not be granted); owners still resolve against the meeting's attendees. |
 | `GOOGLE_HOSTED_DOMAIN` | Your domain, e.g. `example.com` | Leave empty |
+| `GOOGLE_USE_GMAIL`, `GOOGLE_USE_DIRECTORY` | Leave on | Set both to `0`. Gmail is a *restricted* scope, and a personal account has no directory, so neither scope is requested. The recap email source then reads "Gmail is off"; the Notes by Gemini doc still works, or paste or upload the notes. |
 
 ## 1. Create a Google Cloud project
 
@@ -55,7 +56,8 @@ https://www.googleapis.com/auth/spreadsheets
 https://www.googleapis.com/auth/directory.readonly
 ```
 
-The list lives in `api/app/google/oauth.py` (`CONNECTION_SCOPES`). Sign-in itself only asks for
+Leave out `gmail.readonly` with `GOOGLE_USE_GMAIL=0` and `directory.readonly` with
+`GOOGLE_USE_DIRECTORY=0`. The list lives in `api/app/google/oauth.py` (`CONNECTION_SCOPES`). Sign-in itself only asks for
 `openid`, `email` and `profile`; the rest are requested when an admin connects an account, and the
 Admin page shows which ones each connection granted.
 

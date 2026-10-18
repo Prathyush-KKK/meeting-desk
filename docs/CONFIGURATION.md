@@ -34,6 +34,12 @@ Two flags pick the implementation. Everything else below only matters when the f
 | `WORKSTREAMS` | `Product,Engineering,Design,Growth,Operations,Hiring` | The workstreams offered on a meeting and a point. Any workstream already used is offered too. |
 | `CALENDAR_LOOKBACK_DAYS`, `CALENDAR_LOOKAHEAD_DAYS` | `30`, `14` | The calendar window of the meeting list. Captured meetings stay listed whatever their date. |
 
+## Notifications
+
+| variable | what it is |
+| --- | --- |
+| `NOTIFY_WEBHOOK_URL` | After every transfer, post who sent which points to which tab (up to ten lines, then "...and N more", plus the sheet's link). The body is `{"text": ...}`, which works with **Slack** and **Mattermost** incoming webhooks, **Google Chat** space webhooks, and **Discord** webhook URLs with `/slack` on the end. Sent after the response; a failing webhook is logged and counted (`provider="webhook"`) but never fails the transfer. |
+
 ## Admin connections (`FAKE_GOOGLE=0`)
 
 [GOOGLE_SETUP.md](GOOGLE_SETUP.md) walks through creating the OAuth client.
@@ -46,6 +52,8 @@ authorization-code flow with `access_type=offline`, `prompt=consent` and
 | variable | used by | what it is |
 | --- | --- | --- |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | sign-in, the connect flow, every token refresh | The OAuth client. Register both `GOOGLE_OIDC_REDIRECT_URI` and `GOOGLE_CONNECT_REDIRECT_URI` on it. |
+| `GOOGLE_USE_GMAIL` | Gmail | `1`. Off: `gmail.readonly` is not requested and the recap email source on the Notes step reads "Gmail is off". Gmail is a restricted scope, so turn it off for an External OAuth app you don't want to send for Google's verification. |
+| `GOOGLE_USE_DIRECTORY` | People | `1`. Off: `directory.readonly` is not requested and owners resolve against the meeting's attendees only. Turn it off for personal (non-Workspace) accounts. |
 | `GOOGLE_CONNECT_REDIRECT_URI` | the connect flow | Where Google sends the admin back; default `http://localhost:8000/admin/connections/callback`. |
 | `MEETING_DESK_TOKEN_KEY` | token storage | The Fernet key for refresh tokens at rest. `make token-key` prints one. Required when `FAKE_GOOGLE=0`. |
 | `MEETING_DESK_TOKEN_KEY_VERSION` | token storage | The number stored on `connections.key_version` for rows encrypted with the current key (default `1`). |

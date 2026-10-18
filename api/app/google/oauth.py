@@ -51,6 +51,20 @@ SCOPE_LABELS = {
 }
 
 
+GMAIL_SCOPE = "https://www.googleapis.com/auth/gmail.readonly"
+DIRECTORY_SCOPE = "https://www.googleapis.com/auth/directory.readonly"
+
+
+def connection_scopes(settings: Settings | None = None) -> list[str]:
+    """``CONNECTION_SCOPES`` without the ones ``GOOGLE_USE_GMAIL`` / ``GOOGLE_USE_DIRECTORY`` turn off."""
+    off = set()
+    if settings is not None and not settings.google_use_gmail:
+        off.add(GMAIL_SCOPE)
+    if settings is not None and not settings.google_use_directory:
+        off.add(DIRECTORY_SCOPE)
+    return [s for s in CONNECTION_SCOPES if s not in off]
+
+
 class ConnectError(RuntimeError):
     pass
 
@@ -63,7 +77,7 @@ def oauth_client(settings: Settings, transport: httpx.BaseTransport | None = Non
     return OAuth2Client(
         client_id=settings.google_client_id,
         client_secret=settings.google_client_secret,
-        scope=" ".join(CONNECTION_SCOPES),
+        scope=" ".join(connection_scopes(settings)),
         redirect_uri=settings.google_connect_redirect_uri,
         # Google documents client_id / client_secret in the token request body.
         token_endpoint_auth_method="client_secret_post",
@@ -124,8 +138,8 @@ def granted_scopes(token: dict[str, Any]) -> list[str]:
     return [SCOPE_LABELS.get(s, s) for s in scopes if s in SCOPE_LABELS]
 
 
-def missing_scopes(labels: list[str]) -> list[str]:
-    wanted = list(SCOPE_LABELS.values())
+def missing_scopes(labels: list[str], settings: Settings | None = None) -> list[str]:
+    wanted = [label for scope, label in SCOPE_LABELS.items() if scope in connection_scopes(settings)]
     return [s for s in wanted if s not in labels]
 
 

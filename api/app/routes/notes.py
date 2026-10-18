@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from app.activity import log
 from app.auth.deps import authenticate
 from app.clock import Clock
+from app.config import Settings
 from app.db import get_session
 from app.extract.fake import MAX_INPUT_CHARS
 from app.extract.postprocess import normalise_note
@@ -25,6 +26,7 @@ from app.routes.common import (
     as_uuid,
     aware,
     get_clock,
+    get_config,
     get_meeting,
     healthy_connections,
     next_key,
@@ -64,6 +66,7 @@ def sources(
     db: Session = Depends(get_session),
     google: GoogleSuite = Depends(get_google),
     clock: Clock = Depends(get_clock),
+    settings: Settings = Depends(get_config),
     user: User = Depends(authenticate),
 ) -> dict[str, Any]:
     """What can be imported for this meeting, and through which connection."""
@@ -135,6 +138,7 @@ def sources(
         )
 
     query = recap_query(meeting.title, start_at)
+    no_recap = "no recap email found" if settings.google_use_gmail else "Gmail is off"
     recap = pick_for(db, emails, lambda email: google.gmail.search_messages(email, query), accept=bool)
     out.append(
         {
@@ -145,7 +149,7 @@ def sources(
             "available": recap.ok,
             "connection": recap.email,
             "tabs": [],
-            "message": "" if recap.ok else "no recap email found",
+            "message": "" if recap.ok else no_recap,
         }
     )
     out.append(
@@ -241,7 +245,7 @@ def paste(
 ) -> dict[str, Any]:
     meeting = get_meeting(db, body.meeting_id)
     if not body.text.strip():
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Nothing to save.")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Nothing to save.")
     note, created = _save(
         db, meeting, source=body.source, title=body.title, raw=body.text, origin_ref="", actor=user.email
     )
@@ -267,7 +271,7 @@ def quick_paste(
     """
     text = body.text.strip()
     if not text:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Nothing to save.")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Nothing to save.")
 
     created_meeting = False
     if body.meeting_id:

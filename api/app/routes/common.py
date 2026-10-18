@@ -143,7 +143,7 @@ def spreadsheet_id_from_url(url: str) -> str:
     if BARE_SPREADSHEET_ID_RE.fullmatch(bare):
         return bare
     raise HTTPException(
-        status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status.HTTP_422_UNPROCESSABLE_CONTENT,
         "That does not look like a Google Sheets link. Paste the URL from the browser's address bar.",
     )
 

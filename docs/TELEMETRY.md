@@ -20,7 +20,7 @@ background_job_total{job_name, outcome}                     counter   outcome in
 background_job_last_success_timestamp_seconds{job_name}     gauge
 app_build_info{version, commit}                             gauge, always 1
 ```
-- `external_provider_*` MUST cover every outbound call: Google Calendar, Drive, Docs, Gmail, Sheets, People, Vertex, Bedrock, OpenAI-compatible endpoints, Anthropic, Postgres.
+- `external_provider_*` MUST cover every outbound call: Google Calendar, Drive, Docs, Gmail, Sheets, People, Vertex, Bedrock, OpenAI-compatible endpoints, Anthropic, the notification webhook, Postgres.
   A provider with no breaker still reports requests_total and last_success; its breaker gauge is a constant 0 and the PR says so.
 - Cardinality: templated routes only, status_class not raw codes, closed enums for any reason label, every metric under 1000 series,
   series count per metric derived by a test that walks the route table (state naive bound vs real bound).

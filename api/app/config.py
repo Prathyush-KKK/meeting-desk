@@ -97,6 +97,11 @@ class Settings(BaseSettings):
     google_backoff_base_seconds: float = 0.5
     google_connection_backoff_seconds: int = 60  # a rate-limited connection is skipped this long
     sheets_max_rows: int = 5000  # the table region is never read past this row
+    # Off: the scope is not requested and the client finds nothing. Gmail (``gmail.readonly``) is a
+    # restricted scope that an External OAuth app needs Google's verification for, and directory
+    # search only exists in Google Workspace - both are worth turning off for a personal account.
+    google_use_gmail: bool = True  # the Gemini recap email as a note source
+    google_use_directory: bool = True  # owner names to work emails through the People directory
 
     # --- behaviour --------------------------------------------------------------------------
     # The IANA zone every time is shown in (meeting list, manual meetings, due dates, "read HH:MM").
@@ -112,6 +117,9 @@ class Settings(BaseSettings):
     # own events, so an upcoming meeting can be prepared and an older one still captured.
     calendar_lookback_days: int = 30
     calendar_lookahead_days: int = 14
+    # A Slack, Google Chat or Mattermost incoming-webhook URL (or a Discord one ending in /slack):
+    # each transfer posts who sent which points to which tab. Empty: no message.
+    notify_webhook_url: str = ""
     tab_read_max_age_seconds: int = 300
     transfer_undo_minutes: int = 10
     point_undo_seconds: int = 10
