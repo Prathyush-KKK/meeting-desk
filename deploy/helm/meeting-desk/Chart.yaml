@@ -1,0 +1,15 @@
+apiVersion: v2
+name: meeting-desk
+description: >-
+  Meeting Desk - meetings in, rows in a Google Sheet out. One image serves the API and the built
+  SPA; a second Deployment runs the procrastinate worker (extraction, the Notes by Gemini re-check,
+  token health).
+type: application
+# The chart's own version. Bump it on any template change.
+version: 0.1.0
+# The default application version; `image.tag` overrides what is actually deployed.
+appVersion: "0.1.0"
+home: https://github.com/Prathyush-KKK/meeting-desk
+maintainers:
+  - name: Meeting Desk
+kubeVersion: ">=1.27.0-0"

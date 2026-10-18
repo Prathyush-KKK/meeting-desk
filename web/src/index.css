@@ -1,0 +1,211 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Black on white (inverted in dark), 1 px borders, 4 px radius, no colour badges; state is plain
+ * text. One selection colour for grid highlights only.
+ *
+ * So there are exactly two non-neutral tokens in the app:
+ *   --sel          the one selection hue. The grid wears it as a tint, an outline or a strike;
+ *                  the Transfer legend wears the same three on its own labels.
+ *   --destructive  the delete affordance, as text only.
+ * Everything else - warnings, errors, read-only notices, the expired-connection banner - is
+ * foreground or muted-foreground text inside a 1 px border.
+ */
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 42%;
+    --accent: 0 0% 95%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 60% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 89%;
+    --input: 0 0% 82%;
+    --ring: 0 0% 9%;
+    --radius: 0.25rem;
+    --grid-header: 0 0% 96%;
+    --sel: 216 80% 50%;
+    --sel-tint-alpha: 0.14;
+  }
+
+  .dark,
+  :root[data-theme="dark"] {
+    --background: 0 0% 7%;
+    --foreground: 0 0% 92%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 92%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 92%;
+    --primary: 0 0% 92%;
+    --primary-foreground: 0 0% 7%;
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 0 0% 92%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 92%;
+    --destructive: 0 55% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 18%;
+    --input: 0 0% 26%;
+    --ring: 0 0% 92%;
+    --grid-header: 0 0% 13%;
+    --sel: 216 80% 62%;
+    /* A 14 % tint all but disappears on the dark grid. */
+    --sel-tint-alpha: 0.3;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --background: 0 0% 7%;
+      --foreground: 0 0% 92%;
+      --card: 0 0% 9%;
+      --card-foreground: 0 0% 92%;
+      --popover: 0 0% 9%;
+      --popover-foreground: 0 0% 92%;
+      --primary: 0 0% 92%;
+      --primary-foreground: 0 0% 7%;
+      --secondary: 0 0% 14%;
+      --secondary-foreground: 0 0% 92%;
+      --muted: 0 0% 14%;
+      --muted-foreground: 0 0% 60%;
+      --accent: 0 0% 15%;
+      --accent-foreground: 0 0% 92%;
+      --destructive: 0 55% 55%;
+      --destructive-foreground: 0 0% 100%;
+      --border: 0 0% 18%;
+      --input: 0 0% 26%;
+      --ring: 0 0% 92%;
+      --grid-header: 0 0% 13%;
+      --sel: 216 80% 62%;
+      --sel-tint-alpha: 0.3;
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.92em;
+  }
+  /* Otherwise a native radio or tick paints itself in the browser's own accent, which is a sixth
+     hue nobody chose. */
+  input[type="radio"],
+  input[type="checkbox"] {
+    accent-color: hsl(var(--sel));
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
+
+  /* A native control's focus ring is the browser's own colour (an
+     orange one on a phone), a hue nobody chose. Every focus ring is the foreground instead; the
+     shadcn parts keep their own 1 px ring, which is the same colour. */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 1px;
+  }
+
+  /* 1 px borders, no shadows. Sonner paints its own shadow on every toast. */
+  [data-sonner-toast] {
+    box-shadow: none !important;
+  }
+
+  /* 44 px tap targets on a phone. One rule rather than a class on every control, so a control
+     added later is covered too. The grid's cells are the exception: a 44 px row would show a
+     third as many rows of the sheet. */
+  @media (max-width: 767.98px) {
+    button:not([role="checkbox"]),
+    select,
+    input:not([type="checkbox"]):not([type="radio"]),
+    a[href] {
+      min-height: 44px;
+    }
+    a[href] {
+      display: inline-flex;
+      align-items: center;
+    }
+    /* An icon-only button is as wide as it is tall. */
+    button:not([role="checkbox"]):has(> svg:only-child) {
+      min-width: 44px;
+    }
+    /* A tick keeps its 16 px look; the area that takes the tap is 44 px high around it. */
+    [role="checkbox"] {
+      position: relative;
+    }
+    [role="checkbox"]::after {
+      content: "";
+      position: absolute;
+      inset: -14px -8px;
+    }
+    label:has(> input[type="radio"]),
+    label:has(> input[type="checkbox"]) {
+      min-height: 44px;
+    }
+  }
+}
+
+@layer components {
+  /*
+   * The three grid variants, so the marks in Grid.tsx, the Transfer legend and the mobile editor
+   * cannot drift apart. All three are the same hue.
+   */
+  .sel-tint {
+    background-color: hsl(var(--sel) / var(--sel-tint-alpha));
+  }
+  .sel-soft {
+    background-color: hsl(var(--sel) / 0.07);
+  }
+  .sel-outline {
+    outline: 1px solid hsl(var(--sel));
+    outline-offset: -1px;
+  }
+  /* The Custom fill anchor. A class rather than `outline outline-2 outline-sel`: tailwind-merge
+     reads `outline` and `outline-2` as the same property and drops one, so the anchor showed only
+     when a conflict mark happened to lend it an outline style. */
+  .sel-anchor {
+    outline: 2px solid hsl(var(--sel));
+    outline-offset: -2px;
+  }
+  /* Add row's "above row N": a 2 px line in the selection hue across the top of that row. An
+     inset box-shadow is the one way to draw it without moving the grid by a pixel. */
+  .sel-insert-above {
+    box-shadow: inset 0 2px 0 0 hsl(var(--sel));
+  }
+  /* The picked row's number: the tint laid over the header grey (an inset spread paints above the
+     background), plus the same top line. */
+  .sel-row-picked {
+    box-shadow: inset 0 2px 0 0 hsl(var(--sel)), inset 0 0 0 100vmax hsl(var(--sel) / var(--sel-tint-alpha));
+  }
+  .sel-strike {
+    text-decoration-line: line-through;
+    text-decoration-color: hsl(var(--sel));
+    @apply text-muted-foreground;
+  }
+}

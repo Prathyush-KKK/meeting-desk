@@ -1,0 +1,23 @@
+{
+  "notes": "Mobile roadmap review\n\nThe Goal\nClose the dataset gaps before the launch.\n\nThe Discussion\nWeight data: the OpenRates mirror is missing portion weights for 40% of Indian items.\nAlert standard: v1.2 lands first, then the telemetry rollout.\nPayments: the vendor spike is unfunded.\n\nThe Next Steps\nAnna Moreno: Review dataset for currency information by 3 Oct\nNoah: Finish the alert emission standard v1.2 by end of week\nDaniel: Mirror OpenRates before launch\nDecided: the Owner column holds a person, not a team\nOpen question: do we fund the payments spike this quarter?\nRisk: the upload flag has no rollback plan",
+  "responses": [
+    {
+      "text": "{\"action_items\": [{\"title\": \"Review dataset for currency information\", \"owner_text\": \"Anna Moreno\", \"due_hint\": \"by 3 Oct\", \"evidence\": \"Anna Moreno: Review dataset",
+      "usage_metadata": {
+        "prompt_token_count": 1412,
+        "candidates_token_count": 8192,
+        "total_token_count": 9604
+      },
+      "finish_reason": "MAX_TOKENS"
+    },
+    {
+      "text": "```json\n{\"action_items\": [{\"title\": \"Review dataset for currency information\", \"detail\": \"Portion weights are missing for 40% of Indian items in the OpenRates mirror.\", \"owner_text\": \"Anna Moreno\", \"due_hint\": \"by 3 Oct\", \"status_hint\": \"open\", \"evidence\": \"Anna Moreno: Review dataset for currency information by 3 Oct\"}, {\"title\": \"Finish the alert emission standard v1.2\", \"detail\": \"\", \"owner_text\": \"Noah\", \"due_hint\": \"by end of week\", \"evidence\": \"Noah: Finish the alert emission standard v1.2 by end of week\"}, {\"title\": \"Mirror OpenRates before launch\", \"detail\": \"\", \"owner_text\": \"Daniel\", \"due_hint\": \"\", \"evidence\": \"Daniel: Mirror OpenRates before launch\"}], \"decisions\": [{\"statement\": \"The Owner column holds a person, not a team\", \"evidence\": \"Decided: the Owner column holds a person, not a team\"}], \"risks\": [{\"statement\": \"The upload flag has no rollback plan\", \"evidence\": \"Risk: the upload flag has no rollback plan\"}, {\"statement\": \"The vendor spike for payments is unfunded\", \"evidence\": \"Payments: the vendor spike is unfunded.\"}], \"questions\": [{\"statement\": \"Do we fund the payments spike this quarter?\", \"needs\": \"a budget decision\", \"evidence\": \"Open question: do we fund the payments spike this quarter?\"}]}\n```",
+      "usage_metadata": {
+        "prompt_token_count": 1412,
+        "candidates_token_count": 390,
+        "total_token_count": 1802
+      },
+      "finish_reason": "STOP"
+    }
+  ]
+}

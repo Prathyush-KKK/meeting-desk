@@ -1,0 +1,28 @@
+Meeting Desk {{ .Values.image.tag | default .Chart.AppVersion }} is installed as {{ include "meeting-desk.fullname" . }}.
+
+  app        https://{{ .Values.ingress.host }}{{ if not .Values.ingress.enabled }}   (ingress disabled){{ end }}
+  api pods   {{ .Values.api.replicaCount }}
+  worker     {{ if .Values.worker.enabled }}on ({{ .Values.worker.replicaCount }} replica(s)){{ else }}off - extraction runs inline in the API{{ end }}
+  metrics    port {{ .Values.containerPorts.metrics }}, named "metrics", ServiceMonitor {{ if .Values.serviceMonitor.enabled }}on{{ else }}off{{ end }}, PrometheusRule {{ if .Values.prometheusRule.enabled }}on{{ else }}off{{ end }}
+
+Check the deploy:
+
+  kubectl -n {{ .Release.Namespace }} rollout status deploy/{{ include "meeting-desk.fullname" . }}-api
+  kubectl -n {{ .Release.Namespace }} exec deploy/{{ include "meeting-desk.fullname" . }}-api -- \
+    python -c "import urllib.request;print(urllib.request.urlopen('http://127.0.0.1:{{ .Values.containerPorts.metrics }}/metrics').read().decode()[:400])"
+
+/metrics must NOT answer on the ingress. The app port serves the SPA, so what matters is that the
+exposition format never comes back:
+
+  curl -sS https://{{ .Values.ingress.host }}/metrics | grep -q '^# TYPE http_requests_total' \
+    && echo "LEAK" || echo "ok: not public"
+
+{{ if .Values.externalSecrets.enabled -}}
+Secrets come from the secret store at {{ .Values.externalSecrets.basePath }}/<KEY>:
+{{ range .Values.externalSecrets.keys }}  {{ $.Values.externalSecrets.basePath }}/{{ . }}
+{{ end }}{{- if .Values.externalSecrets.vertexServiceAccount.enabled }}  {{ .Values.externalSecrets.basePath }}/{{ .Values.externalSecrets.vertexServiceAccount.key }}
+{{ end }}
+Any of them missing and the pods stay in CreateContainerConfigError:
+
+  kubectl -n {{ .Release.Namespace }} get externalsecret {{ include "meeting-desk.secretName" . }} -o wide
+{{- end }}

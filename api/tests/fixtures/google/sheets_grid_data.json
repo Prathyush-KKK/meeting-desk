@@ -1,0 +1,170 @@
+{
+  "spreadsheetId": "1RoadmapSpreadsheetId0000000000000000000000",
+  "sheets": [
+    {
+      "data": [
+        {
+          "rowData": [
+            {
+              "values": [
+                {
+                  "effectiveFormat": {
+                    "numberFormat": {
+                      "type": "TEXT"
+                    }
+                  }
+                },
+                {
+                  "effectiveFormat": {
+                    "numberFormat": {
+                      "type": "TEXT"
+                    }
+                  }
+                },
+                {
+                  "effectiveFormat": {
+                    "numberFormat": {
+                      "type": "TEXT"
+                    }
+                  }
+                },
+                {
+                  "effectiveFormat": {
+                    "numberFormat": {
+                      "type": "TEXT"
+                    }
+                  }
+                },
+                {
+                  "effectiveFormat": {
+                    "numberFormat": {
+                      "type": "TEXT"
+                    }
+                  }
+                },
+                {
+                  "effectiveFormat": {
+                    "numberFormat": {
+                      "type": "TEXT"
+                    }
+                  }
+                },
+                {
+                  "effectiveFormat": {
+                    "numberFormat": {
+                      "type": "TEXT"
+                    }
+                  }
+                },
+                {
+                  "effectiveFormat": {
+                    "numberFormat": {
+                      "type": "TEXT"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "values": [
+                {
+                  "effectiveFormat": {
+                    "numberFormat": {
+                      "type": "TEXT"
+                    }
+                  }
+                },
+                {
+                  "effectiveFormat": {
+                    "numberFormat": {
+                      "type": "TEXT"
+                    }
+                  }
+                },
+                {
+                  "effectiveFormat": {
+                    "numberFormat": {
+                      "type": "TEXT"
+                    }
+                  }
+                },
+                {
+                  "effectiveFormat": {
+                    "numberFormat": {
+                      "type": "DATE",
+                      "pattern": "d mmm yyyy"
+                    }
+                  }
+                },
+                {
+                  "effectiveFormat": {
+                    "numberFormat": {
+                      "type": "TEXT"
+                    }
+                  },
+                  "dataValidation": {
+                    "condition": {
+                      "type": "ONE_OF_LIST",
+                      "values": [
+                        {
+                          "userEnteredValue": "Open"
+                        },
+                        {
+                          "userEnteredValue": "In progress"
+                        },
+                        {
+                          "userEnteredValue": "Blocked"
+                        },
+                        {
+                          "userEnteredValue": "Done"
+                        },
+                        {
+                          "userEnteredValue": "Dropped"
+                        }
+                      ]
+                    },
+                    "showCustomUi": true,
+                    "strict": true
+                  }
+                },
+                {
+                  "effectiveFormat": {
+                    "numberFormat": {
+                      "type": "TEXT"
+                    }
+                  },
+                  "dataValidation": {
+                    "condition": {
+                      "type": "ONE_OF_RANGE",
+                      "values": [
+                        {
+                          "userEnteredValue": "=Lists!$A$2:$A$5"
+                        }
+                      ]
+                    },
+                    "showCustomUi": true
+                  }
+                },
+                {
+                  "effectiveFormat": {
+                    "numberFormat": {
+                      "type": "NUMBER",
+                      "pattern": "0"
+                    }
+                  }
+                },
+                {
+                  "effectiveFormat": {
+                    "numberFormat": {
+                      "type": "TEXT"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

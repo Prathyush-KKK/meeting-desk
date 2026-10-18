@@ -1,0 +1,40 @@
+{{- if .Values.ingress.enabled }}
+{{/*
+Internal only. The class and the annotations are values because the internal ingress controller is
+named differently per cluster; the default is an internal NLB.
+
+Note what is NOT here: the metrics port. /metrics is served by a different ASGI app on a different
+container port and is only ever reached in-cluster by the Prometheus scrape. There is no rule
+pointing at it, so it cannot be published by accident - and README's "Verify /metrics is not
+public" is the curl that proves it.
+*/}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "meeting-desk.fullname" . }}
+  labels:
+    {{- include "meeting-desk.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host | quote }}
+      secretName: {{ .Values.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.host | quote }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.path }}
+            pathType: {{ .Values.ingress.pathType }}
+            backend:
+              service:
+                name: {{ include "meeting-desk.fullname" . }}
+                port:
+                  name: http
+{{- end }}

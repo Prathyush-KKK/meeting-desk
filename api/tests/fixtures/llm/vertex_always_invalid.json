@@ -1,0 +1,23 @@
+{
+  "notes": "Mobile roadmap review\n\nThe Goal\nClose the dataset gaps before the launch.\n\nThe Discussion\nWeight data: the OpenRates mirror is missing portion weights for 40% of Indian items.\nAlert standard: v1.2 lands first, then the telemetry rollout.\nPayments: the vendor spike is unfunded.\n\nThe Next Steps\nAnna Moreno: Review dataset for currency information by 3 Oct\nNoah: Finish the alert emission standard v1.2 by end of week\nDaniel: Mirror OpenRates before launch\nDecided: the Owner column holds a person, not a team\nOpen question: do we fund the payments spike this quarter?\nRisk: the upload flag has no rollback plan",
+  "responses": [
+    {
+      "text": "I could not find any action items in these notes.",
+      "usage_metadata": {
+        "prompt_token_count": 1412,
+        "candidates_token_count": 12,
+        "total_token_count": 1424
+      },
+      "finish_reason": "STOP"
+    },
+    {
+      "text": "",
+      "usage_metadata": {
+        "prompt_token_count": 1412,
+        "candidates_token_count": 0,
+        "total_token_count": 1412
+      },
+      "finish_reason": "SAFETY"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "meeting-desk-api"
+version = "0.1.0"
+description = "Meeting Desk API: turn meeting notes into action items and write them into Google Sheets"
+requires-python = ">=3.12"
+dependencies = [
+  # 0.136.x: 0.137 nests included routers inside app.routes, which the telemetry middleware's
+  # route prediction (app/telemetry/middleware.py) walks as a flat list.
+  "fastapi==0.136.3",
+  # Floor for the Range-header DoS fix in FileResponse (the SPA is served through StaticFiles).
+  "starlette>=0.49.1",
+  "uvicorn[standard]==0.54.0",
+  "sqlalchemy==2.0.55",
+  "alembic==1.20.0",
+  "pydantic==2.14.1",
+  "pydantic-settings==2.16.0",
+  # The Google clients are plain httpx against the REST endpoints (see app/google/http.py);
+  # authlib runs the OAuth flows (1.7.x: 1.8 switches to httpx2 when it is installed, which the
+  # httpx transports the tests inject cannot drive); cryptography (Fernet) keeps refresh tokens at rest.
+  "httpx==0.28.1",
+  "authlib==1.7.2",
+  "cryptography>=46.0.0",
+  "itsdangerous==2.2.0",
+  "dateparser==1.4.3",
+  "python-dateutil==2.9.0.post0",
+  "psycopg[binary]==3.3.6",
+  "psycopg-pool>=3.2",
+  "procrastinate==2.15.1",
+  # Telemetry per docs/TELEMETRY.md; /metrics on its own port.
+  "prometheus-client==0.26.0",
+]
+
+[project.optional-dependencies]
+# The model SDKs are only needed with FAKE_LLM=0 and are imported lazily. EXTRACTION_PROVIDER=openai
+# (OpenAI, Ollama, OpenRouter, ...) needs none of them: it is plain httpx.
+vertex = ["google-cloud-aiplatform==1.75.0"]
+bedrock = ["boto3==1.35.90"]
+anthropic = ["anthropic==1.15.0"]
+llm = ["google-cloud-aiplatform==1.75.0", "boto3==1.35.90", "anthropic==1.15.0"]
+dev = [
+  "pytest==8.3.4",
+  "pytest-cov==6.0.0",
+  "ruff==0.8.6",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = [".venv", "alembic/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4", "SIM", "RUF"]
+ignore = ["B008", "RUF012"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]
+# Verbatim demo content; reflowing it would change the data.
+"app/seed_data.py" = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]

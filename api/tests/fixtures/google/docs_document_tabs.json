@@ -1,0 +1,645 @@
+{
+  "documentId": "1qX9Lm3kNotesDocIdForMobile",
+  "title": "Mobile roadmap review - 2026/09/19 16:00 IST - Notes by Gemini",
+  "revisionId": "ALBJ4LtQx",
+  "suggestionsViewMode": "SUGGESTIONS_INLINE",
+  "tabs": [
+    {
+      "tabProperties": {
+        "tabId": "t.0",
+        "title": "Quick notes",
+        "index": 0,
+        "nestingLevel": 0
+      },
+      "documentTab": {
+        "body": {
+          "content": [
+            {
+              "sectionBreak": {}
+            },
+            {
+              "startIndex": 0,
+              "endIndex": 1,
+              "paragraph": {
+                "elements": [
+                  {
+                    "startIndex": 0,
+                    "endIndex": 12,
+                    "textRun": {
+                      "content": "Quick notes\n",
+                      "textStyle": {}
+                    }
+                  }
+                ],
+                "paragraphStyle": {
+                  "namedStyleType": "HEADING_1",
+                  "direction": "LEFT_TO_RIGHT"
+                }
+              }
+            },
+            {
+              "startIndex": 0,
+              "endIndex": 1,
+              "paragraph": {
+                "elements": [
+                  {
+                    "startIndex": 0,
+                    "endIndex": 70,
+                    "textRun": {
+                      "content": "Dataset gaps reviewed; alert standard first; payments spike unfunded.\n",
+                      "textStyle": {}
+                    }
+                  }
+                ],
+                "paragraphStyle": {
+                  "namedStyleType": "NORMAL_TEXT",
+                  "direction": "LEFT_TO_RIGHT"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "childTabs": [
+        {
+          "tabProperties": {
+            "tabId": "t.1",
+            "title": "Full notes",
+            "index": 0,
+            "nestingLevel": 1,
+            "parentTabId": "t.0"
+          },
+          "documentTab": {
+            "body": {
+              "content": [
+                {
+                  "sectionBreak": {
+                    "sectionStyle": {
+                      "columnSeparatorStyle": "NONE",
+                      "contentDirection": "LEFT_TO_RIGHT"
+                    }
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "paragraph": {
+                    "elements": [
+                      {
+                        "startIndex": 0,
+                        "endIndex": 25,
+                        "textRun": {
+                          "content": "Mobile roadmap review\n",
+                          "textStyle": {}
+                        }
+                      }
+                    ],
+                    "paragraphStyle": {
+                      "namedStyleType": "TITLE",
+                      "direction": "LEFT_TO_RIGHT"
+                    }
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "paragraph": {
+                    "elements": [
+                      {
+                        "startIndex": 0,
+                        "endIndex": 8,
+                        "textRun": {
+                          "content": "Summary\n",
+                          "textStyle": {}
+                        }
+                      }
+                    ],
+                    "paragraphStyle": {
+                      "namedStyleType": "HEADING_1",
+                      "direction": "LEFT_TO_RIGHT"
+                    }
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "paragraph": {
+                    "elements": [
+                      {
+                        "startIndex": 0,
+                        "endIndex": 81,
+                        "textRun": {
+                          "content": "The team reviewed the dataset gaps and agreed the Owner column holds one person.\n",
+                          "textStyle": {}
+                        }
+                      }
+                    ],
+                    "paragraphStyle": {
+                      "namedStyleType": "NORMAL_TEXT",
+                      "direction": "LEFT_TO_RIGHT"
+                    }
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "paragraph": {
+                    "elements": [
+                      {
+                        "startIndex": 0,
+                        "endIndex": 8,
+                        "textRun": {
+                          "content": "Details\n",
+                          "textStyle": {}
+                        }
+                      }
+                    ],
+                    "paragraphStyle": {
+                      "namedStyleType": "HEADING_1",
+                      "direction": "LEFT_TO_RIGHT"
+                    }
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "paragraph": {
+                    "elements": [
+                      {
+                        "startIndex": 0,
+                        "endIndex": 92,
+                        "textRun": {
+                          "content": "Weight data: the OpenRates mirror is missing portion weights for 40% of Indian items.\n",
+                          "textStyle": {}
+                        }
+                      }
+                    ],
+                    "paragraphStyle": {
+                      "namedStyleType": "NORMAL_TEXT",
+                      "direction": "LEFT_TO_RIGHT"
+                    },
+                    "bullet": {
+                      "listId": "kix.list0",
+                      "nestingLevel": 0,
+                      "textStyle": {}
+                    }
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "paragraph": {
+                    "elements": [
+                      {
+                        "startIndex": 0,
+                        "endIndex": 64,
+                        "textRun": {
+                          "content": "Anna Moreno will review the dataset for currency information.\n",
+                          "textStyle": {}
+                        }
+                      }
+                    ],
+                    "paragraphStyle": {
+                      "namedStyleType": "NORMAL_TEXT",
+                      "direction": "LEFT_TO_RIGHT"
+                    },
+                    "bullet": {
+                      "listId": "kix.list0",
+                      "nestingLevel": 1,
+                      "textStyle": {}
+                    }
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "paragraph": {
+                    "elements": [
+                      {
+                        "startIndex": 0,
+                        "endIndex": 62,
+                        "textRun": {
+                          "content": "Alert standard: v1.2 lands first, then the telemetry rollout.\n",
+                          "textStyle": {}
+                        }
+                      }
+                    ],
+                    "paragraphStyle": {
+                      "namedStyleType": "NORMAL_TEXT",
+                      "direction": "LEFT_TO_RIGHT"
+                    },
+                    "bullet": {
+                      "listId": "kix.list0",
+                      "nestingLevel": 0,
+                      "textStyle": {}
+                    }
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "table": {
+                    "rows": 2,
+                    "columns": 2,
+                    "tableRows": [
+                      {
+                        "tableCells": [
+                          {
+                            "content": [
+                              {
+                                "startIndex": 0,
+                                "endIndex": 1,
+                                "paragraph": {
+                                  "elements": [
+                                    {
+                                      "startIndex": 0,
+                                      "endIndex": 5,
+                                      "textRun": {
+                                        "content": "Item\n",
+                                        "textStyle": {}
+                                      }
+                                    }
+                                  ],
+                                  "paragraphStyle": {
+                                    "namedStyleType": "NORMAL_TEXT",
+                                    "direction": "LEFT_TO_RIGHT"
+                                  }
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "content": [
+                              {
+                                "startIndex": 0,
+                                "endIndex": 1,
+                                "paragraph": {
+                                  "elements": [
+                                    {
+                                      "startIndex": 0,
+                                      "endIndex": 6,
+                                      "textRun": {
+                                        "content": "Owner\n",
+                                        "textStyle": {}
+                                      }
+                                    }
+                                  ],
+                                  "paragraphStyle": {
+                                    "namedStyleType": "NORMAL_TEXT",
+                                    "direction": "LEFT_TO_RIGHT"
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "tableCells": [
+                          {
+                            "content": [
+                              {
+                                "startIndex": 0,
+                                "endIndex": 1,
+                                "paragraph": {
+                                  "elements": [
+                                    {
+                                      "startIndex": 0,
+                                      "endIndex": 21,
+                                      "textRun": {
+                                        "content": "Vendor questionnaire\n",
+                                        "textStyle": {}
+                                      }
+                                    }
+                                  ],
+                                  "paragraphStyle": {
+                                    "namedStyleType": "NORMAL_TEXT",
+                                    "direction": "LEFT_TO_RIGHT"
+                                  }
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "content": [
+                              {
+                                "startIndex": 0,
+                                "endIndex": 1,
+                                "paragraph": {
+                                  "elements": [
+                                    {
+                                      "startIndex": 0,
+                                      "endIndex": 8,
+                                      "textRun": {
+                                        "content": "Alex S\n",
+                                        "textStyle": {}
+                                      }
+                                    }
+                                  ],
+                                  "paragraphStyle": {
+                                    "namedStyleType": "NORMAL_TEXT",
+                                    "direction": "LEFT_TO_RIGHT"
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "paragraph": {
+                    "elements": [
+                      {
+                        "startIndex": 0,
+                        "endIndex": 15,
+                        "textRun": {
+                          "content": "The Next Steps\n",
+                          "textStyle": {}
+                        }
+                      }
+                    ],
+                    "paragraphStyle": {
+                      "namedStyleType": "HEADING_1",
+                      "direction": "LEFT_TO_RIGHT"
+                    }
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "paragraph": {
+                    "elements": [
+                      {
+                        "startIndex": 0,
+                        "endIndex": 64,
+                        "textRun": {
+                          "content": "Anna Moreno: Review dataset for currency information by 3 Oct\n",
+                          "textStyle": {}
+                        }
+                      }
+                    ],
+                    "paragraphStyle": {
+                      "namedStyleType": "NORMAL_TEXT",
+                      "direction": "LEFT_TO_RIGHT"
+                    },
+                    "bullet": {
+                      "listId": "kix.list0",
+                      "nestingLevel": 0,
+                      "textStyle": {}
+                    }
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "paragraph": {
+                    "elements": [
+                      {
+                        "startIndex": 0,
+                        "endIndex": 65,
+                        "textRun": {
+                          "content": "Noah: Finish the alert emission standard v1.2 by end of week\n",
+                          "textStyle": {}
+                        }
+                      }
+                    ],
+                    "paragraphStyle": {
+                      "namedStyleType": "NORMAL_TEXT",
+                      "direction": "LEFT_TO_RIGHT"
+                    },
+                    "bullet": {
+                      "listId": "kix.list0",
+                      "nestingLevel": 0,
+                      "textStyle": {}
+                    }
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "paragraph": {
+                    "elements": [
+                      {
+                        "startIndex": 0,
+                        "endIndex": 1,
+                        "person": {
+                          "personId": "kix.p1",
+                          "personProperties": {
+                            "name": "Daniel",
+                            "email": "daniel.okafor@example.com"
+                          }
+                        }
+                      },
+                      {
+                        "startIndex": 1,
+                        "endIndex": 2,
+                        "textRun": {
+                          "content": ": Mirror OpenRates before launch\n",
+                          "textStyle": {}
+                        }
+                      }
+                    ],
+                    "paragraphStyle": {
+                      "namedStyleType": "NORMAL_TEXT",
+                      "direction": "LEFT_TO_RIGHT"
+                    },
+                    "bullet": {
+                      "listId": "kix.list0",
+                      "nestingLevel": 0,
+                      "textStyle": {}
+                    }
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "paragraph": {
+                    "elements": [
+                      {
+                        "startIndex": 0,
+                        "endIndex": 53,
+                        "textRun": {
+                          "content": "Decided: the Owner column holds a person, not a team\n",
+                          "textStyle": {}
+                        }
+                      }
+                    ],
+                    "paragraphStyle": {
+                      "namedStyleType": "NORMAL_TEXT",
+                      "direction": "LEFT_TO_RIGHT"
+                    }
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "paragraph": {
+                    "elements": [
+                      {
+                        "startIndex": 0,
+                        "endIndex": 59,
+                        "textRun": {
+                          "content": "Open question: do we fund the payments spike this quarter?\n",
+                          "textStyle": {}
+                        }
+                      }
+                    ],
+                    "paragraphStyle": {
+                      "namedStyleType": "NORMAL_TEXT",
+                      "direction": "LEFT_TO_RIGHT"
+                    }
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "paragraph": {
+                    "elements": [
+                      {
+                        "startIndex": 0,
+                        "endIndex": 1,
+                        "textRun": {
+                          "content": "\n",
+                          "textStyle": {}
+                        }
+                      }
+                    ],
+                    "paragraphStyle": {
+                      "namedStyleType": "NORMAL_TEXT",
+                      "direction": "LEFT_TO_RIGHT"
+                    }
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "paragraph": {
+                    "elements": [
+                      {
+                        "startIndex": 0,
+                        "endIndex": 1,
+                        "textRun": {
+                          "content": "\n",
+                          "textStyle": {}
+                        }
+                      }
+                    ],
+                    "paragraphStyle": {
+                      "namedStyleType": "NORMAL_TEXT",
+                      "direction": "LEFT_TO_RIGHT"
+                    }
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "paragraph": {
+                    "elements": [
+                      {
+                        "startIndex": 0,
+                        "endIndex": 1,
+                        "textRun": {
+                          "content": "\n",
+                          "textStyle": {}
+                        }
+                      }
+                    ],
+                    "paragraphStyle": {
+                      "namedStyleType": "NORMAL_TEXT",
+                      "direction": "LEFT_TO_RIGHT"
+                    }
+                  }
+                },
+                {
+                  "startIndex": 0,
+                  "endIndex": 1,
+                  "paragraph": {
+                    "elements": [
+                      {
+                        "startIndex": 0,
+                        "endIndex": 43,
+                        "textRun": {
+                          "content": "Risk: the upload flag has no rollback plan\n",
+                          "textStyle": {}
+                        }
+                      }
+                    ],
+                    "paragraphStyle": {
+                      "namedStyleType": "NORMAL_TEXT",
+                      "direction": "LEFT_TO_RIGHT"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "childTabs": [
+            {
+              "tabProperties": {
+                "tabId": "t.2",
+                "title": "Transcript",
+                "index": 0,
+                "nestingLevel": 2,
+                "parentTabId": "t.1"
+              },
+              "documentTab": {
+                "body": {
+                  "content": [
+                    {
+                      "sectionBreak": {}
+                    },
+                    {
+                      "startIndex": 0,
+                      "endIndex": 1,
+                      "paragraph": {
+                        "elements": [
+                          {
+                            "startIndex": 0,
+                            "endIndex": 54,
+                            "textRun": {
+                              "content": "00:00 Daniel Okafor: Let's look at the dataset.\n",
+                              "textStyle": {}
+                            }
+                          }
+                        ],
+                        "paragraphStyle": {
+                          "namedStyleType": "NORMAL_TEXT",
+                          "direction": "LEFT_TO_RIGHT"
+                        }
+                      }
+                    },
+                    {
+                      "startIndex": 0,
+                      "endIndex": 1,
+                      "paragraph": {
+                        "elements": [
+                          {
+                            "startIndex": 0,
+                            "endIndex": 75,
+                            "textRun": {
+                              "content": "00:41 Anna Moreno: I'll review it for currency information by the third.\n",
+                              "textStyle": {}
+                            }
+                          }
+                        ],
+                        "paragraphStyle": {
+                          "namedStyleType": "NORMAL_TEXT",
+                          "direction": "LEFT_TO_RIGHT"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

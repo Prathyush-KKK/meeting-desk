@@ -1,0 +1,83 @@
+{
+  "notes": "Mobile roadmap review\n\nThe Goal\nClose the dataset gaps before the launch.\n\nThe Discussion\nWeight data: the OpenRates mirror is missing portion weights for 40% of Indian items.\nAlert standard: v1.2 lands first, then the telemetry rollout.\nPayments: the vendor spike is unfunded.\n\nThe Next Steps\nAnna Moreno: Review dataset for currency information by 3 Oct\nNoah: Finish the alert emission standard v1.2 by end of week\nDaniel: Mirror OpenRates before launch\nDecided: the Owner column holds a person, not a team\nOpen question: do we fund the payments spike this quarter?\nRisk: the upload flag has no rollback plan",
+  "response": {
+    "ResponseMetadata": {
+      "RequestId": "3f1c4b2a-9d0e-4c8f-b1a2-7e6d5c4b3a21",
+      "HTTPStatusCode": 200
+    },
+    "output": {
+      "message": {
+        "role": "assistant",
+        "content": [
+          {
+            "text": "I'll record the outcomes from the notes."
+          },
+          {
+            "toolUse": {
+              "toolUseId": "tooluse_Q1w2E3r4T5y6U7i8O9p0",
+              "name": "record_points",
+              "input": {
+                "action_items": [
+                  {
+                    "title": "Review dataset for currency information",
+                    "detail": "Portion weights are missing for 40% of Indian items in the OpenRates mirror.",
+                    "owner_text": "Anna Moreno",
+                    "due_hint": "by 3 Oct",
+                    "status_hint": "open",
+                    "evidence": "Anna Moreno: Review dataset for currency information by 3 Oct"
+                  },
+                  {
+                    "title": "Finish the alert emission standard v1.2",
+                    "detail": "",
+                    "owner_text": "Noah",
+                    "due_hint": "by end of week",
+                    "evidence": "Noah: Finish the alert emission standard v1.2 by end of week"
+                  },
+                  {
+                    "title": "Mirror OpenRates before launch",
+                    "detail": "",
+                    "owner_text": "Daniel",
+                    "due_hint": "",
+                    "evidence": "Daniel: Mirror OpenRates before launch"
+                  }
+                ],
+                "decisions": [
+                  {
+                    "statement": "The Owner column holds a person, not a team",
+                    "evidence": "Decided: the Owner column holds a person, not a team"
+                  }
+                ],
+                "risks": [
+                  {
+                    "statement": "The upload flag has no rollback plan",
+                    "evidence": "Risk: the upload flag has no rollback plan"
+                  },
+                  {
+                    "statement": "The vendor spike for payments is unfunded",
+                    "evidence": "Payments: the vendor spike is unfunded."
+                  }
+                ],
+                "questions": [
+                  {
+                    "statement": "Do we fund the payments spike this quarter?",
+                    "needs": "a budget decision",
+                    "evidence": "Open question: do we fund the payments spike this quarter?"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "stopReason": "tool_use",
+    "usage": {
+      "inputTokens": 1655,
+      "outputTokens": 421,
+      "totalTokens": 2076
+    },
+    "metrics": {
+      "latencyMs": 6120
+    }
+  }
+}

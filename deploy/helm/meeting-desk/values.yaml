@@ -1,0 +1,225 @@
+# Meeting Desk - chart defaults.
+#
+# Nothing here is a credential and nothing here may become one. Every secret is pulled from
+# your secret store (Infisical, Vault, AWS Secrets Manager, ...) by External Secrets Operator from
+# /meeting-desk/<KEY> (see externalSecrets below).
+
+nameOverride: ""
+fullnameOverride: ""
+
+# One image serves the API and the built SPA (deploy/Dockerfile.api builds the web app in an
+# earlier stage and copies web/dist in as WEB_DIST). The worker runs the same image with a
+# different command, so there is exactly one tag to move per release.
+image:
+  repository: ghcr.io/prathyush-kkk/meeting-desk
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+imagePullSecrets: []
+
+# The commit the image was built from. Surfaces as app_build_info{version,commit}.
+build:
+  version: ""   # defaults to image.tag
+  commit: "unknown"
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+    # Bedrock fallback (IRSA). The role's trust policy names this namespace and service account:
+    # eks.amazonaws.com/role-arn: arn:aws:iam::<account>:role/meeting-desk-bedrock
+
+podAnnotations: {}
+podLabels: {}
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+topologySpreadConstraints: []
+
+# --- the API (it also serves the SPA) ---------------------------------------------------------
+api:
+  replicaCount: 2
+  command: []   # empty: the image's own CMD (uvicorn on containerPorts.http)
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+  readinessProbe:
+    path: /healthz
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+  livenessProbe:
+    path: /livez
+    initialDelaySeconds: 15
+    periodSeconds: 20
+    timeoutSeconds: 3
+    failureThreshold: 6
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+
+# --- the procrastinate worker ------------------------------------------------------------------
+# A Deployment rather than a CronJob: procrastinate's own periodic scheduler owns the cadence
+# (fetch_missing_docs every 5 minutes, token_health daily) and a long-lived worker also picks up
+# the on-demand extraction jobs the API defers. A CronJob could not do the second one.
+worker:
+  enabled: true
+  replicaCount: 1
+  command: ["python", "-m", "app.jobs.queue"]
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+  # The worker exposes the same metrics port so its counters are scraped too.
+  metrics:
+    enabled: true
+
+containerPorts:
+  http: 8000
+  metrics: 9464
+
+service:
+  type: ClusterIP
+  annotations: {}
+  # Both ports are named; the ServiceMonitor references "metrics" by name, never by number.
+  httpPort: 80
+  metricsPort: 9464
+
+# --- ingress: internal only --------------------------------------------------------------------
+# The class and the annotations are values because the cluster's internal ingress is named
+# differently per environment. The default is an internal load balancer; there is no
+# public ingress for this service and /metrics is not on this port at all.
+ingress:
+  enabled: true
+  className: nginx-internal
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 8m
+    # The controller's Service is the internal NLB; kept here so `helm template` shows the intent.
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+  host: meeting-desk.example.com
+  path: /
+  pathType: Prefix
+  tls:
+    enabled: false
+    secretName: ""
+
+# --- Prometheus ---------------------------------------------------------------------------------
+serviceMonitor:
+  enabled: false        # on in values-production.example.yaml
+  interval: 30s
+  scrapeTimeout: 10s
+  # Extra labels the cluster's Prometheus selects ServiceMonitors by (e.g. release: kube-prometheus)
+  labels: {}
+  relabelings: []
+  metricRelabelings: []
+
+prometheusRule:
+  enabled: false        # on in values-production.example.yaml
+  labels: {}
+  # Thresholds. Every rule carries service and severity labels and a remediation annotation
+  # written in the event tokens app/telemetry/events.py emits.
+  lastSuccessStaleSeconds: 1800     # no successful call to a provider for this long
+  extractionFailureRatio: 0.2       # background_job_total{job_name="extract"}
+  sheetsErrorRatio: 0.1             # external_provider_requests_total{provider="google_sheets"}
+  transferConflictRatio: 0.25       # 4xx on the transfer/save routes (409 is what they return)
+  oauthRefreshFailures: 0           # any failed refresh over the window alerts
+  requestLatencyP95Seconds: 5
+  # Providers that must have reported a success recently. google_oauth and the LLM providers are
+  # left out on purpose: both are legitimately idle for hours.
+  watchedProviders: "google_calendar|google_drive|google_sheets|postgres"
+
+# --- non-secret environment (ConfigMap) ---------------------------------------------------------
+env:
+  ENVIRONMENT: production
+  FAKE_GOOGLE: "0"
+  FAKE_LLM: "0"
+  SEED_DEMO: "0"
+  AUTH_DEV_USER: ""
+  CORS_ORIGINS: "[]"
+  WEB_DIST: /srv/web/dist
+  WEB_BASE_URL: https://meeting-desk.example.com
+  GOOGLE_OIDC_REDIRECT_URI: https://meeting-desk.example.com/auth/callback
+  GOOGLE_CONNECT_REDIRECT_URI: https://meeting-desk.example.com/admin/connections/callback
+  GOOGLE_HOSTED_DOMAIN: ""
+  MEETING_DESK_TOKEN_KEY_VERSION: "1"
+  DISPLAY_TIMEZONE: UTC
+  SHEETS_MAX_ROWS: "5000"
+  EXTRACTION_PROVIDER: vertex
+  VERTEX_PROJECT: ""
+  VERTEX_LOCATION: us-central1
+  VERTEX_MODEL: gemini-2.5-flash
+  BEDROCK_REGION: us-east-1
+  BEDROCK_MODEL: anthropic.claude-3-5-sonnet-20240620-v1:0
+  EXTRACT_FALLBACK_TO_BEDROCK: "1"
+  JOBS_ENABLED: "1"
+  METRICS_ENABLED: "1"
+  LOG_LEVEL: INFO
+  # dateparser needs an explicit zone; a host TZ like Asia/Calcutta trips tzlocal.
+  TZ: UTC
+
+# --- secrets: a secret store through External Secrets Operator ----------------------------------
+# Every key below is read from /meeting-desk/<KEY> in the store. No value is ever in this repo.
+externalSecrets:
+  enabled: true
+  refreshInterval: 1h
+  secretStore:
+    name: my-secret-store
+    kind: ClusterSecretStore
+  basePath: /meeting-desk
+  # Becomes one Secret, mounted with envFrom. Every key here must exist in the store or the
+  # ExternalSecret never syncs and the pods start with no secrets at all.
+  keys:
+    - SESSION_SECRET
+    - DATABASE_URL
+    - GOOGLE_CLIENT_ID
+    - GOOGLE_CLIENT_SECRET
+    - MEETING_DESK_TOKEN_KEY
+  # The previous token key exists only while a rotation is in flight (dual-read). Off by default:
+  # a required-but-absent MEETING_DESK_TOKEN_KEY_PREVIOUS blocks the whole secret. Turn it on for
+  # the rotation, run POST /admin/connections/rotate-keys, turn it off again.
+  rotation:
+    enabled: false
+    key: MEETING_DESK_TOKEN_KEY_PREVIOUS
+  # The Vertex service account key, as a file rather than an env var: the Vertex SDK reads
+  # GOOGLE_APPLICATION_CREDENTIALS. Its own ExternalSecret so it can be rotated on its own.
+  vertexServiceAccount:
+    enabled: true
+    key: VERTEX_SERVICE_ACCOUNT_KEY
+    mountPath: /var/run/secrets/vertex
+    fileName: key.json
+
+# --- the migration hook --------------------------------------------------------------------------
+# `alembic upgrade head` as a Helm pre-upgrade / pre-install hook, so the schema is in place before
+# any new pod starts. The hook fails the release if the migration fails.
+migrations:
+  enabled: true
+  backoffLimit: 2
+  activeDeadlineSeconds: 600
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi

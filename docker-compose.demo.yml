@@ -1,0 +1,30 @@
+# The demo: Meeting Desk with a built-in fake Google (calendar, notes, Sheets) and the rule-based
+# extractor - no accounts, no keys, nothing leaves your machine.
+#
+#   docker compose -f docker-compose.demo.yml up      then open http://localhost:8000
+#
+# Builds the image from this checkout on the first run. Everything lives in the container: stop it
+# and the demo starts fresh next time.
+name: meeting-desk-demo
+
+services:
+  app:
+    image: meeting-desk:demo
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.api
+    environment:
+      DATABASE_URL: sqlite:////tmp/meeting-desk.db
+      FAKE_GOOGLE: "1"
+      FAKE_LLM: "1"
+      SEED_DEMO: "1"
+      # Signed in as the demo team's admin, without Google.
+      AUTH_DEV_USER: daniel.okafor@example.com
+      WORKSTREAMS: Mobile,Platform,Billing,Rewards,Prod ops,Hiring
+      METRICS_ENABLED: "0"
+      # Try a real model on the demo notes: FAKE_LLM=0 plus one provider, e.g.
+      #   EXTRACTION_PROVIDER: openai
+      #   LLM_API_KEY: sk-...            (or LLM_BASE_URL: http://host.docker.internal:11434/v1 for Ollama)
+      #   LLM_MODEL: gpt-4.1-mini
+    ports:
+      - "127.0.0.1:8000:8000"

@@ -1,0 +1,69 @@
+{{- if .Values.migrations.enabled }}
+{{/*
+`alembic upgrade head` as a Helm hook, before any new pod starts.
+
+pre-install and pre-upgrade with hook-weight -5, so it runs before the Deployments are applied;
+hook-delete-policy keeps a failed Job around for `kubectl logs` and deletes it before the next
+release, so the name is free. If the migration fails the release fails and the old pods keep
+serving - which is the whole point of doing it here rather than in an initContainer.
+
+procrastinate's own tables are installed by `python -m app.jobs.schema`; it is run once by hand
+(README, "Run the worker") rather than on every upgrade.
+*/}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "meeting-desk.fullname" . }}-migrate
+  labels:
+    {{- include "meeting-desk.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migrate
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ .Values.migrations.backoffLimit }}
+  activeDeadlineSeconds: {{ .Values.migrations.activeDeadlineSeconds }}
+  template:
+    metadata:
+      labels:
+        {{- include "meeting-desk.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: migrate
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "meeting-desk.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: migrate
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["alembic", "upgrade", "head"]
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          envFrom:
+            {{- include "meeting-desk.envFrom" . | nindent 12 }}
+          env:
+            {{- include "meeting-desk.commonEnv" . | nindent 12 }}
+            # The migration Job opens no listening socket.
+            - name: METRICS_ENABLED
+              value: "0"
+          resources:
+            {{- toYaml .Values.migrations.resources | nindent 12 }}
+          volumeMounts:
+            {{- include "meeting-desk.volumeMounts" . | nindent 12 }}
+      volumes:
+        {{- include "meeting-desk.volumes" . | nindent 8 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

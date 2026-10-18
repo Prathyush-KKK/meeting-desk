@@ -1,0 +1,979 @@
+{
+  "name": "formula_col",
+  "description": "Days left is a formula column: never written, copied down after an insert.",
+  "title": "P4 Regional & AI",
+  "rows": [
+    [
+      "ID",
+      "Task",
+      "Owner",
+      "Due",
+      "Days left",
+      "Status",
+      "Notes"
+    ],
+    [
+      "T-301",
+      "Parse the vendor CSV exports",
+      "Daniel Okafor",
+      "10 Oct",
+      "18",
+      "open",
+      ""
+    ],
+    [
+      "T-302",
+      "Legal review of tax table",
+      "product",
+      "3 Oct",
+      "11",
+      "blocked",
+      "buy an hour"
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  ],
+  "formulas": [
+    [
+      "ID",
+      "Task",
+      "Owner",
+      "Due",
+      "Days left",
+      "Status",
+      "Notes"
+    ],
+    [
+      "T-301",
+      "Parse the vendor CSV exports",
+      "Daniel Okafor",
+      "10 Oct",
+      "=DATEDIF(TODAY(),D2,\"D\")",
+      "=IF(E2<0,\"overdue\",\"open\")",
+      ""
+    ],
+    [
+      "T-302",
+      "Legal review of tax table",
+      "product",
+      "3 Oct",
+      "=DATEDIF(TODAY(),D3,\"D\")",
+      "=IF(E3<0,\"overdue\",\"open\")",
+      "buy an hour"
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  ],
+  "number_formats": null,
+  "dropdowns": {},
+  "formula_cols": [
+    4,
+    5
+  ],
+  "date_cols": [],
+  "points": [
+    {
+      "id": "p1",
+      "kind": "action",
+      "text": "Mirror OpenRates before launch",
+      "owner": "Daniel Okafor",
+      "due": "3 Oct",
+      "status": "open",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    },
+    {
+      "id": "p2",
+      "kind": "decision",
+      "text": "Owner column holds a person, not a team",
+      "owner": "",
+      "due": "",
+      "status": "decided",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    },
+    {
+      "id": "p3",
+      "kind": "risk",
+      "text": "Receipt OCR accuracy is unmeasured",
+      "owner": "Anna Moreno",
+      "due": "",
+      "status": "blocked",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    }
+  ],
+  "fill": {
+    "anchor": {
+      "r": 1,
+      "c": 1
+    },
+    "write_keys": false
+  },
+  "with_hooks": {
+    "append_cells": [
+      "A4",
+      "B4",
+      "C4",
+      "D4",
+      "G4",
+      "A5",
+      "B5",
+      "G5",
+      "A6",
+      "B6",
+      "C6",
+      "G6"
+    ],
+    "formula_fill": [
+      {
+        "col": 4,
+        "source_row": 2,
+        "target_rows": [
+          3,
+          4,
+          5
+        ]
+      },
+      {
+        "col": 5,
+        "source_row": 2,
+        "target_rows": [
+          3,
+          4,
+          5
+        ]
+      }
+    ],
+    "fill_skip_cells": [
+      "G2",
+      "B4",
+      "C4",
+      "G4"
+    ],
+    "fill_skip_conflicts": [
+      "B2",
+      "C2",
+      "D2",
+      "B3",
+      "G3"
+    ],
+    "date_cells": []
+  },
+  "expect": {
+    "layout": {
+      "header_row": 0,
+      "first_col": 0,
+      "last_col": 6,
+      "columns": {
+        "id": 0,
+        "task": 1,
+        "owner": 2,
+        "due": 3,
+        "status": 5,
+        "notes": 6
+      },
+      "key_col": 0,
+      "key_prefix": "T",
+      "last_table_row": 2,
+      "header_score": 6
+    },
+    "next_keys": [
+      "T-303",
+      "T-304",
+      "T-305"
+    ],
+    "append": {
+      "insert_at": 3,
+      "count": 3,
+      "keys": [
+        "T-303",
+        "T-304",
+        "T-305"
+      ],
+      "cells": [
+        "A4",
+        "B4",
+        "C4",
+        "D4",
+        "F4",
+        "G4",
+        "A5",
+        "B5",
+        "F5",
+        "G5",
+        "A6",
+        "B6",
+        "C6",
+        "F6",
+        "G6"
+      ],
+      "writes": [
+        {
+          "ref": "A4",
+          "r": 3,
+          "c": 0,
+          "value": "T-303",
+          "kind": "key",
+          "existing": null
+        },
+        {
+          "ref": "B4",
+          "r": 3,
+          "c": 1,
+          "value": "Mirror OpenRates before launch",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "C4",
+          "r": 3,
+          "c": 2,
+          "value": "Daniel Okafor",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "D4",
+          "r": 3,
+          "c": 3,
+          "value": "3 Oct",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "F4",
+          "r": 3,
+          "c": 5,
+          "value": "open",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "G4",
+          "r": 3,
+          "c": 6,
+          "value": "Platform squad sync · 22 Sep",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "A5",
+          "r": 4,
+          "c": 0,
+          "value": "T-304",
+          "kind": "key",
+          "existing": null
+        },
+        {
+          "ref": "B5",
+          "r": 4,
+          "c": 1,
+          "value": "Owner column holds a person, not a team",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "F5",
+          "r": 4,
+          "c": 5,
+          "value": "decided",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "G5",
+          "r": 4,
+          "c": 6,
+          "value": "Platform squad sync · 22 Sep",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "A6",
+          "r": 5,
+          "c": 0,
+          "value": "T-305",
+          "kind": "key",
+          "existing": null
+        },
+        {
+          "ref": "B6",
+          "r": 5,
+          "c": 1,
+          "value": "Receipt OCR accuracy is unmeasured",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "C6",
+          "r": 5,
+          "c": 2,
+          "value": "Anna Moreno",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "F6",
+          "r": 5,
+          "c": 5,
+          "value": "blocked",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "G6",
+          "r": 5,
+          "c": 6,
+          "value": "Platform squad sync · 22 Sep",
+          "kind": "new",
+          "existing": null
+        }
+      ],
+      "moved": [],
+      "applied": [
+        [
+          "ID",
+          "Task",
+          "Owner",
+          "Due",
+          "Days left",
+          "Status",
+          "Notes"
+        ],
+        [
+          "T-301",
+          "Parse the vendor CSV exports",
+          "Daniel Okafor",
+          "10 Oct",
+          "18",
+          "open",
+          ""
+        ],
+        [
+          "T-302",
+          "Legal review of tax table",
+          "product",
+          "3 Oct",
+          "11",
+          "blocked",
+          "buy an hour"
+        ],
+        [
+          "T-303",
+          "Mirror OpenRates before launch",
+          "Daniel Okafor",
+          "3 Oct",
+          "",
+          "open",
+          "Platform squad sync · 22 Sep"
+        ],
+        [
+          "T-304",
+          "Owner column holds a person, not a team",
+          "",
+          "",
+          "",
+          "decided",
+          "Platform squad sync · 22 Sep"
+        ],
+        [
+          "T-305",
+          "Receipt OCR accuracy is unmeasured",
+          "Anna Moreno",
+          "",
+          "",
+          "blocked",
+          "Platform squad sync · 22 Sep"
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ]
+    },
+    "fill": {
+      "skip": {
+        "cells": [
+          "G2",
+          "B4",
+          "C4",
+          "F4",
+          "G4"
+        ],
+        "writes": [
+          {
+            "ref": "B2",
+            "r": 1,
+            "c": 1,
+            "value": "Parse the vendor CSV exports",
+            "kind": "conflict",
+            "existing": "Parse the vendor CSV exports"
+          },
+          {
+            "ref": "C2",
+            "r": 1,
+            "c": 2,
+            "value": "Daniel Okafor",
+            "kind": "conflict",
+            "existing": "Daniel Okafor"
+          },
+          {
+            "ref": "D2",
+            "r": 1,
+            "c": 3,
+            "value": "10 Oct",
+            "kind": "conflict",
+            "existing": "10 Oct"
+          },
+          {
+            "ref": "F2",
+            "r": 1,
+            "c": 5,
+            "value": "open",
+            "kind": "conflict",
+            "existing": "open"
+          },
+          {
+            "ref": "G2",
+            "r": 1,
+            "c": 6,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "B3",
+            "r": 2,
+            "c": 1,
+            "value": "Legal review of tax table",
+            "kind": "conflict",
+            "existing": "Legal review of tax table"
+          },
+          {
+            "ref": "F3",
+            "r": 2,
+            "c": 5,
+            "value": "blocked",
+            "kind": "conflict",
+            "existing": "blocked"
+          },
+          {
+            "ref": "G3",
+            "r": 2,
+            "c": 6,
+            "value": "buy an hour",
+            "kind": "conflict",
+            "existing": "buy an hour"
+          },
+          {
+            "ref": "B4",
+            "r": 3,
+            "c": 1,
+            "value": "Receipt OCR accuracy is unmeasured",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "C4",
+            "r": 3,
+            "c": 2,
+            "value": "Anna Moreno",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "F4",
+            "r": 3,
+            "c": 5,
+            "value": "blocked",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "G4",
+            "r": 3,
+            "c": 6,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          }
+        ],
+        "conflicts": [
+          "B2",
+          "C2",
+          "D2",
+          "F2",
+          "B3",
+          "F3",
+          "G3"
+        ],
+        "field_order": [
+          {
+            "c": 1,
+            "field": "task"
+          },
+          {
+            "c": 2,
+            "field": "owner"
+          },
+          {
+            "c": 3,
+            "field": "due"
+          },
+          {
+            "c": 5,
+            "field": "status"
+          },
+          {
+            "c": 6,
+            "field": "notes"
+          }
+        ],
+        "insert_at": null,
+        "count": 3,
+        "applied": [
+          [
+            "ID",
+            "Task",
+            "Owner",
+            "Due",
+            "Days left",
+            "Status",
+            "Notes"
+          ],
+          [
+            "T-301",
+            "Parse the vendor CSV exports",
+            "Daniel Okafor",
+            "10 Oct",
+            "18",
+            "open",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "T-302",
+            "Legal review of tax table",
+            "product",
+            "3 Oct",
+            "11",
+            "blocked",
+            "buy an hour"
+          ],
+          [
+            "",
+            "Receipt OCR accuracy is unmeasured",
+            "Anna Moreno",
+            "",
+            "",
+            "blocked",
+            "Platform squad sync · 22 Sep"
+          ]
+        ]
+      },
+      "overwrite": {
+        "cells": [
+          "B2",
+          "D2",
+          "G2",
+          "B3",
+          "F3",
+          "G3",
+          "B4",
+          "C4",
+          "F4",
+          "G4"
+        ],
+        "writes": [
+          {
+            "ref": "B2",
+            "r": 1,
+            "c": 1,
+            "value": "Mirror OpenRates before launch",
+            "kind": "conflict",
+            "existing": "Parse the vendor CSV exports"
+          },
+          {
+            "ref": "C2",
+            "r": 1,
+            "c": 2,
+            "value": "Daniel Okafor",
+            "kind": "conflict",
+            "existing": "Daniel Okafor"
+          },
+          {
+            "ref": "D2",
+            "r": 1,
+            "c": 3,
+            "value": "3 Oct",
+            "kind": "conflict",
+            "existing": "10 Oct"
+          },
+          {
+            "ref": "F2",
+            "r": 1,
+            "c": 5,
+            "value": "open",
+            "kind": "conflict",
+            "existing": "open"
+          },
+          {
+            "ref": "G2",
+            "r": 1,
+            "c": 6,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "B3",
+            "r": 2,
+            "c": 1,
+            "value": "Owner column holds a person, not a team",
+            "kind": "conflict",
+            "existing": "Legal review of tax table"
+          },
+          {
+            "ref": "F3",
+            "r": 2,
+            "c": 5,
+            "value": "decided",
+            "kind": "conflict",
+            "existing": "blocked"
+          },
+          {
+            "ref": "G3",
+            "r": 2,
+            "c": 6,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "conflict",
+            "existing": "buy an hour"
+          },
+          {
+            "ref": "B4",
+            "r": 3,
+            "c": 1,
+            "value": "Receipt OCR accuracy is unmeasured",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "C4",
+            "r": 3,
+            "c": 2,
+            "value": "Anna Moreno",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "F4",
+            "r": 3,
+            "c": 5,
+            "value": "blocked",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "G4",
+            "r": 3,
+            "c": 6,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          }
+        ],
+        "conflicts": [
+          "B2",
+          "C2",
+          "D2",
+          "F2",
+          "B3",
+          "F3",
+          "G3"
+        ],
+        "field_order": [
+          {
+            "c": 1,
+            "field": "task"
+          },
+          {
+            "c": 2,
+            "field": "owner"
+          },
+          {
+            "c": 3,
+            "field": "due"
+          },
+          {
+            "c": 5,
+            "field": "status"
+          },
+          {
+            "c": 6,
+            "field": "notes"
+          }
+        ],
+        "insert_at": null,
+        "count": 3,
+        "applied": [
+          [
+            "ID",
+            "Task",
+            "Owner",
+            "Due",
+            "Days left",
+            "Status",
+            "Notes"
+          ],
+          [
+            "T-301",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
+            "3 Oct",
+            "18",
+            "open",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "T-302",
+            "Owner column holds a person, not a team",
+            "product",
+            "3 Oct",
+            "11",
+            "decided",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "",
+            "Receipt OCR accuracy is unmeasured",
+            "Anna Moreno",
+            "",
+            "",
+            "blocked",
+            "Platform squad sync · 22 Sep"
+          ]
+        ]
+      },
+      "insert": {
+        "cells": [
+          "B2",
+          "C2",
+          "D2",
+          "F2",
+          "G2",
+          "B3",
+          "F3",
+          "G3",
+          "B4",
+          "C4",
+          "F4",
+          "G4"
+        ],
+        "writes": [
+          {
+            "ref": "B2",
+            "r": 1,
+            "c": 1,
+            "value": "Mirror OpenRates before launch",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "C2",
+            "r": 1,
+            "c": 2,
+            "value": "Daniel Okafor",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "D2",
+            "r": 1,
+            "c": 3,
+            "value": "3 Oct",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "F2",
+            "r": 1,
+            "c": 5,
+            "value": "open",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "G2",
+            "r": 1,
+            "c": 6,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "B3",
+            "r": 2,
+            "c": 1,
+            "value": "Owner column holds a person, not a team",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "F3",
+            "r": 2,
+            "c": 5,
+            "value": "decided",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "G3",
+            "r": 2,
+            "c": 6,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "B4",
+            "r": 3,
+            "c": 1,
+            "value": "Receipt OCR accuracy is unmeasured",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "C4",
+            "r": 3,
+            "c": 2,
+            "value": "Anna Moreno",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "F4",
+            "r": 3,
+            "c": 5,
+            "value": "blocked",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "G4",
+            "r": 3,
+            "c": 6,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          }
+        ],
+        "conflicts": [],
+        "field_order": [
+          {
+            "c": 1,
+            "field": "task"
+          },
+          {
+            "c": 2,
+            "field": "owner"
+          },
+          {
+            "c": 3,
+            "field": "due"
+          },
+          {
+            "c": 5,
+            "field": "status"
+          },
+          {
+            "c": 6,
+            "field": "notes"
+          }
+        ],
+        "insert_at": 1,
+        "count": 3,
+        "applied": [
+          [
+            "ID",
+            "Task",
+            "Owner",
+            "Due",
+            "Days left",
+            "Status",
+            "Notes"
+          ],
+          [
+            "",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
+            "3 Oct",
+            "",
+            "open",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "",
+            "Owner column holds a person, not a team",
+            "",
+            "",
+            "",
+            "decided",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "",
+            "Receipt OCR accuracy is unmeasured",
+            "Anna Moreno",
+            "",
+            "",
+            "blocked",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "T-301",
+            "Parse the vendor CSV exports",
+            "Daniel Okafor",
+            "10 Oct",
+            "18",
+            "open",
+            ""
+          ],
+          [
+            "T-302",
+            "Legal review of tax table",
+            "product",
+            "3 Oct",
+            "11",
+            "blocked",
+            "buy an hour"
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ]
+      }
+    }
+  }
+}

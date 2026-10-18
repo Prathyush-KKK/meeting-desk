@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": 403,
+    "message": "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.",
+    "status": "PERMISSION_DENIED"
+  }
+}

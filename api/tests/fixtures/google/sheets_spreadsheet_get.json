@@ -1,0 +1,42 @@
+{
+  "spreadsheetId": "1RoadmapSpreadsheetId0000000000000000000000",
+  "properties": {
+    "title": "Mobile App Product Roadmap"
+  },
+  "spreadsheetUrl": "https://docs.google.com/spreadsheets/d/1RoadmapSpreadsheetId0000000000000000000000/edit",
+  "sheets": [
+    {
+      "properties": {
+        "sheetId": 0,
+        "title": "P1 Resolve & Log",
+        "index": 0,
+        "gridProperties": {
+          "rowCount": 1000,
+          "columnCount": 26
+        }
+      }
+    },
+    {
+      "properties": {
+        "sheetId": 1487211930,
+        "title": "Decisions",
+        "index": 1,
+        "gridProperties": {
+          "rowCount": 120,
+          "columnCount": 12
+        }
+      }
+    },
+    {
+      "properties": {
+        "sheetId": 22,
+        "title": "Tiny",
+        "index": 2,
+        "gridProperties": {
+          "rowCount": 30,
+          "columnCount": 8
+        }
+      }
+    }
+  ]
+}

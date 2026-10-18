@@ -1,0 +1,77 @@
+# Meeting Desk - one image: the API, the built SPA it serves, and the job worker.
+#
+# Why one image and not two: main.py already mounts `WEB_DIST` at "/" with an SPA fallback,
+# so the API is the web server. A second nginx image would mean a second thing to
+# version, a second ingress path and a CORS exception for the session cookie, and would buy
+# nothing - the SPA is 420 kB of static files. deploy/Dockerfile.web keeps the nginx route alive
+# for a split-origin deployment; it is not what the chart deploys.
+#
+# Three stages: the web build (node + pnpm), the Python build (a venv with the wheels), and a slim
+# runtime that carries neither toolchain. Runs as a non-root user with a read-only root filesystem
+# (the chart sets that; /tmp is a volume).
+
+# --- 1. the web app ------------------------------------------------------------------------------
+FROM node:22-alpine AS web
+WORKDIR /src/web
+RUN corepack enable
+# The lockfile first, so a source-only change does not reinstall the world.
+COPY web/package.json web/pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+COPY web/ ./
+RUN pnpm run build          # writes /src/web/dist
+
+# --- 2. the Python environment -------------------------------------------------------------------
+FROM python:3.12-slim AS build
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+WORKDIR /src
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+COPY api/pyproject.toml ./pyproject.toml
+COPY api/app ./app
+# `.` rather than `.[llm]`: the Vertex, Bedrock and Anthropic SDKs are extras, all imported
+# lazily. Build with `--build-arg EXTRAS='[llm]'` for an image that can run FAKE_LLM=0.
+ARG EXTRAS=""
+RUN pip install --no-cache-dir ".${EXTRAS}"
+
+# --- 3. the runtime ------------------------------------------------------------------------------
+FROM python:3.12-slim AS runtime
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/opt/venv/bin:$PATH" \
+    WEB_DIST=/srv/web/dist \
+    METRICS_PORT=9464 \
+    TZ=UTC
+
+# A fixed uid so the chart's runAsUser: 10001 matches the files this image owns.
+RUN groupadd --gid 10001 app \
+ && useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin app
+
+WORKDIR /srv/api
+
+COPY --from=build /opt/venv /opt/venv
+COPY api/app ./app
+COPY api/alembic.ini ./alembic.ini
+COPY api/alembic ./alembic
+# The sheet fixtures are what the in-memory Google is built from (FAKE_GOOGLE=1); they are small
+# and make the image runnable with no credentials, which is how docker-compose and a smoke test
+# start it.
+COPY api/tests/fixtures/sheets ./tests/fixtures/sheets
+COPY --from=web /src/web/dist /srv/web/dist
+
+USER 10001:10001
+
+# 8000: the API and the SPA (the only port the Service publishes as `http`).
+# 9464: /metrics, served by the second ASGI app in app/telemetry/server.py. Named `metrics` in the
+#       chart and never routed through the ingress.
+EXPOSE 8000 9464
+
+# The readiness probe is /healthz; this is the same check for `docker run` and compose.
+HEALTHCHECK --interval=15s --timeout=3s --start-period=20s --retries=3 \
+  CMD ["python", "-c", "import urllib.request,sys;sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2).status == 200 else 1)"]
+
+# One uvicorn process per container on purpose: the metrics server binds METRICS_PORT inside the
+# process, so `--workers N` would have N processes fighting over it. Scale with replicas.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--no-access-log"]

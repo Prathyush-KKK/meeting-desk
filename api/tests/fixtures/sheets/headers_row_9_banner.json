@@ -1,0 +1,1851 @@
+{
+  "name": "headers_row_9_banner",
+  "description": "Headers on row 9 under four banner rows, with a stray note two rows below the table.",
+  "title": "P1 Resolve & Log",
+  "rows": [
+    [
+      "P1 Resolve & Log",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "Phase goal: all five capture flows ship; receipt scan is ours alone",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "Owner is the assignee, one person (decided 21 Sep)",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "ID",
+      "Task",
+      "Owner",
+      "Due",
+      "Priority",
+      "Effort",
+      "Status",
+      "Notes"
+    ],
+    [
+      "T-101",
+      "Photo capture flow",
+      "Anna Moreno",
+      "5 Sep",
+      "P0",
+      "M",
+      "done",
+      "v1.1"
+    ],
+    [
+      "T-102",
+      "Manual entry flow",
+      "Anna Moreno",
+      "5 Sep",
+      "P0",
+      "S",
+      "done",
+      ""
+    ],
+    [
+      "T-103",
+      "Card import flow",
+      "Sofia Silva",
+      "12 Sep",
+      "P1",
+      "S",
+      "done",
+      ""
+    ],
+    [
+      "T-104",
+      "Receipt scan flow",
+      "Daniel Okafor",
+      "12 Sep",
+      "P1",
+      "M",
+      "blocked",
+      "OCR accuracy unmeasured"
+    ],
+    [
+      "T-105",
+      "Northwind vendor verification call with Maya",
+      "Alex S",
+      "",
+      "P2",
+      "XS",
+      "open",
+      "from 15 Sep sync"
+    ],
+    [
+      "T-106",
+      "Mirror OpenRates before launch",
+      "Daniel Okafor",
+      "3 Oct",
+      "P0",
+      "S",
+      "open",
+      "503s past ~10 req/min"
+    ],
+    [
+      "T-107",
+      "Confirmation screen for receipt scanning",
+      "Daniel Okafor",
+      "3 Oct",
+      "P1",
+      "M",
+      "in progress",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "check dropdown on Status"
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  ],
+  "formulas": null,
+  "number_formats": null,
+  "dropdowns": {
+    "4": [
+      "P0",
+      "P1",
+      "P2",
+      "P3"
+    ],
+    "5": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "6": [
+      "open",
+      "in progress",
+      "blocked",
+      "done",
+      "dropped"
+    ]
+  },
+  "formula_cols": [],
+  "date_cols": [],
+  "points": [
+    {
+      "id": "p1",
+      "kind": "action",
+      "text": "Mirror OpenRates before launch",
+      "owner": "Daniel Okafor",
+      "due": "3 Oct",
+      "status": "open",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    },
+    {
+      "id": "p2",
+      "kind": "decision",
+      "text": "Owner column holds a person, not a team",
+      "owner": "",
+      "due": "",
+      "status": "decided",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    },
+    {
+      "id": "p3",
+      "kind": "risk",
+      "text": "Receipt OCR accuracy is unmeasured",
+      "owner": "Anna Moreno",
+      "due": "",
+      "status": "blocked",
+      "meeting_label": "Platform squad sync · 22 Sep"
+    }
+  ],
+  "fill": {
+    "anchor": {
+      "r": 10,
+      "c": 1
+    },
+    "write_keys": true
+  },
+  "with_hooks": null,
+  "expect": {
+    "layout": {
+      "header_row": 8,
+      "first_col": 0,
+      "last_col": 7,
+      "columns": {
+        "id": 0,
+        "task": 1,
+        "owner": 2,
+        "due": 3,
+        "priority": 4,
+        "effort": 5,
+        "status": 6,
+        "notes": 7
+      },
+      "key_col": 0,
+      "key_prefix": "T",
+      "last_table_row": 15,
+      "header_score": 8
+    },
+    "next_keys": [
+      "T-108",
+      "T-109",
+      "T-110"
+    ],
+    "append": {
+      "insert_at": 16,
+      "count": 3,
+      "keys": [
+        "T-108",
+        "T-109",
+        "T-110"
+      ],
+      "cells": [
+        "A17",
+        "B17",
+        "C17",
+        "D17",
+        "G17",
+        "H17",
+        "A18",
+        "B18",
+        "G18",
+        "H18",
+        "A19",
+        "B19",
+        "C19",
+        "G19",
+        "H19"
+      ],
+      "writes": [
+        {
+          "ref": "A17",
+          "r": 16,
+          "c": 0,
+          "value": "T-108",
+          "kind": "key",
+          "existing": null
+        },
+        {
+          "ref": "B17",
+          "r": 16,
+          "c": 1,
+          "value": "Mirror OpenRates before launch",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "C17",
+          "r": 16,
+          "c": 2,
+          "value": "Daniel Okafor",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "D17",
+          "r": 16,
+          "c": 3,
+          "value": "3 Oct",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "G17",
+          "r": 16,
+          "c": 6,
+          "value": "open",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "H17",
+          "r": 16,
+          "c": 7,
+          "value": "Platform squad sync · 22 Sep",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "A18",
+          "r": 17,
+          "c": 0,
+          "value": "T-109",
+          "kind": "key",
+          "existing": null
+        },
+        {
+          "ref": "B18",
+          "r": 17,
+          "c": 1,
+          "value": "Owner column holds a person, not a team",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "G18",
+          "r": 17,
+          "c": 6,
+          "value": "done",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "H18",
+          "r": 17,
+          "c": 7,
+          "value": "Platform squad sync · 22 Sep",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "A19",
+          "r": 18,
+          "c": 0,
+          "value": "T-110",
+          "kind": "key",
+          "existing": null
+        },
+        {
+          "ref": "B19",
+          "r": 18,
+          "c": 1,
+          "value": "Receipt OCR accuracy is unmeasured",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "C19",
+          "r": 18,
+          "c": 2,
+          "value": "Anna Moreno",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "G19",
+          "r": 18,
+          "c": 6,
+          "value": "blocked",
+          "kind": "new",
+          "existing": null
+        },
+        {
+          "ref": "H19",
+          "r": 18,
+          "c": 7,
+          "value": "Platform squad sync · 22 Sep",
+          "kind": "new",
+          "existing": null
+        }
+      ],
+      "moved": [
+        "H18"
+      ],
+      "applied": [
+        [
+          "P1 Resolve & Log",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "Phase goal: all five capture flows ship; receipt scan is ours alone",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "Owner is the assignee, one person (decided 21 Sep)",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "ID",
+          "Task",
+          "Owner",
+          "Due",
+          "Priority",
+          "Effort",
+          "Status",
+          "Notes"
+        ],
+        [
+          "T-101",
+          "Photo capture flow",
+          "Anna Moreno",
+          "5 Sep",
+          "P0",
+          "M",
+          "done",
+          "v1.1"
+        ],
+        [
+          "T-102",
+          "Manual entry flow",
+          "Anna Moreno",
+          "5 Sep",
+          "P0",
+          "S",
+          "done",
+          ""
+        ],
+        [
+          "T-103",
+          "Card import flow",
+          "Sofia Silva",
+          "12 Sep",
+          "P1",
+          "S",
+          "done",
+          ""
+        ],
+        [
+          "T-104",
+          "Receipt scan flow",
+          "Daniel Okafor",
+          "12 Sep",
+          "P1",
+          "M",
+          "blocked",
+          "OCR accuracy unmeasured"
+        ],
+        [
+          "T-105",
+          "Northwind vendor verification call with Maya",
+          "Alex S",
+          "",
+          "P2",
+          "XS",
+          "open",
+          "from 15 Sep sync"
+        ],
+        [
+          "T-106",
+          "Mirror OpenRates before launch",
+          "Daniel Okafor",
+          "3 Oct",
+          "P0",
+          "S",
+          "open",
+          "503s past ~10 req/min"
+        ],
+        [
+          "T-107",
+          "Confirmation screen for receipt scanning",
+          "Daniel Okafor",
+          "3 Oct",
+          "P1",
+          "M",
+          "in progress",
+          ""
+        ],
+        [
+          "T-108",
+          "Mirror OpenRates before launch",
+          "Daniel Okafor",
+          "3 Oct",
+          "",
+          "",
+          "open",
+          "Platform squad sync · 22 Sep"
+        ],
+        [
+          "T-109",
+          "Owner column holds a person, not a team",
+          "",
+          "",
+          "",
+          "",
+          "done",
+          "Platform squad sync · 22 Sep"
+        ],
+        [
+          "T-110",
+          "Receipt OCR accuracy is unmeasured",
+          "Anna Moreno",
+          "",
+          "",
+          "",
+          "blocked",
+          "Platform squad sync · 22 Sep"
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "check dropdown on Status"
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ]
+    },
+    "fill": {
+      "skip": {
+        "cells": [
+          "H11",
+          "H12"
+        ],
+        "writes": [
+          {
+            "ref": "B11",
+            "r": 10,
+            "c": 1,
+            "value": "Manual entry flow",
+            "kind": "conflict",
+            "existing": "Manual entry flow"
+          },
+          {
+            "ref": "C11",
+            "r": 10,
+            "c": 2,
+            "value": "Anna Moreno",
+            "kind": "conflict",
+            "existing": "Anna Moreno"
+          },
+          {
+            "ref": "D11",
+            "r": 10,
+            "c": 3,
+            "value": "5 Sep",
+            "kind": "conflict",
+            "existing": "5 Sep"
+          },
+          {
+            "ref": "G11",
+            "r": 10,
+            "c": 6,
+            "value": "done",
+            "kind": "conflict",
+            "existing": "done"
+          },
+          {
+            "ref": "H11",
+            "r": 10,
+            "c": 7,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A11",
+            "r": 10,
+            "c": 0,
+            "value": "T-102",
+            "kind": "conflict",
+            "existing": "T-102"
+          },
+          {
+            "ref": "B12",
+            "r": 11,
+            "c": 1,
+            "value": "Card import flow",
+            "kind": "conflict",
+            "existing": "Card import flow"
+          },
+          {
+            "ref": "G12",
+            "r": 11,
+            "c": 6,
+            "value": "done",
+            "kind": "conflict",
+            "existing": "done"
+          },
+          {
+            "ref": "H12",
+            "r": 11,
+            "c": 7,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A12",
+            "r": 11,
+            "c": 0,
+            "value": "T-103",
+            "kind": "conflict",
+            "existing": "T-103"
+          },
+          {
+            "ref": "B13",
+            "r": 12,
+            "c": 1,
+            "value": "Receipt scan flow",
+            "kind": "conflict",
+            "existing": "Receipt scan flow"
+          },
+          {
+            "ref": "C13",
+            "r": 12,
+            "c": 2,
+            "value": "Daniel Okafor",
+            "kind": "conflict",
+            "existing": "Daniel Okafor"
+          },
+          {
+            "ref": "G13",
+            "r": 12,
+            "c": 6,
+            "value": "blocked",
+            "kind": "conflict",
+            "existing": "blocked"
+          },
+          {
+            "ref": "H13",
+            "r": 12,
+            "c": 7,
+            "value": "OCR accuracy unmeasured",
+            "kind": "conflict",
+            "existing": "OCR accuracy unmeasured"
+          },
+          {
+            "ref": "A13",
+            "r": 12,
+            "c": 0,
+            "value": "T-104",
+            "kind": "conflict",
+            "existing": "T-104"
+          }
+        ],
+        "conflicts": [
+          "B11",
+          "C11",
+          "D11",
+          "G11",
+          "A11",
+          "B12",
+          "G12",
+          "A12",
+          "B13",
+          "C13",
+          "G13",
+          "H13",
+          "A13"
+        ],
+        "field_order": [
+          {
+            "c": 1,
+            "field": "task"
+          },
+          {
+            "c": 2,
+            "field": "owner"
+          },
+          {
+            "c": 3,
+            "field": "due"
+          },
+          {
+            "c": 4,
+            "field": "priority"
+          },
+          {
+            "c": 5,
+            "field": "effort"
+          },
+          {
+            "c": 6,
+            "field": "status"
+          },
+          {
+            "c": 7,
+            "field": "notes"
+          }
+        ],
+        "insert_at": null,
+        "count": 3,
+        "applied": [
+          [
+            "P1 Resolve & Log",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "Phase goal: all five capture flows ship; receipt scan is ours alone",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "Owner is the assignee, one person (decided 21 Sep)",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "ID",
+            "Task",
+            "Owner",
+            "Due",
+            "Priority",
+            "Effort",
+            "Status",
+            "Notes"
+          ],
+          [
+            "T-101",
+            "Photo capture flow",
+            "Anna Moreno",
+            "5 Sep",
+            "P0",
+            "M",
+            "done",
+            "v1.1"
+          ],
+          [
+            "T-102",
+            "Manual entry flow",
+            "Anna Moreno",
+            "5 Sep",
+            "P0",
+            "S",
+            "done",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "T-103",
+            "Card import flow",
+            "Sofia Silva",
+            "12 Sep",
+            "P1",
+            "S",
+            "done",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "T-104",
+            "Receipt scan flow",
+            "Daniel Okafor",
+            "12 Sep",
+            "P1",
+            "M",
+            "blocked",
+            "OCR accuracy unmeasured"
+          ],
+          [
+            "T-105",
+            "Northwind vendor verification call with Maya",
+            "Alex S",
+            "",
+            "P2",
+            "XS",
+            "open",
+            "from 15 Sep sync"
+          ],
+          [
+            "T-106",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
+            "3 Oct",
+            "P0",
+            "S",
+            "open",
+            "503s past ~10 req/min"
+          ],
+          [
+            "T-107",
+            "Confirmation screen for receipt scanning",
+            "Daniel Okafor",
+            "3 Oct",
+            "P1",
+            "M",
+            "in progress",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "check dropdown on Status"
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ]
+      },
+      "overwrite": {
+        "cells": [
+          "B11",
+          "C11",
+          "D11",
+          "G11",
+          "H11",
+          "A11",
+          "B12",
+          "H12",
+          "A12",
+          "B13",
+          "C13",
+          "H13",
+          "A13"
+        ],
+        "writes": [
+          {
+            "ref": "B11",
+            "r": 10,
+            "c": 1,
+            "value": "Mirror OpenRates before launch",
+            "kind": "conflict",
+            "existing": "Manual entry flow"
+          },
+          {
+            "ref": "C11",
+            "r": 10,
+            "c": 2,
+            "value": "Daniel Okafor",
+            "kind": "conflict",
+            "existing": "Anna Moreno"
+          },
+          {
+            "ref": "D11",
+            "r": 10,
+            "c": 3,
+            "value": "3 Oct",
+            "kind": "conflict",
+            "existing": "5 Sep"
+          },
+          {
+            "ref": "G11",
+            "r": 10,
+            "c": 6,
+            "value": "open",
+            "kind": "conflict",
+            "existing": "done"
+          },
+          {
+            "ref": "H11",
+            "r": 10,
+            "c": 7,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A11",
+            "r": 10,
+            "c": 0,
+            "value": "T-108",
+            "kind": "conflict",
+            "existing": "T-102"
+          },
+          {
+            "ref": "B12",
+            "r": 11,
+            "c": 1,
+            "value": "Owner column holds a person, not a team",
+            "kind": "conflict",
+            "existing": "Card import flow"
+          },
+          {
+            "ref": "G12",
+            "r": 11,
+            "c": 6,
+            "value": "done",
+            "kind": "conflict",
+            "existing": "done"
+          },
+          {
+            "ref": "H12",
+            "r": 11,
+            "c": 7,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A12",
+            "r": 11,
+            "c": 0,
+            "value": "T-109",
+            "kind": "conflict",
+            "existing": "T-103"
+          },
+          {
+            "ref": "B13",
+            "r": 12,
+            "c": 1,
+            "value": "Receipt OCR accuracy is unmeasured",
+            "kind": "conflict",
+            "existing": "Receipt scan flow"
+          },
+          {
+            "ref": "C13",
+            "r": 12,
+            "c": 2,
+            "value": "Anna Moreno",
+            "kind": "conflict",
+            "existing": "Daniel Okafor"
+          },
+          {
+            "ref": "G13",
+            "r": 12,
+            "c": 6,
+            "value": "blocked",
+            "kind": "conflict",
+            "existing": "blocked"
+          },
+          {
+            "ref": "H13",
+            "r": 12,
+            "c": 7,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "conflict",
+            "existing": "OCR accuracy unmeasured"
+          },
+          {
+            "ref": "A13",
+            "r": 12,
+            "c": 0,
+            "value": "T-110",
+            "kind": "conflict",
+            "existing": "T-104"
+          }
+        ],
+        "conflicts": [
+          "B11",
+          "C11",
+          "D11",
+          "G11",
+          "A11",
+          "B12",
+          "G12",
+          "A12",
+          "B13",
+          "C13",
+          "G13",
+          "H13",
+          "A13"
+        ],
+        "field_order": [
+          {
+            "c": 1,
+            "field": "task"
+          },
+          {
+            "c": 2,
+            "field": "owner"
+          },
+          {
+            "c": 3,
+            "field": "due"
+          },
+          {
+            "c": 4,
+            "field": "priority"
+          },
+          {
+            "c": 5,
+            "field": "effort"
+          },
+          {
+            "c": 6,
+            "field": "status"
+          },
+          {
+            "c": 7,
+            "field": "notes"
+          }
+        ],
+        "insert_at": null,
+        "count": 3,
+        "applied": [
+          [
+            "P1 Resolve & Log",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "Phase goal: all five capture flows ship; receipt scan is ours alone",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "Owner is the assignee, one person (decided 21 Sep)",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "ID",
+            "Task",
+            "Owner",
+            "Due",
+            "Priority",
+            "Effort",
+            "Status",
+            "Notes"
+          ],
+          [
+            "T-101",
+            "Photo capture flow",
+            "Anna Moreno",
+            "5 Sep",
+            "P0",
+            "M",
+            "done",
+            "v1.1"
+          ],
+          [
+            "T-108",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
+            "3 Oct",
+            "P0",
+            "S",
+            "open",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "T-109",
+            "Owner column holds a person, not a team",
+            "Sofia Silva",
+            "12 Sep",
+            "P1",
+            "S",
+            "done",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "T-110",
+            "Receipt OCR accuracy is unmeasured",
+            "Anna Moreno",
+            "12 Sep",
+            "P1",
+            "M",
+            "blocked",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "T-105",
+            "Northwind vendor verification call with Maya",
+            "Alex S",
+            "",
+            "P2",
+            "XS",
+            "open",
+            "from 15 Sep sync"
+          ],
+          [
+            "T-106",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
+            "3 Oct",
+            "P0",
+            "S",
+            "open",
+            "503s past ~10 req/min"
+          ],
+          [
+            "T-107",
+            "Confirmation screen for receipt scanning",
+            "Daniel Okafor",
+            "3 Oct",
+            "P1",
+            "M",
+            "in progress",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "check dropdown on Status"
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ]
+      },
+      "insert": {
+        "cells": [
+          "B11",
+          "C11",
+          "D11",
+          "G11",
+          "H11",
+          "A11",
+          "B12",
+          "G12",
+          "H12",
+          "A12",
+          "B13",
+          "C13",
+          "G13",
+          "H13",
+          "A13"
+        ],
+        "writes": [
+          {
+            "ref": "B11",
+            "r": 10,
+            "c": 1,
+            "value": "Mirror OpenRates before launch",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "C11",
+            "r": 10,
+            "c": 2,
+            "value": "Daniel Okafor",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "D11",
+            "r": 10,
+            "c": 3,
+            "value": "3 Oct",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "G11",
+            "r": 10,
+            "c": 6,
+            "value": "open",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "H11",
+            "r": 10,
+            "c": 7,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A11",
+            "r": 10,
+            "c": 0,
+            "value": "T-108",
+            "kind": "key",
+            "existing": null
+          },
+          {
+            "ref": "B12",
+            "r": 11,
+            "c": 1,
+            "value": "Owner column holds a person, not a team",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "G12",
+            "r": 11,
+            "c": 6,
+            "value": "done",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "H12",
+            "r": 11,
+            "c": 7,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A12",
+            "r": 11,
+            "c": 0,
+            "value": "T-109",
+            "kind": "key",
+            "existing": null
+          },
+          {
+            "ref": "B13",
+            "r": 12,
+            "c": 1,
+            "value": "Receipt OCR accuracy is unmeasured",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "C13",
+            "r": 12,
+            "c": 2,
+            "value": "Anna Moreno",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "G13",
+            "r": 12,
+            "c": 6,
+            "value": "blocked",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "H13",
+            "r": 12,
+            "c": 7,
+            "value": "Platform squad sync · 22 Sep",
+            "kind": "new",
+            "existing": null
+          },
+          {
+            "ref": "A13",
+            "r": 12,
+            "c": 0,
+            "value": "T-110",
+            "kind": "key",
+            "existing": null
+          }
+        ],
+        "conflicts": [],
+        "field_order": [
+          {
+            "c": 1,
+            "field": "task"
+          },
+          {
+            "c": 2,
+            "field": "owner"
+          },
+          {
+            "c": 3,
+            "field": "due"
+          },
+          {
+            "c": 4,
+            "field": "priority"
+          },
+          {
+            "c": 5,
+            "field": "effort"
+          },
+          {
+            "c": 6,
+            "field": "status"
+          },
+          {
+            "c": 7,
+            "field": "notes"
+          }
+        ],
+        "insert_at": 10,
+        "count": 3,
+        "applied": [
+          [
+            "P1 Resolve & Log",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "Phase goal: all five capture flows ship; receipt scan is ours alone",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "Owner is the assignee, one person (decided 21 Sep)",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "ID",
+            "Task",
+            "Owner",
+            "Due",
+            "Priority",
+            "Effort",
+            "Status",
+            "Notes"
+          ],
+          [
+            "T-101",
+            "Photo capture flow",
+            "Anna Moreno",
+            "5 Sep",
+            "P0",
+            "M",
+            "done",
+            "v1.1"
+          ],
+          [
+            "T-108",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
+            "3 Oct",
+            "",
+            "",
+            "open",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "T-109",
+            "Owner column holds a person, not a team",
+            "",
+            "",
+            "",
+            "",
+            "done",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "T-110",
+            "Receipt OCR accuracy is unmeasured",
+            "Anna Moreno",
+            "",
+            "",
+            "",
+            "blocked",
+            "Platform squad sync · 22 Sep"
+          ],
+          [
+            "T-102",
+            "Manual entry flow",
+            "Anna Moreno",
+            "5 Sep",
+            "P0",
+            "S",
+            "done",
+            ""
+          ],
+          [
+            "T-103",
+            "Card import flow",
+            "Sofia Silva",
+            "12 Sep",
+            "P1",
+            "S",
+            "done",
+            ""
+          ],
+          [
+            "T-104",
+            "Receipt scan flow",
+            "Daniel Okafor",
+            "12 Sep",
+            "P1",
+            "M",
+            "blocked",
+            "OCR accuracy unmeasured"
+          ],
+          [
+            "T-105",
+            "Northwind vendor verification call with Maya",
+            "Alex S",
+            "",
+            "P2",
+            "XS",
+            "open",
+            "from 15 Sep sync"
+          ],
+          [
+            "T-106",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
+            "3 Oct",
+            "P0",
+            "S",
+            "open",
+            "503s past ~10 req/min"
+          ],
+          [
+            "T-107",
+            "Confirmation screen for receipt scanning",
+            "Daniel Okafor",
+            "3 Oct",
+            "P1",
+            "M",
+            "in progress",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "check dropdown on Status"
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ]
+      }
+    }
+  }
+}

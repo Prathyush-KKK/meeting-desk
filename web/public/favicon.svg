@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Meeting Desk">
+  <rect width="64" height="64" rx="14" fill="#111"/>
+  <path d="M15 21.5l4 4 7-7.5" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M15 36.5l4 4 7-7.5" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="31" y="19" width="19" height="5" rx="2.5" fill="#fff"/>
+  <rect x="31" y="34" width="19" height="5" rx="2.5" fill="#fff"/>
+  <rect x="15" y="47" width="35" height="5" rx="2.5" fill="#6b7280"/>
+</svg>
