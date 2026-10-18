@@ -105,7 +105,9 @@ class AnthropicExtractionProvider:
             usage = {**usage_from(response), "attempts": attempt + 1}
             stop = getattr(response, "stop_reason", "") or ""
             if stop == "refusal":
-                raise ExtractionError("Claude declined to extract these notes (stop_reason=refusal).")
+                # An answer, not an outage: these notes were declined, others will not be. Kept off
+                # the breaker so a run of declined notes cannot shut extraction off for everyone.
+                raise _refusal("Claude declined to extract these notes (stop_reason=refusal).")
             try:
                 output = parse_output(answer_text(response))
             except InvalidModelOutput as exc:

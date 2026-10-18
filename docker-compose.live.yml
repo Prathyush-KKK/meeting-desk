@@ -55,7 +55,9 @@ services:
       JOBS_ENABLED: "0" # extraction runs inline; the Doc re-check and token health run from Admin
       # LLM credentials: from .env, or from the shell that runs the script (an empty value counts
       # as unset in the app). An OpenAI-compatible key (the URL and model come from .env), Claude, or Bedrock ...
-      LLM_API_KEY: ${LLM_API_KEY:-}
+      # OPENAI_API_KEY is accepted too (scripts/live.sh does): an empty LLM_API_KEY here would
+      # otherwise shadow it in the app.
+      LLM_API_KEY: ${LLM_API_KEY:-${OPENAI_API_KEY:-}}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       # ... Bedrock's API key on its OpenAI-compatible endpoint ...
       AWS_BEARER_TOKEN_BEDROCK: ${AWS_BEARER_TOKEN_BEDROCK:-}

@@ -10,7 +10,7 @@ import { ExtractionLines, TransferLines } from "@/components/History";
 import { cn } from "@/lib/utils";
 import { useCloseOnBack } from "@/lib/overlay";
 import { useAutoGrow } from "@/lib/autogrow";
-import { ago, displayTimeZone, fmtDate, mergeWorkstreams, plural, zoneLabel } from "@/lib/display";
+import { ago, displayTimeZone, displayToday as today, fmtDate, mergeWorkstreams, plural, zoneLabel } from "@/lib/display";
 import { parseAttendees } from "@/lib/attendees";
 import {
   useCaptureCalendarEvent,
@@ -35,7 +35,6 @@ interface Props {
   onOpenStep: (meetingId: string, step: "notes" | "points") => void;
 }
 
-const today = () => new Date().toISOString().slice(0, 10);
 
 /** One empty list while the meetings load, so the memos below stay put. */
 const NO_MEETINGS: MeetingItem[] = [];

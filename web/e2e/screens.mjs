@@ -201,7 +201,7 @@ async function main() {
   const browser = await chromium.launch({ headless: true, executablePath: EXECUTABLE });
 
   // --- the fake world, plus two meetings of our own ------------------------------------------------
-  const long = await api("POST", "/meetings/manual", {
+  await api("POST", "/meetings/manual", {
     title: LONG_TITLE,
     date: "2026-09-22",
     start: "15:00",

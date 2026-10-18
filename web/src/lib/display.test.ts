@@ -2,7 +2,7 @@
 // tests hold whatever zone the machine running them is in: the instant is fixed, the answer must be IST.
 
 import { describe, expect, it } from "vitest";
-import { clip, dayGroup, fmtClock, fmtDate, fmtStamp, localToday, meetingLabel, plural, transferSheet } from "./display";
+import { clip, dayGroup, displayToday, fmtClock, fmtDate, fmtStamp, meetingLabel, plural, transferSheet } from "./display";
 
 describe("times and dates", () => {
   it("shows an instant as Asia/Kolkata wall-clock time", () => {
@@ -29,9 +29,10 @@ describe("times and dates", () => {
 });
 
 describe("the meeting list's day groups", () => {
-  it("reads today off the local calendar, not UTC", () => {
-    expect(localToday(new Date(2026, 8, 22, 0, 30))).toBe("2026-09-22");
-    expect(localToday(new Date(2026, 0, 5, 23, 59))).toBe("2026-01-05");
+  it("reads today off the display zone's calendar, not the machine's or UTC", () => {
+    // The display zone (Asia/Kolkata in the tests) decides, whatever zone the machine is in.
+    expect(displayToday(new Date(Date.UTC(2026, 8, 21, 19, 0)))).toBe("2026-09-22"); // 00:30 there
+    expect(displayToday(new Date(Date.UTC(2026, 0, 5, 18, 0)))).toBe("2026-01-05"); // 23:30 there
   });
 
   it("puts a meeting before, on or after today, and one with no date in Earlier", () => {

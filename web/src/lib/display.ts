@@ -121,13 +121,16 @@ export function clip(text: string, max: number): string {
 }
 
 /**
- * Today as YYYY-MM-DD on this machine's calendar. Not toISOString: that is UTC, and east of UTC
- * it is still yesterday there for the first hours of the day.
+ * Today as YYYY-MM-DD in the display zone - the calendar the meeting dates from the API are on.
+ * Not the browser's calendar, and not toISOString (UTC): around midnight either can be a day off.
  */
-export function localToday(now: Date = new Date()): string {
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${now.getFullYear()}-${m}-${d}`;
+export function displayToday(now: Date = new Date()): string {
+  try {
+    // en-CA writes dates as YYYY-MM-DD.
+    return new Intl.DateTimeFormat("en-CA", { timeZone: displayZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+  } catch {
+    return now.toISOString().slice(0, 10);
+  }
 }
 
 export type DayGroup = "upcoming" | "today" | "earlier";

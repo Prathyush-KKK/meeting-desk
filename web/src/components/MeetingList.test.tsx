@@ -168,7 +168,7 @@ describe("MeetingList groups", () => {
     // Only the clock: user-event needs real timers.
     vi.useFakeTimers({ toFake: ["Date"] });
     const [y, m, d] = date.split("-").map(Number);
-    vi.setSystemTime(new Date(y, m - 1, d, 0, 30)); // 00:30 local: in IST, UTC is still the day before
+    vi.setSystemTime(new Date(Date.UTC(y, m - 1, d - 1, 19, 0))); // 00:30 in the display zone; UTC is still the day before
   };
 
   it("splits the rows into Upcoming, Today and Earlier, keeping the order inside each", () => {

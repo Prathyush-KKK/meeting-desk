@@ -30,7 +30,7 @@ from app.extract.openai_compat import (
 from app.extract.parse import InvalidModelOutput
 from app.extract.provider import ExtractionContext, ExtractionError
 from app.telemetry.metrics import metrics
-from app.telemetry.providers import ANTHROPIC, OPENAI
+from app.telemetry.providers import ANTHROPIC, OPENAI, provider_telemetry
 
 LLM = Path(__file__).parent / "fixtures" / "llm"
 FIXTURE = json.loads((LLM / "bedrock_openai_roadmap_review.json").read_text())
@@ -200,6 +200,21 @@ def test_anthropic_a_refusal_is_an_error_not_an_empty_result() -> None:
     s = settings(extraction_provider="anthropic", anthropic_api_key="sk-ant-test")
     with pytest.raises(ExtractionError, match="refusal"):
         AnthropicExtractionProvider(s, client=client).extract(FIXTURE["notes"], CONTEXT)
+
+
+def test_anthropic_refusals_never_open_the_breaker() -> None:
+    """Declined notes are answers: a run of them must not shut Claude off for everyone else."""
+    client, _ = stub_client(claude_answer("", stop="refusal"))
+    s = settings(extraction_provider="anthropic", anthropic_api_key="sk-ant-test")
+    provider = AnthropicExtractionProvider(s, client=client)
+    for _ in range(8):
+        with pytest.raises(ExtractionError):
+            provider.extract(FIXTURE["notes"], CONTEXT)
+    assert provider_telemetry().breakers[ANTHROPIC].state == "closed"
+    errors = metrics().registry.get_sample_value(
+        "external_provider_requests_total", {"provider": ANTHROPIC, "op": "messages_create", "outcome": "error"}
+    )
+    assert errors == 8.0
 
 
 def test_anthropic_without_a_key_says_so_before_any_call() -> None:

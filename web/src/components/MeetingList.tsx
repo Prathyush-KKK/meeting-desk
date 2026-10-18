@@ -2,7 +2,7 @@ import type { MouseEvent } from "react";
 import { Eye, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { dayGroup, fmtDate, localToday, plural, type DayGroup } from "@/lib/display";
+import { dayGroup, displayToday, fmtDate, plural, type DayGroup } from "@/lib/display";
 import type { MeetingItem } from "@/api/types";
 
 const STEP_TEXT: Record<string, string> = {
@@ -53,7 +53,7 @@ function MetaLink({ label, testId, children, onClick }: { label: string; testId:
 export function MeetingList({ items, selectedKey, onSelect, onOpen, onContinue, onOpenNotes, onOpenPoints }: Props) {
   // The calendar window runs 30 days back and 14 ahead, so the list says which side of today a
   // meeting is on. Each group keeps the API's order.
-  const today = localToday();
+  const today = displayToday();
   const groups = GROUPS.map((g) => ({ ...g, items: items.filter((m) => dayGroup(m.date, today) === g.key) })).filter((g) => g.items.length);
 
   const row = (m: MeetingItem) => {
