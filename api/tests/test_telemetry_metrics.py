@@ -50,8 +50,8 @@ def test_the_metrics_app_serves_the_six_required_names_and_app_build_info() -> N
 def test_the_six_carry_samples_once_the_app_has_done_some_work(client: TestClient) -> None:
     from tests.conftest import saved_meeting_id
 
-    meeting_id = saved_meeting_id(client, "Nutrition roadmap review")
-    client.post("/notes/paste", json={"meeting_id": meeting_id, "text": "Ansul S: send the deck by Friday"})
+    meeting_id = saved_meeting_id(client, "Mobile roadmap review")
+    client.post("/notes/paste", json={"meeting_id": meeting_id, "text": "Alex S: send the deck by Friday"})
     client.post(f"/meetings/{meeting_id}/extract")
     body = metrics_client().get("/metrics").text
     lines = [line for line in body.splitlines() if not line.startswith("#")]
@@ -165,8 +165,8 @@ def test_last_success_is_absent_until_something_succeeds() -> None:
 def test_a_background_job_records_its_name_and_outcome(client: TestClient) -> None:
     from tests.conftest import saved_meeting_id
 
-    meeting_id = saved_meeting_id(client, "Nutrition roadmap review")
-    client.post("/notes/paste", json={"meeting_id": meeting_id, "text": "Ansul S: send the deck by Friday"})
+    meeting_id = saved_meeting_id(client, "Mobile roadmap review")
+    client.post("/notes/paste", json={"meeting_id": meeting_id, "text": "Alex S: send the deck by Friday"})
     client.post(f"/meetings/{meeting_id}/extract")
     assert _job_counter("extract", "success") >= 1
     assert _gauge("background_job_last_success_timestamp_seconds", {"job_name": "extract"}) > 0
@@ -209,7 +209,7 @@ def test_secrets_tokens_and_user_content_never_reach_a_log_line(tmp_path: Path) 
             authorization="Bearer ya29.secret",
             refresh_token="1//rt-secret",
             text="the whole meeting transcript",
-            email="someone@simpleo.ai",
+            email="someone@example.com",
             body={"points": ["..."]},
         )
     finally:
@@ -219,7 +219,7 @@ def test_secrets_tokens_and_user_content_never_reach_a_log_line(tmp_path: Path) 
     line = json.loads(stream.lines[-1])
     assert line["provider"] == "google_sheets"
     assert line["request_id"] == "rid-2"
-    for leak in ("ya29.secret", "1//rt-secret", "transcript", "someone@simpleo.ai", "points"):
+    for leak in ("ya29.secret", "1//rt-secret", "transcript", "someone@example.com", "points"):
         assert leak not in json.dumps(line)
 
 
@@ -302,8 +302,8 @@ def test_every_line_of_a_request_carries_its_route_not_only_the_last(client: Tes
     """
     from tests.conftest import saved_meeting_id
 
-    meeting_id = saved_meeting_id(client, "Nutrition roadmap review")
-    client.post("/notes/paste", json={"meeting_id": meeting_id, "text": "Ansul S: send the deck by Friday"})
+    meeting_id = saved_meeting_id(client, "Mobile roadmap review")
+    client.post("/notes/paste", json={"meeting_id": meeting_id, "text": "Alex S: send the deck by Friday"})
 
     stream = _Capture()
     configure_logging("INFO", stream)

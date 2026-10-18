@@ -14,8 +14,8 @@
     ],
     [
       "T-301",
-      "Parse CoFID vitamin sheets",
-      "Prathyush Kodhanpur",
+      "Parse the vendor CSV exports",
+      "Daniel Okafor",
       "10 Oct",
       "18",
       "open",
@@ -23,7 +23,7 @@
     ],
     [
       "T-302",
-      "Clinical review of RDA table",
+      "Legal review of tax table",
       "product",
       "3 Oct",
       "11",
@@ -52,8 +52,8 @@
     ],
     [
       "T-301",
-      "Parse CoFID vitamin sheets",
-      "Prathyush Kodhanpur",
+      "Parse the vendor CSV exports",
+      "Daniel Okafor",
       "10 Oct",
       "=DATEDIF(TODAY(),D2,\"D\")",
       "=IF(E2<0,\"overdue\",\"open\")",
@@ -61,7 +61,7 @@
     ],
     [
       "T-302",
-      "Clinical review of RDA table",
+      "Legal review of tax table",
       "product",
       "3 Oct",
       "=DATEDIF(TODAY(),D3,\"D\")",
@@ -89,8 +89,8 @@
     {
       "id": "p1",
       "kind": "action",
-      "text": "Mirror Open Food Facts before launch",
-      "owner": "Prathyush Kodhanpur",
+      "text": "Mirror OpenRates before launch",
+      "owner": "Daniel Okafor",
       "due": "3 Oct",
       "status": "open",
       "meeting_label": "Platform squad sync · 22 Sep"
@@ -107,8 +107,8 @@
     {
       "id": "p3",
       "kind": "risk",
-      "text": "Photo portion accuracy is unmeasured",
-      "owner": "Anushka Mohanty",
+      "text": "Receipt OCR accuracy is unmeasured",
+      "owner": "Anna Moreno",
       "due": "",
       "status": "blocked",
       "meeting_label": "Platform squad sync · 22 Sep"
@@ -232,7 +232,7 @@
           "ref": "B4",
           "r": 3,
           "c": 1,
-          "value": "Mirror Open Food Facts before launch",
+          "value": "Mirror OpenRates before launch",
           "kind": "new",
           "existing": null
         },
@@ -240,7 +240,7 @@
           "ref": "C4",
           "r": 3,
           "c": 2,
-          "value": "Prathyush Kodhanpur",
+          "value": "Daniel Okafor",
           "kind": "new",
           "existing": null
         },
@@ -312,7 +312,7 @@
           "ref": "B6",
           "r": 5,
           "c": 1,
-          "value": "Photo portion accuracy is unmeasured",
+          "value": "Receipt OCR accuracy is unmeasured",
           "kind": "new",
           "existing": null
         },
@@ -320,7 +320,7 @@
           "ref": "C6",
           "r": 5,
           "c": 2,
-          "value": "Anushka Mohanty",
+          "value": "Anna Moreno",
           "kind": "new",
           "existing": null
         },
@@ -354,8 +354,8 @@
         ],
         [
           "T-301",
-          "Parse CoFID vitamin sheets",
-          "Prathyush Kodhanpur",
+          "Parse the vendor CSV exports",
+          "Daniel Okafor",
           "10 Oct",
           "18",
           "open",
@@ -363,7 +363,7 @@
         ],
         [
           "T-302",
-          "Clinical review of RDA table",
+          "Legal review of tax table",
           "product",
           "3 Oct",
           "11",
@@ -372,8 +372,8 @@
         ],
         [
           "T-303",
-          "Mirror Open Food Facts before launch",
-          "Prathyush Kodhanpur",
+          "Mirror OpenRates before launch",
+          "Daniel Okafor",
           "3 Oct",
           "",
           "open",
@@ -390,8 +390,8 @@
         ],
         [
           "T-305",
-          "Photo portion accuracy is unmeasured",
-          "Anushka Mohanty",
+          "Receipt OCR accuracy is unmeasured",
+          "Anna Moreno",
           "",
           "",
           "blocked",
@@ -422,17 +422,17 @@
             "ref": "B2",
             "r": 1,
             "c": 1,
-            "value": "Parse CoFID vitamin sheets",
+            "value": "Parse the vendor CSV exports",
             "kind": "conflict",
-            "existing": "Parse CoFID vitamin sheets"
+            "existing": "Parse the vendor CSV exports"
           },
           {
             "ref": "C2",
             "r": 1,
             "c": 2,
-            "value": "Prathyush Kodhanpur",
+            "value": "Daniel Okafor",
             "kind": "conflict",
-            "existing": "Prathyush Kodhanpur"
+            "existing": "Daniel Okafor"
           },
           {
             "ref": "D2",
@@ -462,9 +462,9 @@
             "ref": "B3",
             "r": 2,
             "c": 1,
-            "value": "Clinical review of RDA table",
+            "value": "Legal review of tax table",
             "kind": "conflict",
-            "existing": "Clinical review of RDA table"
+            "existing": "Legal review of tax table"
           },
           {
             "ref": "F3",
@@ -486,7 +486,7 @@
             "ref": "B4",
             "r": 3,
             "c": 1,
-            "value": "Photo portion accuracy is unmeasured",
+            "value": "Receipt OCR accuracy is unmeasured",
             "kind": "new",
             "existing": null
           },
@@ -494,7 +494,7 @@
             "ref": "C4",
             "r": 3,
             "c": 2,
-            "value": "Anushka Mohanty",
+            "value": "Anna Moreno",
             "kind": "new",
             "existing": null
           },
@@ -560,8 +560,8 @@
           ],
           [
             "T-301",
-            "Parse CoFID vitamin sheets",
-            "Prathyush Kodhanpur",
+            "Parse the vendor CSV exports",
+            "Daniel Okafor",
             "10 Oct",
             "18",
             "open",
@@ -569,7 +569,7 @@
           ],
           [
             "T-302",
-            "Clinical review of RDA table",
+            "Legal review of tax table",
             "product",
             "3 Oct",
             "11",
@@ -578,8 +578,8 @@
           ],
           [
             "",
-            "Photo portion accuracy is unmeasured",
-            "Anushka Mohanty",
+            "Receipt OCR accuracy is unmeasured",
+            "Anna Moreno",
             "",
             "",
             "blocked",
@@ -605,17 +605,17 @@
             "ref": "B2",
             "r": 1,
             "c": 1,
-            "value": "Mirror Open Food Facts before launch",
+            "value": "Mirror OpenRates before launch",
             "kind": "conflict",
-            "existing": "Parse CoFID vitamin sheets"
+            "existing": "Parse the vendor CSV exports"
           },
           {
             "ref": "C2",
             "r": 1,
             "c": 2,
-            "value": "Prathyush Kodhanpur",
+            "value": "Daniel Okafor",
             "kind": "conflict",
-            "existing": "Prathyush Kodhanpur"
+            "existing": "Daniel Okafor"
           },
           {
             "ref": "D2",
@@ -647,7 +647,7 @@
             "c": 1,
             "value": "Owner column holds a person, not a team",
             "kind": "conflict",
-            "existing": "Clinical review of RDA table"
+            "existing": "Legal review of tax table"
           },
           {
             "ref": "F3",
@@ -669,7 +669,7 @@
             "ref": "B4",
             "r": 3,
             "c": 1,
-            "value": "Photo portion accuracy is unmeasured",
+            "value": "Receipt OCR accuracy is unmeasured",
             "kind": "new",
             "existing": null
           },
@@ -677,7 +677,7 @@
             "ref": "C4",
             "r": 3,
             "c": 2,
-            "value": "Anushka Mohanty",
+            "value": "Anna Moreno",
             "kind": "new",
             "existing": null
           },
@@ -743,8 +743,8 @@
           ],
           [
             "T-301",
-            "Mirror Open Food Facts before launch",
-            "Prathyush Kodhanpur",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
             "3 Oct",
             "18",
             "open",
@@ -761,8 +761,8 @@
           ],
           [
             "",
-            "Photo portion accuracy is unmeasured",
-            "Anushka Mohanty",
+            "Receipt OCR accuracy is unmeasured",
+            "Anna Moreno",
             "",
             "",
             "blocked",
@@ -790,7 +790,7 @@
             "ref": "B2",
             "r": 1,
             "c": 1,
-            "value": "Mirror Open Food Facts before launch",
+            "value": "Mirror OpenRates before launch",
             "kind": "new",
             "existing": null
           },
@@ -798,7 +798,7 @@
             "ref": "C2",
             "r": 1,
             "c": 2,
-            "value": "Prathyush Kodhanpur",
+            "value": "Daniel Okafor",
             "kind": "new",
             "existing": null
           },
@@ -854,7 +854,7 @@
             "ref": "B4",
             "r": 3,
             "c": 1,
-            "value": "Photo portion accuracy is unmeasured",
+            "value": "Receipt OCR accuracy is unmeasured",
             "kind": "new",
             "existing": null
           },
@@ -862,7 +862,7 @@
             "ref": "C4",
             "r": 3,
             "c": 2,
-            "value": "Anushka Mohanty",
+            "value": "Anna Moreno",
             "kind": "new",
             "existing": null
           },
@@ -920,8 +920,8 @@
           ],
           [
             "",
-            "Mirror Open Food Facts before launch",
-            "Prathyush Kodhanpur",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
             "3 Oct",
             "",
             "open",
@@ -938,8 +938,8 @@
           ],
           [
             "",
-            "Photo portion accuracy is unmeasured",
-            "Anushka Mohanty",
+            "Receipt OCR accuracy is unmeasured",
+            "Anna Moreno",
             "",
             "",
             "blocked",
@@ -947,8 +947,8 @@
           ],
           [
             "T-301",
-            "Parse CoFID vitamin sheets",
-            "Prathyush Kodhanpur",
+            "Parse the vendor CSV exports",
+            "Daniel Okafor",
             "10 Oct",
             "18",
             "open",
@@ -956,7 +956,7 @@
           ],
           [
             "T-302",
-            "Clinical review of RDA table",
+            "Legal review of tax table",
             "product",
             "3 Oct",
             "11",

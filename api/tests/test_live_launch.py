@@ -1,4 +1,4 @@
-"""scripts/mac-launch.sh: the Bedrock checks accept the nutrition service's bearer form.
+"""scripts/live.sh: the Bedrock checks accept the Bedrock API key (bearer) form.
 
 The script runs for real in a scratch copy of the repo root, with ``docker`` and ``curl`` stubbed on
 PATH: the stub records the compose call and the ``EXTRAS`` it was built with, and ``curl`` answers
@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-SCRIPT = REPO / "scripts" / "mac-launch.sh"
+SCRIPT = REPO / "scripts" / "live.sh"
 
 BASE_URL = "https://bedrock-mantle.us-east-1.api.aws/openai/v1"
 TOKEN = "ABSKQmVkcm9ja0FQSUtleS10ZXN0LWtleQ=="
@@ -23,8 +23,8 @@ GEMMA = "google.gemma-4-26b-a4b"
 CLAUDE = "anthropic.claude-3-5-sonnet-20240620-v1:0"
 
 BASE_ENV = """\
-BOOTSTRAP_ADMINS=prathyush.kodhanpur@simpleo.ai
-GOOGLE_HOSTED_DOMAIN=simpleo.ai
+BOOTSTRAP_ADMINS=daniel.okafor@example.com
+GOOGLE_HOSTED_DOMAIN=example.com
 GOOGLE_CLIENT_ID=client-id
 GOOGLE_CLIENT_SECRET=client-secret
 SESSION_SECRET=already-generated-session-secret-value
@@ -43,7 +43,7 @@ exit 0
 def launch(tmp_path: Path, env_lines: str, shell: dict[str, str] | None = None) -> tuple[int, str, str, str]:
     root = tmp_path / "repo"
     (root / "scripts").mkdir(parents=True)
-    shutil.copy(SCRIPT, root / "scripts" / "mac-launch.sh")
+    shutil.copy(SCRIPT, root / "scripts" / "live.sh")
     (root / ".env").write_text(BASE_ENV + env_lines)
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
@@ -57,7 +57,7 @@ def launch(tmp_path: Path, env_lines: str, shell: dict[str, str] | None = None) 
     env = {"PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}", "HOME": str(tmp_path), "STUB_LOG": str(log)}
     env.update(shell or {})
     done = subprocess.run(
-        ["bash", str(root / "scripts" / "mac-launch.sh")],
+        ["bash", str(root / "scripts" / "live.sh")],
         env=env,
         capture_output=True,
         text=True,
@@ -75,7 +75,7 @@ def test_the_script_parses() -> None:
     assert subprocess.run(["bash", "-n", str(SCRIPT)], capture_output=True, check=False).returncode == 0
 
 
-def test_the_nutrition_bearer_form_is_accepted_without_the_boto3_extra(tmp_path: Path) -> None:
+def test_the_bearer_form_is_accepted_without_the_boto3_extra(tmp_path: Path) -> None:
     code, out, err, log = launch(
         tmp_path,
         "EXTRACTION_PROVIDER=bedrock\n"

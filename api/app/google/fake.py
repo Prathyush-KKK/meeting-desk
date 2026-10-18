@@ -12,6 +12,7 @@ import re
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from app import seed_data
 from app.google.interface import (
@@ -196,6 +197,7 @@ class FakeGoogle:
                 title=m["title"],
                 start_at=start,
                 end_at=seed_data.meeting_end(m),
+                timezone=start.tzinfo.key if isinstance(start.tzinfo, ZoneInfo) else "",
                 description=m["description"],
                 location=m["location"],
                 organizer_email=m["organizer"],
@@ -267,7 +269,7 @@ class FakeGoogle:
                     title=t["title"],
                     rows=t["rows"],
                     dropdowns=t.get("dropdowns"),
-                    protected_by="ansul.s@simpleo.ai" if t["sheet_id"] == "t4" else None,
+                    protected_by="alex.s@example.com" if t["sheet_id"] == "t4" else None,
                 )
                 for t in wb["tabs"]
             ]
@@ -306,8 +308,8 @@ class FakeGoogle:
             name="Planner Fixtures",
             url=f"https://docs.google.com/spreadsheets/d/{FIXTURE_SPREADSHEET_ID}",
             tabs=tabs,
-            editors=["prathyush.kodhanpur@simpleo.ai"],
-            readers=["prathyush.kodhanpur@simpleo.ai", "ansul.s@simpleo.ai"],
+            editors=["daniel.okafor@example.com"],
+            readers=["daniel.okafor@example.com", "alex.s@example.com"],
         )
 
     # --- calendar ---------------------------------------------------------------------------

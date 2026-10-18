@@ -1,6 +1,6 @@
 {
-  "documentId": "1qX9Lm3kNotesDocIdForNutrition",
-  "title": "Nutrition roadmap review - 2026/09/19 16:00 IST - Notes by Gemini",
+  "documentId": "1qX9Lm3kNotesDocIdForMobile",
+  "title": "Mobile roadmap review - 2026/09/19 16:00 IST - Notes by Gemini",
   "revisionId": "ALBJ4LtQx",
   "suggestionsViewMode": "SUGGESTIONS_INLINE",
   "tabs": [
@@ -89,7 +89,7 @@
                         "startIndex": 0,
                         "endIndex": 25,
                         "textRun": {
-                          "content": "Nutrition roadmap review\n",
+                          "content": "Mobile roadmap review\n",
                           "textStyle": {}
                         }
                       }
@@ -169,7 +169,7 @@
                         "startIndex": 0,
                         "endIndex": 92,
                         "textRun": {
-                          "content": "Weight data: the Open Food Facts mirror is missing portion weights for 40% of Indian items.\n",
+                          "content": "Weight data: the OpenRates mirror is missing portion weights for 40% of Indian items.\n",
                           "textStyle": {}
                         }
                       }
@@ -194,7 +194,7 @@
                         "startIndex": 0,
                         "endIndex": 64,
                         "textRun": {
-                          "content": "Anushka Mohanty will review the dataset for weight information.\n",
+                          "content": "Anna Moreno will review the dataset for currency information.\n",
                           "textStyle": {}
                         }
                       }
@@ -331,7 +331,7 @@
                                       "startIndex": 0,
                                       "endIndex": 8,
                                       "textRun": {
-                                        "content": "Ansul S\n",
+                                        "content": "Alex S\n",
                                         "textStyle": {}
                                       }
                                     }
@@ -378,7 +378,7 @@
                         "startIndex": 0,
                         "endIndex": 64,
                         "textRun": {
-                          "content": "Anushka Mohanty: Review dataset for weight information by 3 Oct\n",
+                          "content": "Anna Moreno: Review dataset for currency information by 3 Oct\n",
                           "textStyle": {}
                         }
                       }
@@ -403,7 +403,7 @@
                         "startIndex": 0,
                         "endIndex": 65,
                         "textRun": {
-                          "content": "Nishchay: Finish the alert emission standard v1.2 by end of week\n",
+                          "content": "Noah: Finish the alert emission standard v1.2 by end of week\n",
                           "textStyle": {}
                         }
                       }
@@ -430,8 +430,8 @@
                         "person": {
                           "personId": "kix.p1",
                           "personProperties": {
-                            "name": "Prathyush",
-                            "email": "prathyush.kodhanpur@simpleo.ai"
+                            "name": "Daniel",
+                            "email": "daniel.okafor@example.com"
                           }
                         }
                       },
@@ -439,7 +439,7 @@
                         "startIndex": 1,
                         "endIndex": 2,
                         "textRun": {
-                          "content": ": Mirror Open Food Facts before launch\n",
+                          "content": ": Mirror OpenRates before launch\n",
                           "textStyle": {}
                         }
                       }
@@ -602,7 +602,7 @@
                             "startIndex": 0,
                             "endIndex": 54,
                             "textRun": {
-                              "content": "00:00 Prathyush Kodhanpur: Let's look at the dataset.\n",
+                              "content": "00:00 Daniel Okafor: Let's look at the dataset.\n",
                               "textStyle": {}
                             }
                           }
@@ -622,7 +622,7 @@
                             "startIndex": 0,
                             "endIndex": 75,
                             "textRun": {
-                              "content": "00:41 Anushka Mohanty: I'll review it for weight information by the third.\n",
+                              "content": "00:41 Anna Moreno: I'll review it for currency information by the third.\n",
                               "textStyle": {}
                             }
                           }

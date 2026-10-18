@@ -9,16 +9,14 @@ from __future__ import annotations
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from app import seed_data
+from app import seed_data, tz
 from app.config import Settings
-
-IST = ZoneInfo("Asia/Kolkata")
 
 
 class Clock:
-    def __init__(self, fixed: datetime | None = None, tz: ZoneInfo = IST) -> None:
+    def __init__(self, fixed: datetime | None = None, zone: ZoneInfo | None = None) -> None:
         self._fixed = fixed
-        self.tz = tz
+        self.tz = zone or tz.display_zone()
 
     def now(self) -> datetime:
         return self._fixed if self._fixed is not None else datetime.now(self.tz)
@@ -32,5 +30,5 @@ class Clock:
 
 
 def build_clock(settings: Settings) -> Clock:
-    tz = ZoneInfo(settings.display_timezone)
-    return Clock(seed_data.now(), tz) if settings.fake_google else Clock(None, tz)
+    zone = tz.configure(settings.display_timezone)
+    return Clock(seed_data.now(), zone) if settings.fake_google else Clock(None, zone)

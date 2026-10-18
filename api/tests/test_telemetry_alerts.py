@@ -49,7 +49,7 @@ def tokens_in(text: str) -> set[str]:
 def test_the_chart_and_its_rules_are_there() -> None:
     assert (CHART / "Chart.yaml").is_file()
     assert (CHART / "values.yaml").is_file()
-    assert (CHART / "values-internal.yaml").is_file()
+    assert (CHART / "values-production.example.yaml").is_file()
     assert RULES.is_file()
 
 
@@ -129,7 +129,7 @@ def test_the_ingress_never_points_at_the_metrics_port() -> None:
 
 
 def test_no_secret_value_is_in_the_chart() -> None:
-    """Only Infisical paths. A literal key here would be a leak in git history."""
+    """Only secret-store paths. A literal key here would be a leak in git history."""
     for path in CHART.rglob("*.yaml"):
         text = path.read_text()
         assert "BEGIN PRIVATE KEY" not in text

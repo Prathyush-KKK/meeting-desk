@@ -1,6 +1,8 @@
-# HelloSIA Service Telemetry & Alert Signal Standard v1.2 - what Meeting Desk must emit
+# Telemetry - what Meeting Desk emits
 
-Condensed from the org standard (kiro-import/context/SIALET-ALERT-EMISSION-STANDARD.md). MUST items only.
+The metrics, logs and alert rules the service ships with, and the rules the code keeps so they stay
+useful: a separate metrics port, closed label sets, no user content anywhere. The README's
+"Telemetry" section maps each metric to the code that sets it.
 
 ## Metrics endpoint
 - `GET /metrics`, Prometheus text format, on a SEPARATE container port (not the app port), unauthenticated,

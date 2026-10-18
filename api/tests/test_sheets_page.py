@@ -12,7 +12,7 @@ def _tab(client: TestClient, workbook_id: str, sheet_id: str) -> dict:
 
 
 def _roadmap(client: TestClient) -> dict:
-    return workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    return workbook_by_name(client, "Mobile App Product Roadmap")
 
 
 # --- edits ----------------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ def test_saving_one_cell_writes_it_and_logs_the_edit(client: TestClient) -> None
     assert edits[0]["cell"] == "G14"
     assert edits[0]["before"] == before
     assert edits[0]["after"] == "in progress"
-    assert edits[0]["actor"] == "prathyush.kodhanpur@simpleo.ai"
+    assert edits[0]["actor"] == "daniel.okafor@example.com"
 
 
 def test_several_cells_go_in_one_batch(client: TestClient) -> None:
@@ -51,7 +51,7 @@ def test_several_cells_go_in_one_batch(client: TestClient) -> None:
             "workbook_id": workbook["id"],
             "sheet_id": "t1",
             "edits": [
-                {"cell": "C14", "before": tab["values"][13][2], "after": "Nishchay S"},
+                {"cell": "C14", "before": tab["values"][13][2], "after": "Noah S"},
                 {"cell": "D14", "before": tab["values"][13][3], "after": "30 Sep"},
             ],
         },
@@ -144,7 +144,7 @@ def test_add_row_from_a_form_lands_after_the_table(client: TestClient) -> None:
             "workbook_id": workbook["id"],
             "sheet_id": "t1",
             "region_hash": tab["region_hash"],
-            "values": {"Task": "Write the transfer runbook", "Owner": "Nishchay S", "Status": "open"},
+            "values": {"Task": "Write the transfer runbook", "Owner": "Noah S", "Status": "open"},
         },
     )
     assert response.status_code == 200, response.text
@@ -169,13 +169,13 @@ def test_add_row_above_a_clicked_row_lands_inside_the_section(client: TestClient
             "workbook_id": workbook["id"],
             "sheet_id": "t1",
             "region_hash": tab["region_hash"],
-            "values": {"Task": "Menu scan accuracy spike"},
+            "values": {"Task": "Receipt scan accuracy spike"},
             "position": {"mode": "above", "row": 11},
         },
     )
     assert response.status_code == 200
     values = response.json()["tab"]["values"]
-    assert values[11][1] == "Menu scan accuracy spike"
+    assert values[11][1] == "Receipt scan accuracy spike"
     assert values[12] == was_at_11
     assert len(values) == len(tab["values"]) + 1
 
@@ -199,7 +199,7 @@ def test_add_row_above_the_header_is_refused(client: TestClient) -> None:
 
 def test_add_row_from_a_point_transfers_it(client: TestClient) -> None:
     workbook = _roadmap(client)
-    meeting_id = meeting_by_title(client, "Nutrition roadmap review")["id"]
+    meeting_id = meeting_by_title(client, "Mobile roadmap review")["id"]
     point = client.get("/points", params={"meeting_id": meeting_id}).json()[0]
     tab = _tab(client, workbook["id"], "t1")
 
@@ -223,7 +223,7 @@ def test_add_row_from_a_point_transfers_it(client: TestClient) -> None:
 
 def test_a_deferred_point_can_be_added_as_a_row(client: TestClient) -> None:
     workbook = _roadmap(client)
-    meeting_id = meeting_by_title(client, "Nutrition roadmap review")["id"]
+    meeting_id = meeting_by_title(client, "Mobile roadmap review")["id"]
     point = client.get("/points", params={"meeting_id": meeting_id}).json()[0]
     client.post(f"/points/{point['id']}/defer")
     tab = _tab(client, workbook["id"], "t1")
@@ -283,7 +283,7 @@ def test_add_row_copies_formulas_and_skips_formula_columns(client: TestClient) -
             "workbook_id": workbook["id"],
             "sheet_id": "formula_col",
             "region_hash": tab["region_hash"],
-            "values": {"Task": "Mirror Open Food Facts", "Owner": "Prathyush Kodhanpur"},
+            "values": {"Task": "Mirror OpenRates", "Owner": "Daniel Okafor"},
             "position": {"mode": "above", "row": 2},
         },
     )

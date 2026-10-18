@@ -26,14 +26,14 @@ IST = ZoneInfo("Asia/Kolkata")
 LLM = Path(__file__).resolve().parent / "fixtures" / "llm"
 
 CONTEXT = ExtractionContext(
-    meeting_title="Nutrition roadmap review",
+    meeting_title="Mobile roadmap review",
     meeting_start=datetime(2026, 9, 19, 16, 0, tzinfo=IST),
     timezone="Asia/Kolkata",
-    workstream="Nutrition",
+    workstream="Mobile",
     attendees=[
-        {"name": "Prathyush Kodhanpur", "email": "prathyush.kodhanpur@simpleo.ai"},
-        {"name": "Anushka Mohanty", "email": "anushka.mohanty@simpleo.ai"},
-        {"name": "Nishchay S", "email": "nishchay.s@simpleo.ai"},
+        {"name": "Daniel Okafor", "email": "daniel.okafor@example.com"},
+        {"name": "Anna Moreno", "email": "anna.moreno@example.com"},
+        {"name": "Noah S", "email": "noah.s@example.com"},
     ],
 )
 
@@ -46,17 +46,17 @@ def recorded(name: str) -> dict[str, Any]:
 
 
 def test_the_prompt_carries_the_rules_the_context_and_the_notes_verbatim() -> None:
-    prompt = build_prompt("The Next Steps\nNishchay: finish the standard by Friday", CONTEXT)
+    prompt = build_prompt("The Next Steps\nNoah: finish the standard by Friday", CONTEXT)
     assert PROMPT_RULES.splitlines()[0] in prompt.system
     assert "Weight the Next steps section" in prompt.system
     assert "never invent" in prompt.system
-    assert "- title: Nutrition roadmap review" in prompt.user
+    assert "- title: Mobile roadmap review" in prompt.user
     assert "- held on: Saturday 19 September 2026, 16:00 (Asia/Kolkata)" in prompt.user
-    assert "- workstream: Nutrition" in prompt.user
-    assert "  - Anushka Mohanty" in prompt.user
+    assert "- workstream: Mobile" in prompt.user
+    assert "  - Anna Moreno" in prompt.user
     fence = prompt.delimiter
     assert prompt.user.endswith(
-        f"{fence}\nThe Next Steps\nNishchay: finish the standard by Friday\n{fence}"
+        f"{fence}\nThe Next Steps\nNoah: finish the standard by Friday\n{fence}"
     )
     assert prompt.text == f"{prompt.system}\n\n{prompt.user}"
 
@@ -79,9 +79,9 @@ def test_the_prompt_is_deterministic_and_capped() -> None:
 
 
 def test_clean_json_fenced_json_and_prose_around_json_all_parse() -> None:
-    payload = recorded("vertex_nutrition_review.json")["response"]["text"]
+    payload = recorded("vertex_roadmap_review.json")["response"]["text"]
     output = parse_output(payload)
-    assert [a.owner_text for a in output.action_items] == ["Anushka Mohanty", "Nishchay", "Prathyush"]
+    assert [a.owner_text for a in output.action_items] == ["Anna Moreno", "Noah", "Daniel"]
     assert output.action_items[0].status_hint == "open"
     assert output.action_items[1].status_hint is None
     assert output.total() == 7
@@ -167,13 +167,13 @@ def _vertex(responses: list[dict[str, Any]]) -> tuple[VertexExtractionProvider, 
         return model
 
     settings = Settings(
-        _env_file=None, fake_llm=False, extraction_provider="vertex", vertex_project="simpleo-prod"
+        _env_file=None, fake_llm=False, extraction_provider="vertex", vertex_project="my-gcp-project"
     )
     return VertexExtractionProvider(settings, model_factory=factory), model, made
 
 
-def test_vertex_calls_gemini_in_asia_south1_with_the_schema_and_temperature_zero() -> None:
-    fixture = recorded("vertex_nutrition_review.json")
+def test_vertex_calls_gemini_in_the_configured_location_with_the_schema_and_temperature_zero() -> None:
+    fixture = recorded("vertex_roadmap_review.json")
     provider, model, made = _vertex([fixture["response"]])
     result = provider.extract(fixture["notes"], CONTEXT)
 
@@ -182,11 +182,11 @@ def test_vertex_calls_gemini_in_asia_south1_with_the_schema_and_temperature_zero
     assert config["temperature"] == 0
     assert config["response_mime_type"] == "application/json"
     assert config["response_schema"] == EXTRACTION_JSON_SCHEMA
-    assert "Anushka Mohanty: Review dataset for weight information by 3 Oct" in model.calls[0]["prompt"]
+    assert "Anna Moreno: Review dataset for currency information by 3 Oct" in model.calls[0]["prompt"]
 
     assert result.provider == "vertex"
     assert result.model == "gemini-2.5-flash"
-    assert result.region == "asia-south1"
+    assert result.region == "us-central1"
     assert result.usage == {"input_tokens": 1412, "output_tokens": 388, "total_tokens": 1800, "attempts": 1}
     assert result.output.total() == 7
     assert result.output.decisions[0].statement == "The Owner column holds a person, not a team"
@@ -236,7 +236,7 @@ class RecordedBedrock:
 
 
 def test_bedrock_uses_converse_with_the_schema_as_a_forced_tool() -> None:
-    fixture = recorded("bedrock_nutrition_review.json")
+    fixture = recorded("bedrock_roadmap_review.json")
     client = RecordedBedrock([fixture["response"]])
     settings = Settings(
         _env_file=None,
@@ -254,12 +254,12 @@ def test_bedrock_uses_converse_with_the_schema_as_a_forced_tool() -> None:
     assert call["toolConfig"]["tools"][0]["toolSpec"]["inputSchema"] == {"json": EXTRACTION_JSON_SCHEMA}
     assert call["system"][0]["text"] == build_prompt("", CONTEXT).system
     assert (
-        "Nishchay: Finish the alert emission standard v1.2 by end of week"
+        "Noah: Finish the alert emission standard v1.2 by end of week"
         in call["messages"][0]["content"][0]["text"]
     )
 
     assert result.provider == "bedrock"
-    assert result.region == "ap-south-1"
+    assert result.region == "us-east-1"
     assert result.usage == {
         "input_tokens": 1655,
         "output_tokens": 421,
@@ -268,7 +268,7 @@ def test_bedrock_uses_converse_with_the_schema_as_a_forced_tool() -> None:
         "attempts": 1,
     }
     assert [a.title for a in result.output.action_items][:2] == [
-        "Review dataset for weight information",
+        "Review dataset for currency information",
         "Finish the alert emission standard v1.2",
     ]
 
@@ -293,7 +293,7 @@ class Failing:
 
 
 def test_the_fallback_answers_from_bedrock_and_says_so() -> None:
-    fixture = recorded("bedrock_nutrition_review.json")
+    fixture = recorded("bedrock_roadmap_review.json")
     settings = Settings(_env_file=None, fake_llm=False)
     bedrock = BedrockExtractionProvider(settings, client=RecordedBedrock([fixture["response"]]))
     provider = FallbackExtractionProvider(Failing(), bedrock)
@@ -330,7 +330,7 @@ def test_build_provider_follows_the_flags() -> None:
     assert with_fallback.name == "vertex"
     assert isinstance(with_fallback.fallback, BedrockExtractionProvider)
     with pytest.raises(ValueError):
-        build_provider(Settings(_env_file=None, fake_llm=False, extraction_provider="openai"))
+        build_provider(Settings(_env_file=None, fake_llm=False, extraction_provider="mistral"))
 
 
 def test_the_fallback_flag_answers_to_its_env_name(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -18,7 +18,7 @@
           "warningOnly": false,
           "editors": {
             "users": [
-              "ansul.s@simpleo.ai"
+              "alex.s@example.com"
             ]
           }
         },
@@ -33,8 +33,8 @@
           "warningOnly": false,
           "editors": {
             "users": [
-              "ansul.s@simpleo.ai",
-              "prathyush.kodhanpur@simpleo.ai"
+              "alex.s@example.com",
+              "daniel.okafor@example.com"
             ]
           }
         }

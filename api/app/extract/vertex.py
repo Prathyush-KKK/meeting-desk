@@ -1,4 +1,4 @@
-"""Gemini 2.5 Flash on Vertex AI, asia-south1.
+"""Gemini on Vertex AI, in VERTEX_LOCATION (default us-central1).
 
 ``GenerativeModel.generate_content`` with ``response_mime_type=application/json``,
 ``response_schema=EXTRACTION_JSON_SCHEMA`` and temperature 0. One retry on an answer that is not

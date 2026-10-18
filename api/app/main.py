@@ -86,12 +86,12 @@ def guard_environment(settings: Settings) -> None:
     if not settings.is_guarded:
         # Local, but with Google sign-in in use and the real Google clients: the session cookie is
         # the whole of authentication, so its secret has to be real even on a laptop. This is the
-        # Mac launch (docker-compose.live.yml), where scripts/mac-launch.sh generates the value.
+        # live launch (docker-compose.live.yml), where scripts/live.sh generates the value.
         if not settings.fake_google and not settings.auth_dev_user:
             if settings.session_secret == DEFAULT_SESSION_SECRET or not settings.session_secret:
                 raise UnsafeConfiguration(
                     "FAKE_GOOGLE=0 without AUTH_DEV_USER means Google sign-in is in use: set "
-                    "SESSION_SECRET to a real value (32+ characters). scripts/mac-launch.sh does."
+                    "SESSION_SECRET to a real value (32+ characters). scripts/live.sh does."
                 )
             if len(settings.session_secret) < MIN_SESSION_SECRET_LENGTH:
                 raise UnsafeConfiguration(

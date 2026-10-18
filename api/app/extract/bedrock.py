@@ -1,4 +1,4 @@
-"""Bedrock, ap-south-1: the configured fallback.
+"""Bedrock on the Converse API, in BEDROCK_REGION: a provider of its own and the Vertex fallback.
 
 The Converse API with the extraction schema enforced through a tool definition
 (``toolConfig`` with ``toolChoice`` forcing ``record_points``), so the answer is the tool's input,

@@ -1,6 +1,6 @@
 """The six required metrics, plus ``app_build_info``.
 
-Names, types, labels and buckets are `docs/ALERT-EMISSION-STANDARD-SUMMARY.md` verbatim. They live
+Names, types, labels and buckets are `docs/TELEMETRY.md` verbatim. They live
 on their own ``CollectorRegistry`` rather than the process-global one so that
 
 * ``GET /metrics`` on the metrics port answers exactly these and nothing else (no ``python_gc_*``,

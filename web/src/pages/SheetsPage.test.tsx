@@ -36,10 +36,10 @@ vi.mock("@/api/hooks", () => ({
 const book: Workbook = {
   id: "wb-1",
   spreadsheet_id: "ss-1",
-  name: "Nutrition Sialet Product Roadmap",
+  name: "Mobile App Product Roadmap",
   url: "https://docs.google.com/spreadsheets/d/ss-1",
   connection_id: "c-1",
-  connected_by: "prathyush.kodhanpur@simpleo.ai",
+  connected_by: "daniel.okafor@example.com",
   connected_at: "2026-09-01T09:00:00+05:30",
   last_read_at: null,
   can_edit: true,
@@ -48,11 +48,11 @@ const book: Workbook = {
 };
 
 const HEADER = ["ID", "Task", "Owner", "Due", "Status"];
-const rows = (owner: string, task = "Mirror Open Food Facts"): string[][] => [
-  ["Nutrition roadmap", "", "", "", ""],
+const rows = (owner: string, task = "Mirror OpenRates"): string[][] => [
+  ["Mobile roadmap", "", "", "", ""],
   HEADER,
   ["T-101", task, owner, "3 Oct", "open"],
-  ["T-102", "Send the Sprinto questionnaire", "Ansul S", "26 Sep", "open"],
+  ["T-102", "Send the Northwind questionnaire", "Alex S", "26 Sep", "open"],
 ];
 
 function tabState(values: string[][], readAt = "2026-09-22T10:00:00+05:30"): TabState {
@@ -84,8 +84,8 @@ function tabState(values: string[][], readAt = "2026-09-22T10:00:00+05:30"): Tab
 
 const me: Me = {
   id: "u-1",
-  email: "prathyush.kodhanpur@simpleo.ai",
-  name: "Prathyush Kodhanpur",
+  email: "daniel.okafor@example.com",
+  name: "Daniel Okafor",
   role: "admin",
   is_admin: true,
 };
@@ -111,7 +111,7 @@ async function editOwner(container: HTMLElement, value: string) {
 beforeEach(() => {
   h.save.mockReset();
   h.addRow.mockReset();
-  h.tab = tabState(rows("Ansul S"));
+  h.tab = tabState(rows("Alex S"));
   h.save.mockResolvedValue({ ok: true, batch_id: "b", edits: [{}], tab: h.tab });
 });
 
@@ -120,41 +120,41 @@ afterEach(() => vi.unstubAllGlobals());
 describe("the Sheets page pre-save guard", () => {
   it("sends the value the cell held when it was changed, not the one the poll brought in", async () => {
     const { container, rerender } = page();
-    await editOwner(container, "Nishchay S");
+    await editOwner(container, "Noah S");
     await screen.findByText("1 unsaved");
 
-    // 60 s later the poll lands: somebody else has put Shambhavi Singh in the same cell.
-    h.tab = tabState(rows("Shambhavi Singh"), "2026-09-22T10:01:00+05:30");
+    // 60 s later the poll lands: somebody else has put Sofia Silva in the same cell.
+    h.tab = tabState(rows("Sofia Silva"), "2026-09-22T10:01:00+05:30");
     rerender();
     // The rest of the grid shows what was read; the staged cell still shows what was typed.
-    expect(cell(container, "2,2")).toHaveTextContent("Nishchay S");
+    expect(cell(container, "2,2")).toHaveTextContent("Noah S");
     expect(screen.getByText(/read /)).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "Save to Sheet" }));
     await waitFor(() => expect(h.save).toHaveBeenCalledTimes(1));
-    expect(h.save.mock.calls[0][0].edits).toEqual([{ cell: "C3", before: "Ansul S", after: "Nishchay S" }]);
+    expect(h.save.mock.calls[0][0].edits).toEqual([{ cell: "C3", before: "Alex S", after: "Noah S" }]);
   });
 
   it("keeps the first baseline when the same cell is changed twice", async () => {
     const { container } = page();
-    await editOwner(container, "Nishchay S");
-    await editOwner(container, "Madhu R");
+    await editOwner(container, "Noah S");
+    await editOwner(container, "Maya R");
     await screen.findByText("1 unsaved");
 
     await userEvent.click(screen.getByRole("button", { name: "Save to Sheet" }));
     await waitFor(() => expect(h.save).toHaveBeenCalledTimes(1));
-    expect(h.save.mock.calls[0][0].edits).toEqual([{ cell: "C3", before: "Ansul S", after: "Madhu R" }]);
+    expect(h.save.mock.calls[0][0].edits).toEqual([{ cell: "C3", before: "Alex S", after: "Maya R" }]);
   });
 
   it("re-sends a kept edit against what the sheet holds now, so the guard passes", async () => {
     const { container } = page();
-    await editOwner(container, "Nishchay S");
+    await editOwner(container, "Noah S");
     h.save.mockRejectedValueOnce(
       new ApiError(
         409,
         {
           message: "Some of these cells changed in Google Sheets while you were editing. Pick one.",
-          clashes: [{ cell: "C3", yours: "Nishchay S", theirs: "Shambhavi Singh", was: "Ansul S" }],
+          clashes: [{ cell: "C3", yours: "Noah S", theirs: "Sofia Silva", was: "Alex S" }],
         },
         {},
       ),
@@ -166,16 +166,16 @@ describe("the Sheets page pre-save guard", () => {
     await userEvent.click(screen.getByRole("button", { name: "Save to Sheet" }));
 
     await waitFor(() => expect(h.save).toHaveBeenCalledTimes(2));
-    expect(h.save.mock.calls[1][0].edits).toEqual([{ cell: "C3", before: "Shambhavi Singh", after: "Nishchay S" }]);
+    expect(h.save.mock.calls[1][0].edits).toEqual([{ cell: "C3", before: "Sofia Silva", after: "Noah S" }]);
   });
 
   it("drops the edit entirely when theirs is taken", async () => {
     const { container } = page();
-    await editOwner(container, "Nishchay S");
+    await editOwner(container, "Noah S");
     h.save.mockRejectedValueOnce(
       new ApiError(
         409,
-        { message: "Pick one.", clashes: [{ cell: "C3", yours: "Nishchay S", theirs: "Shambhavi Singh", was: "Ansul S" }] },
+        { message: "Pick one.", clashes: [{ cell: "C3", yours: "Noah S", theirs: "Sofia Silva", was: "Alex S" }] },
         {},
       ),
     );
@@ -190,13 +190,13 @@ describe("the Sheets page pre-save guard", () => {
 describe("the Sheets page idempotency key", () => {
   it("sends a uuid with the save and a fresh one for the next save", async () => {
     const { container } = page();
-    await editOwner(container, "Nishchay S");
+    await editOwner(container, "Noah S");
     await userEvent.click(screen.getByRole("button", { name: "Save to Sheet" }));
     await waitFor(() => expect(h.save).toHaveBeenCalledTimes(1));
     const first = h.save.mock.calls[0][0].batch_id;
     expect(first).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
 
-    await editOwner(container, "Madhu R");
+    await editOwner(container, "Maya R");
     await userEvent.click(screen.getByRole("button", { name: "Save to Sheet" }));
     await waitFor(() => expect(h.save).toHaveBeenCalledTimes(2));
     expect(h.save.mock.calls[1][0].batch_id).not.toBe(first);
@@ -204,7 +204,7 @@ describe("the Sheets page idempotency key", () => {
 
   it("re-sends the same id when the first attempt never got an answer", async () => {
     const { container } = page();
-    await editOwner(container, "Nishchay S");
+    await editOwner(container, "Noah S");
     h.save.mockRejectedValueOnce(new ApiError(0, "The API is not reachable. Is it running on port 8000?", {}));
 
     await userEvent.click(screen.getByRole("button", { name: "Save to Sheet" }));
@@ -219,11 +219,11 @@ describe("the Sheets page idempotency key", () => {
 
   it("uses a new id after the server refused, because the body changed", async () => {
     const { container } = page();
-    await editOwner(container, "Nishchay S");
+    await editOwner(container, "Noah S");
     h.save.mockRejectedValueOnce(
       new ApiError(
         409,
-        { message: "Pick one.", clashes: [{ cell: "C3", yours: "Nishchay S", theirs: "Shambhavi Singh", was: "Ansul S" }] },
+        { message: "Pick one.", clashes: [{ cell: "C3", yours: "Noah S", theirs: "Sofia Silva", was: "Alex S" }] },
         {},
       ),
     );

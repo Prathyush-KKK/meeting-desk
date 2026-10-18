@@ -37,23 +37,23 @@ vi.mock("@/api/hooks", () => ({
 
 const MEETING = {
   id: "m-1",
-  title: "Vendor call with Madhu",
+  title: "Vendor call with Maya",
   date: "2026-09-22",
   attendees: [],
-  workstream: "Nutrition",
+  workstream: "Mobile",
 } as unknown as MeetingItem;
 
 const POINT = {
   id: "p-1",
   meeting_id: "m-1",
   kind: "action",
-  text: "Send the Sprinto questionnaire",
-  owner_text: "Ansul S",
+  text: "Send the Northwind questionnaire",
+  owner_text: "Alex S",
   owner_email: null,
   owner_ambiguous: false,
   due_text: "by Friday",
   status: "open",
-  workstream: "Nutrition",
+  workstream: "Mobile",
   lifecycle: "active",
   selected: true,
 } as unknown as Point;
@@ -115,8 +115,8 @@ describe("PointsStep", () => {
 
   it("shows what was transferred from this meeting, read-only, once asked", async () => {
     h.transfers = [
-      { id: "t-2", at: "2026-09-22T17:05:00+05:30", actor: "nishchay.s@simpleo.ai", point_text: "Share the deck", sheet_id: "1234", snapshot: {}, undone_at: "2026-09-22T17:07:00+05:30" },
-      { id: "t-1", at: "2026-09-22T17:02:00+05:30", actor: "ansul.s@simpleo.ai", point_text: "Send the Sprinto questionnaire", sheet_id: "1234", snapshot: {}, undone_at: null },
+      { id: "t-2", at: "2026-09-22T17:05:00+05:30", actor: "noah.s@example.com", point_text: "Share the deck", sheet_id: "1234", snapshot: {}, undone_at: "2026-09-22T17:07:00+05:30" },
+      { id: "t-1", at: "2026-09-22T17:02:00+05:30", actor: "alex.s@example.com", point_text: "Send the Northwind questionnaire", sheet_id: "1234", snapshot: {}, undone_at: null },
     ] as Partial<Transfer>[];
     renderStep();
     expect(screen.queryByTestId("transferred")).not.toBeInTheDocument();
@@ -127,7 +127,7 @@ describe("PointsStep", () => {
     expect(h.transfersFor).toContain("m-1");
     expect(section).toHaveTextContent("Transferred · 2");
     const lines = screen.getAllByTestId("transfer-line");
-    expect(lines[0]).toHaveTextContent(/^Share the deck → sheet 1234 · Tue 22 Sept? 17:05 · nishchay\.s · undone$/);
+    expect(lines[0]).toHaveTextContent(/^Share the deck → sheet 1234 · Tue 22 Sept? 17:05 · noah\.s · undone$/);
     expect(lines[1]).not.toHaveTextContent("undone");
     expect(section.querySelector("input, select, textarea")).toBeNull();
 

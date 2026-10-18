@@ -10,7 +10,7 @@ help:
 	@echo "make check       - ruff + pytest + the web check (the fast inner loop)"
 	@echo "make check-api   - ruff + pytest only"
 	@echo "make web-install - pnpm install in web/"
-	@echo "make live        - the Mac launch: real Google + Google sign-in via docker-compose.live.yml (make live-logs, live-down)"
+	@echo "make live        - real Google on this machine: Google sign-in + Google sign-in via docker-compose.live.yml (make live-logs, live-down)"
 	@echo "make web-check   - tsc, vitest and the web build"
 	@echo "make web-dev     - the Vite dev server on http://localhost:5173"
 	@echo "make e2e         - the browser walkthrough (needs make run and make web-dev)"
@@ -64,7 +64,7 @@ token-key:
 	cd api && .venv/bin/python -c "from app.google.tokens import generate_key; print(generate_key())"
 
 run:
-	cd api && FAKE_GOOGLE=1 FAKE_LLM=1 AUTH_DEV_USER=prathyush.kodhanpur@simpleo.ai \
+	cd api && FAKE_GOOGLE=1 FAKE_LLM=1 AUTH_DEV_USER=daniel.okafor@example.com \
 		DATABASE_URL=sqlite:///./meeting-desk.db \
 		.venv/bin/uvicorn app.main:app --reload --port 8000
 
@@ -84,10 +84,10 @@ e2e:
 	cd web && node e2e/walkthrough.mjs
 
 helm-lint:
-	helm lint deploy/helm/meeting-desk && helm lint deploy/helm/meeting-desk -f deploy/helm/meeting-desk/values-internal.yaml
+	helm lint deploy/helm/meeting-desk && helm lint deploy/helm/meeting-desk -f deploy/helm/meeting-desk/values-production.example.yaml
 
 helm-template:
-	helm template meeting-desk deploy/helm/meeting-desk -f deploy/helm/meeting-desk/values-internal.yaml
+	helm template meeting-desk deploy/helm/meeting-desk -f deploy/helm/meeting-desk/values-production.example.yaml
 
 docker-build:
 	docker build -f deploy/Dockerfile.api -t meeting-desk-api:dev .
@@ -98,12 +98,12 @@ compose-check:
 clean:
 	rm -rf api/.venv api/.pytest_cache api/**/__pycache__ api/meeting-desk.db web/node_modules web/dist .ci
 
-# --- the Mac launch (docker-compose.live.yml: real Google, Google sign-in, Postgres) -------------
+# --- the live launch (docker-compose.live.yml: real Google, Google sign-in, Postgres) -------------
 live:
-	scripts/mac-launch.sh
+	scripts/live.sh
 
 live-logs:
-	scripts/mac-launch.sh logs
+	scripts/live.sh logs
 
 live-down:
-	scripts/mac-launch.sh down
+	scripts/live.sh down

@@ -55,7 +55,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{/*
-The env block every pod shares: the non-secret ConfigMap, the Infisical-backed Secret, and the
+The env block every pod shares: the non-secret ConfigMap, the store-backed Secret, and the
 two build labels that end up on app_build_info.
 */}}
 {{- define "meeting-desk.envFrom" -}}

@@ -2,13 +2,13 @@
 # Start Meeting Desk for real on this machine: docker-compose.live.yml, the shipped image, Postgres,
 # Google sign-in. Idempotent: run it again after editing .env or pulling a change.
 #
-#   scripts/mac-launch.sh            build (if needed), start, wait for /healthz
-#   scripts/mac-launch.sh logs       follow the API log
-#   scripts/mac-launch.sh snapshot   write the last 400 API log lines to .api.log (no terminal needed)
-#   scripts/mac-launch.sh down       stop (the database volume stays)
-#   scripts/mac-launch.sh reset      stop and delete the database volume
+#   scripts/live.sh            build (if needed), start, wait for /healthz
+#   scripts/live.sh logs       follow the API log
+#   scripts/live.sh snapshot   write the last 400 API log lines to .api.log
+#   scripts/live.sh down       stop (the database volume stays)
+#   scripts/live.sh reset      stop and delete the database volume
 #
-# Needs docker with the compose plugin (Colima or OrbStack on the Mac) and openssl. No Python or
+# Needs docker with the compose plugin (Docker Desktop, Colima or OrbStack on a Mac) and openssl. No Python or
 # node on the host: the image builds both.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -26,7 +26,7 @@ case "${1:-up}" in
 esac
 
 if ! docker info >/dev/null 2>&1; then
-  echo "docker is not running (colima start / open OrbStack), then run this again." >&2
+  echo "docker is not running (start Docker Desktop, Colima or OrbStack), then run this again." >&2
   exit 1
 fi
 
@@ -84,7 +84,7 @@ if [ "$(value_of FAKE_LLM)" = "0" ]; then
   case "$provider" in
     bedrock | bedrock_openai)
       # Two credentials, the app picks the same way (app/extract/__init__.py):
-      #   AWS_BEARER_TOKEN_BEDROCK + BEDROCK_BASE_URL - the nutrition service's Bedrock API key on
+      #   AWS_BEARER_TOKEN_BEDROCK + BEDROCK_BASE_URL - a Bedrock API key on
       #     the OpenAI-compatible endpoint. Plain HTTP: no SDK in the image.
       #   AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY - the Converse API in BEDROCK_REGION, which
       #     needs boto3 (the [bedrock] extra). EXTRACTION_PROVIDER=bedrock only.
@@ -113,7 +113,7 @@ if [ "$(value_of FAKE_LLM)" = "0" ]; then
         exit 1
       else
         echo "EXTRACTION_PROVIDER=bedrock needs a credential (in $ENV_FILE or the shell), either:" >&2
-        echo "  AWS_BEARER_TOKEN_BEDROCK + BEDROCK_BASE_URL (+ BEDROCK_MODEL_ID) - the nutrition service's values, or" >&2
+        echo "  AWS_BEARER_TOKEN_BEDROCK + BEDROCK_BASE_URL (+ BEDROCK_MODEL_ID) - a Bedrock API key, or" >&2
         echo "  AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY (+ BEDROCK_MODEL, BEDROCK_REGION) - the Converse API." >&2
         exit 1
       fi
@@ -124,12 +124,30 @@ if [ "$(value_of FAKE_LLM)" = "0" ]; then
         echo "extraction: Bedrock ($path) $model at $base_url"
       fi
       ;;
+    openai)
+      # Any OpenAI-compatible endpoint: plain HTTP, no SDK in the image. A local server (Ollama,
+      # LM Studio) needs no key; from inside the container it is host.docker.internal, not localhost.
+      base_url="$(setting LLM_BASE_URL)"
+      base_url="${base_url:-https://api.openai.com/v1}"
+      model="$(setting LLM_MODEL)"
+      [ -n "$model" ] || { echo "LLM_MODEL is empty." >&2; exit 1; }
+      case "$base_url" in
+        *api.openai.com*) [ -n "$(setting LLM_API_KEY)$(setting OPENAI_API_KEY)" ] || { echo "LLM_API_KEY is empty." >&2; exit 1; } ;;
+      esac
+      echo "extraction: OpenAI-compatible $model at $base_url"
+      ;;
+    anthropic)
+      export EXTRAS="[anthropic]"
+      [ -n "$(setting ANTHROPIC_API_KEY)" ] || { echo "ANTHROPIC_API_KEY is empty." >&2; exit 1; }
+      model="$(setting ANTHROPIC_MODEL)"
+      echo "extraction: Anthropic ${model:-claude-opus-5-5}"
+      ;;
     vertex)
       export EXTRAS="[vertex]"
       [ -n "$(value_of VERTEX_PROJECT)" ] || { echo "VERTEX_PROJECT is empty." >&2; exit 1; }
       echo "extraction: Vertex $(value_of VERTEX_MODEL) in $(value_of VERTEX_LOCATION), project $(value_of VERTEX_PROJECT)"
       ;;
-    *) echo "FAKE_LLM=0 but EXTRACTION_PROVIDER is '$provider' (bedrock, bedrock_openai or vertex)." >&2; exit 1 ;;
+    *) echo "FAKE_LLM=0 but EXTRACTION_PROVIDER is '$provider' (openai, anthropic, bedrock, bedrock_openai or vertex)." >&2; exit 1 ;;
   esac
 else
   echo "extraction: rule-based (FAKE_LLM=1)"
@@ -144,7 +162,8 @@ for _ in $(seq 1 60); do
   if curl -fsS "$url/healthz" >/dev/null 2>&1; then
     echo
     echo "Meeting Desk is up: $url"
-    echo "Sign in with a $(value_of GOOGLE_HOSTED_DOMAIN) account on the allow-list ($(value_of BOOTSTRAP_ADMINS)),"
+    domain="$(value_of GOOGLE_HOSTED_DOMAIN)"
+    echo "Sign in with ${domain:+a $domain }Google account on the allow-list ($(value_of BOOTSTRAP_ADMINS)),"
     echo "then Admin -> Connect an account. Logs: $0 logs"
     exit 0
   fi

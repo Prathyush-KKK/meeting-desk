@@ -42,6 +42,7 @@ from app.google.interface import (
 )
 from app.sheets.dates import serial_for, serial_from_date
 from app.sheets.layout import HEADER_SCAN_ROWS, col_letter, detect_layout, grid_width
+from app.tz import as_zone
 
 BASE = "https://sheets.googleapis.com/v4/spreadsheets"
 META_FIELDS = (
@@ -77,7 +78,7 @@ class RealSheetsClient:
         self,
         http: GoogleHttp,
         drive: RealDriveClient | None = None,
-        display_tz: ZoneInfo | str = "Asia/Kolkata",
+        display_tz: ZoneInfo | str | None = None,
         max_rows: int = 5000,
         meta_cache_seconds: float = 60.0,
         now: Callable[[], float] = time.monotonic,
@@ -85,7 +86,7 @@ class RealSheetsClient:
     ) -> None:
         self.http = http
         self.drive = drive or RealDriveClient(http, display_tz)
-        self.tz = ZoneInfo(display_tz) if isinstance(display_tz, str) else display_tz
+        self.tz = as_zone(display_tz)
         self.max_rows = max_rows
         self.meta_cache_seconds = meta_cache_seconds
         self._now = now

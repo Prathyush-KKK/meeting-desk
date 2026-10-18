@@ -18,7 +18,7 @@ exposition format never comes back:
     && echo "LEAK" || echo "ok: not public"
 
 {{ if .Values.externalSecrets.enabled -}}
-Secrets come from Infisical at {{ .Values.externalSecrets.basePath }}/<KEY>:
+Secrets come from the secret store at {{ .Values.externalSecrets.basePath }}/<KEY>:
 {{ range .Values.externalSecrets.keys }}  {{ $.Values.externalSecrets.basePath }}/{{ . }}
 {{ end }}{{- if .Values.externalSecrets.vertexServiceAccount.enabled }}  {{ .Values.externalSecrets.basePath }}/{{ .Values.externalSecrets.vertexServiceAccount.key }}
 {{ end }}

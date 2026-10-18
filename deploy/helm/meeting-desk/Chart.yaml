@@ -9,7 +9,7 @@ type: application
 version: 0.1.0
 # The default application version; `image.tag` overrides what is actually deployed.
 appVersion: "0.1.0"
-home: https://github.com/hellosia/meeting-desk
+home: https://github.com/Prathyush-KKK/meeting-desk
 maintainers:
   - name: Meeting Desk
 kubeVersion: ">=1.27.0-0"

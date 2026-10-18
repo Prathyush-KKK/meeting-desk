@@ -26,8 +26,7 @@ from app.models import (
     User,
     Workbook,
 )
-
-IST = ZoneInfo("Asia/Kolkata")
+from app.tz import display_zone
 
 Kind = Literal["action", "decision", "risk", "question"]
 Status = Literal["open", "in_progress", "blocked", "done", "dropped", "decided"]
@@ -64,11 +63,11 @@ class MeetingManualIn(BaseModel):
 
     def start_at(self) -> datetime:
         h, m = (int(x) for x in self.start.split(":"))
-        return datetime.combine(self.date, time(h, m), tzinfo=IST)
+        return datetime.combine(self.date, time(h, m), tzinfo=display_zone())
 
     def end_at(self) -> datetime:
         h, m = (int(x) for x in self.end.split(":"))
-        return datetime.combine(self.date, time(h, m), tzinfo=IST)
+        return datetime.combine(self.date, time(h, m), tzinfo=display_zone())
 
 
 class MeetingPatchIn(BaseModel):
@@ -221,12 +220,13 @@ def _iso(value: datetime | None) -> str | None:
     return value.isoformat() if value else None
 
 
-def _local(value: datetime | None, tz: ZoneInfo = IST) -> datetime | None:
+def _local(value: datetime | None, tz: ZoneInfo | None = None) -> datetime | None:
     if value is None:
         return None
+    zone = tz or display_zone()
     if value.tzinfo is None:
-        value = value.replace(tzinfo=tz)
-    return value.astimezone(tz)
+        value = value.replace(tzinfo=zone)
+    return value.astimezone(zone)
 
 
 def user_out(user: User) -> dict[str, Any]:

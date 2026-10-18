@@ -54,7 +54,7 @@ BASE=http://localhost:8000
 
 # 1. Paste with no meeting selected - a manual meeting appears, titled from the first line
 curl -s -X POST $BASE/notes/quick -H 'content-type: application/json' -d '{
-  "text": "Vendor call with Madhu\n\nThe Next Steps\nAnsul S: Send the questionnaire by Friday\nPrathyush Kodhanpur: Mirror Open Food Facts before 3 Oct\nDecided: the Owner column holds a person, not a team"
+  "text": "Vendor call with Maya\n\nThe Next Steps\nAlex S: Send the questionnaire by Friday\nDaniel Okafor: Mirror OpenRates before 3 Oct\nDecided: the Owner column holds a person, not a team"
 }'
 
 # 2. Extract, then look at the points
@@ -248,7 +248,7 @@ references it by that name, and the Ingress has no rule for it at all. Prove it 
 ```bash
 # From outside the cluster. The app port serves the SPA, so an unknown path comes back as
 # index.html - what matters is that the exposition format is never in the body.
-if curl -sS https://meeting-desk.internal.simpleo.ai/metrics | grep -q '^# TYPE http_requests_total'; then
+if curl -sS https://meeting-desk.internal.example.com/metrics | grep -q '^# TYPE http_requests_total'; then
   echo "LEAK: /metrics is reachable from the ingress"; exit 1
 else
   echo "ok: /metrics is not public"
@@ -320,12 +320,12 @@ Once, by a Workspace admin, in the project that owns the OAuth client and Vertex
 
    | URI | used by |
    | --- | --- |
-   | `https://meeting-desk.internal.simpleo.ai/auth/callback` | sign-in (`GOOGLE_OIDC_REDIRECT_URI`) |
-   | `https://meeting-desk.internal.simpleo.ai/admin/connections/callback` | Connect an account (`GOOGLE_CONNECT_REDIRECT_URI`) |
+   | `https://meeting-desk.internal.example.com/auth/callback` | sign-in (`GOOGLE_OIDC_REDIRECT_URI`) |
+   | `https://meeting-desk.internal.example.com/admin/connections/callback` | Connect an account (`GOOGLE_CONNECT_REDIRECT_URI`) |
    | `http://localhost:8000/auth/callback` | local development |
    | `http://localhost:8000/admin/connections/callback` | local development |
 
-   Authorised JavaScript origins: `https://meeting-desk.internal.simpleo.ai` and
+   Authorised JavaScript origins: `https://meeting-desk.internal.example.com` and
    `http://localhost:5173`. Put the client id and secret in Infisical (below).
 5. **Vertex service account.** `meeting-desk-vertex@<project>.iam.gserviceaccount.com` with
    **Vertex AI User** (`roles/aiplatform.user`) and nothing else. Create a JSON key and paste the

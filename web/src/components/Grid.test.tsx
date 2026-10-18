@@ -10,7 +10,7 @@ import { detectLayout } from "@/lib/sheet";
 function sheet(dataRows: number): string[][] {
   const rows: string[][] = [["ID", "Task", "Owner", "Due", "Status"]];
   for (let i = 1; i <= dataRows; i++) {
-    rows.push([`T-${100 + i}`, `Row ${i}`, "Ansul S", "24 Sep", "Open"]);
+    rows.push([`T-${100 + i}`, `Row ${i}`, "Alex S", "24 Sep", "Open"]);
   }
   return rows;
 }
@@ -138,7 +138,7 @@ describe("the cell editor under 768 px", () => {
     expect(editor.className).toContain("md:hidden");
     expect(within(editor).getByTestId("cell-editor-column")).toHaveTextContent("Owner");
     expect(within(editor).getByText("C3")).toBeInTheDocument();
-    expect(within(editor).getByTestId("cell-editor-current")).toHaveTextContent("Ansul S");
+    expect(within(editor).getByTestId("cell-editor-current")).toHaveTextContent("Alex S");
 
     const control = within(editor).getByLabelText("Owner");
     expect(control.tagName).toBe("INPUT");
@@ -148,10 +148,10 @@ describe("the cell editor under 768 px", () => {
     }
 
     await userEvent.clear(control);
-    await userEvent.type(control, "Nishchay S");
+    await userEvent.type(control, "Noah S");
     expect(onChange).not.toHaveBeenCalled();
     await userEvent.click(within(editor).getByRole("button", { name: "Save" }));
-    expect(onChange).toHaveBeenCalledWith(2, 2, "Nishchay S");
+    expect(onChange).toHaveBeenCalledWith(2, 2, "Noah S");
     expect(screen.queryByTestId("cell-editor")).toBeNull();
   });
 
@@ -208,8 +208,8 @@ describe("the cell editor from 768 px up", () => {
     const inline = container.querySelector('[data-cell="2,2"] input') as HTMLInputElement;
     expect(inline).toBeTruthy();
     await userEvent.clear(inline);
-    await userEvent.type(inline, "Nishchay S{Enter}");
-    expect(onChange).toHaveBeenCalledWith(2, 2, "Nishchay S");
+    await userEvent.type(inline, "Noah S{Enter}");
+    expect(onChange).toHaveBeenCalledWith(2, 2, "Noah S");
   });
 
   it("pushes no history entry for an inline edit", async () => {

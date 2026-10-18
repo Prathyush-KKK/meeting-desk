@@ -9,11 +9,11 @@ from fastapi.testclient import TestClient
 
 from tests.conftest import workbook_by_name
 
-NOTES = """**Vendor call with Madhu**
+NOTES = """**Vendor call with Maya**
 
 The Next Steps
-Ansul S: Send the Sprinto questionnaire by Friday
-Prathyush Kodhanpur: Mirror Open Food Facts before 3 Oct
+Alex S: Send the Northwind questionnaire by Friday
+Daniel Okafor: Mirror OpenRates before 3 Oct
 Decided: the Owner column holds a person, not a team
 Risk: the upload flag has no rollback plan
 """
@@ -23,7 +23,7 @@ def test_quick_paste_to_sheet_rows(client: TestClient) -> None:
     # 1. Paste with nothing selected: a manual meeting appears, titled from the first line.
     quick = client.post("/notes/quick", json={"text": NOTES}).json()
     meeting_id = quick["meeting"]["id"]
-    assert quick["meeting"]["title"] == "Vendor call with Madhu"
+    assert quick["meeting"]["title"] == "Vendor call with Maya"
 
     # 2. Extract.
     extracted = client.post(f"/meetings/{meeting_id}/extract").json()
@@ -32,9 +32,9 @@ def test_quick_paste_to_sheet_rows(client: TestClient) -> None:
     kinds = {p["kind"] for p in points}
     assert {"action", "decision", "risk"} <= kinds
 
-    ansul = next(p for p in points if p["owner_text"] == "Ansul S")
-    assert ansul["due_text"] == "by Friday"
-    assert ansul["due_date"] is not None
+    alex = next(p for p in points if p["owner_text"] == "Alex S")
+    assert alex["due_text"] == "by Friday"
+    assert alex["due_date"] is not None
 
     # 3. Defer one, keep the rest.
     client.post(f"/points/{points[-1]['id']}/defer")
@@ -42,7 +42,7 @@ def test_quick_paste_to_sheet_rows(client: TestClient) -> None:
     assert len(active) == len(points) - 1
 
     # 4. Transfer the actions to the roadmap.
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     tab = client.get(f"/workbooks/{workbook['id']}/tabs/t1").json()
     actions = [p["id"] for p in active if p["kind"] == "action"]
     preview = client.post(
@@ -66,7 +66,7 @@ def test_quick_paste_to_sheet_rows(client: TestClient) -> None:
     # 5. The Sheets page shows the rows, keyed and linked back to the meeting.
     after = client.get(f"/workbooks/{workbook['id']}/tabs/t1").json()
     assert after["values"][16][0] == "T-108"
-    assert after["values"][16][7].startswith("Vendor call with Madhu")
+    assert after["values"][16][7].startswith("Vendor call with Maya")
     assert after["layout"]["last_table_row"] == 15 + len(actions)
 
     # 6. The points are gone from the tool but the log keeps them.

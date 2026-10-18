@@ -7,7 +7,7 @@
 #   vitest run      web tests
 #   vite build      web build (also what the API serves as WEB_DIST)
 #   helm lint       the chart
-#   helm template   the chart rendered twice: defaults, and values-internal with the
+#   helm template   the chart rendered twice: defaults, and the production example with the
 #                   ServiceMonitor and the PrometheusRule on
 #   docker build    the API image (skipped, loudly, where there is no docker daemon)
 #
@@ -87,12 +87,12 @@ fi
 # --- the chart ---------------------------------------------------------------------------------------
 if ensure_helm; then
   step "helm lint" helm lint "$CHART"
-  step "helm lint (values-internal)" helm lint "$CHART" -f "$CHART/values-internal.yaml"
+  step "helm lint (production example)" helm lint "$CHART" -f "$CHART/values-production.example.yaml"
   mkdir -p "$RENDER_DIR"
   step "helm template (defaults)" bash -c \
     "helm template meeting-desk '$CHART' > '$RENDER_DIR/default.yaml'"
-  step "helm template (values-internal)" bash -c \
-    "helm template meeting-desk '$CHART' -f '$CHART/values-internal.yaml' > '$RENDER_DIR/internal.yaml'"
+  step "helm template (production example)" bash -c \
+    "helm template meeting-desk '$CHART' -f '$CHART/values-production.example.yaml' > '$RENDER_DIR/internal.yaml'"
   # Both sides of the rotation flag render: off (the steady state) and on (during a key rotation).
   step "helm template (rotation on)" bash -c \
     "helm template meeting-desk '$CHART' --set externalSecrets.rotation.enabled=true \
@@ -105,7 +105,7 @@ if ensure_helm; then
   else
     bad "ServiceMonitor / PrometheusRule missing from the render"
   fi
-  # The previous token key is only ever asked of Infisical while a rotation is in flight; a
+  # The previous token key is only ever asked of the secret store while a rotation is in flight; a
   # required-but-absent secret key stops the whole ExternalSecret from syncing.
   say "the previous token key is behind the rotation flag"
   if ! grep -q "MEETING_DESK_TOKEN_KEY_PREVIOUS" "$RENDER_DIR/default.yaml" \

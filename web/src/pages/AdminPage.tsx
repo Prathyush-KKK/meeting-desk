@@ -105,7 +105,7 @@ export function AdminPage({ me }: { me: Me }) {
             id="allow-email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="name@simpleo.ai"
+            placeholder="name@example.com"
             className="h-8 max-w-xs text-sm"
             onKeyDown={(e) => e.key === "Enter" && void add()}
           />
@@ -137,7 +137,7 @@ export function AdminPage({ me }: { me: Me }) {
           ))}
         </ul>
         <p className="mt-2 text-xs text-muted-foreground">
-          Sign-in is Google, restricted to simpleo.ai, then this list. Admins manage connections and the list; members do
+          Sign-in is Google, restricted to example.com, then this list. Admins manage connections and the list; members do
           everything else.
         </p>
       </section>

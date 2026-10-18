@@ -12,9 +12,9 @@
               "id": "100000000000000000001"
             }
           },
-          "displayName": "Shambhavi Singh",
-          "familyName": "Singh",
-          "givenName": "Shambhavi"
+          "displayName": "Sofia Silva",
+          "familyName": "Silva",
+          "givenName": "Sofia"
         }
       ],
       "emailAddresses": [
@@ -27,7 +27,7 @@
               "id": "100000000000000000001"
             }
           },
-          "value": "shambhavi.singh@simpleo.ai"
+          "value": "sofia.silva@example.com"
         },
         {
           "metadata": {
@@ -36,7 +36,7 @@
               "id": "100000000000000000001"
             }
           },
-          "value": "shambhavi@simpleo.ai"
+          "value": "sofia@example.com"
         }
       ]
     },
@@ -56,7 +56,7 @@
           "metadata": {
             "primary": true
           },
-          "value": "Shamik.Bose@simpleo.ai"
+          "value": "Shamik.Bose@example.com"
         }
       ]
     },

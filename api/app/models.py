@@ -31,6 +31,8 @@ from sqlalchemy import (
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
+from app.tz import display_zone_name
+
 Json = JSON().with_variant(postgresql.JSONB(), "postgresql")
 
 ROLES = ("admin", "member")
@@ -120,7 +122,7 @@ class Meeting(Base):
     location: Mapped[str] = mapped_column(Text, default="")
     start_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     end_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    timezone: Mapped[str] = mapped_column(String(64), default="Asia/Kolkata")
+    timezone: Mapped[str] = mapped_column(String(64), default=display_zone_name)
     organizer_email: Mapped[str] = mapped_column(String(320), default="")
     organizer_name: Mapped[str] = mapped_column(String(200), default="")
     attendees: Mapped[list[Any]] = mapped_column(Json, default=list)

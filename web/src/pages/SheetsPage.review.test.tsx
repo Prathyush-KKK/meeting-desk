@@ -44,7 +44,7 @@ const BOOK: Workbook = {
   name: "Roadmap",
   url: "https://docs.google.com/spreadsheets/d/ss-1",
   connection_id: "c-1",
-  connected_by: "prathyush.kodhanpur@simpleo.ai",
+  connected_by: "daniel.okafor@example.com",
   connected_at: "2026-09-21T09:00:00+05:30",
   last_read_at: null,
   can_edit: true,
@@ -55,8 +55,8 @@ const BOOK: Workbook = {
 const VALUES = [
   ["Roadmap", "", "", "", "", ""],
   ["ID", "Task", "Owner", "Due", "Status", "Days"],
-  ["T-101", "Mirror Open Food Facts", "Ansul S", "3 Oct", "open", "12"],
-  ["T-102", "Send the Sprinto questionnaire", "Ansul S", "26 Sep", "open", "4"],
+  ["T-101", "Mirror OpenRates", "Alex S", "3 Oct", "open", "12"],
+  ["T-102", "Send the Northwind questionnaire", "Alex S", "26 Sep", "open", "4"],
 ];
 
 const TAB = {
@@ -89,10 +89,10 @@ function transfer(over: Partial<Transfer>): Transfer {
     id: "tr-1",
     batch_id: "b-1",
     at: "2026-09-22T17:02:00+05:30",
-    actor: "prathyush.kodhanpur@simpleo.ai",
+    actor: "daniel.okafor@example.com",
     meeting_id: "m-1",
-    meeting_title: "Vendor call with Madhu",
-    point_text: "Send the Sprinto questionnaire",
+    meeting_title: "Vendor call with Maya",
+    point_text: "Send the Northwind questionnaire",
     workbook_id: "wb-1",
     sheet_id: "t1",
     mode: "append",
@@ -105,7 +105,7 @@ function transfer(over: Partial<Transfer>): Transfer {
   };
 }
 
-const me: Me = { id: "u-1", email: "prathyush.kodhanpur@simpleo.ai", name: "Prathyush Kodhanpur", role: "admin", is_admin: true };
+const me: Me = { id: "u-1", email: "daniel.okafor@example.com", name: "Daniel Okafor", role: "admin", is_admin: true };
 const page = () => render(<SheetsPage selection={{ wb: "wb-1", tab: "t1" }} onSelect={vi.fn()} me={me} />);
 const cell = (container: HTMLElement, ref: string) => container.querySelector(`[data-cell="${ref}"]`) as HTMLElement;
 
@@ -159,7 +159,7 @@ describe("Sheets: cells that cannot be edited say why", () => {
 
 describe("Sheets: recent transfers", () => {
   it("offers Undo once per batch while the server says it is open", async () => {
-    h.transfers = [transfer({ id: "tr-1" }), transfer({ id: "tr-2", cells: ["A18"], point_text: "Mirror Open Food Facts" })];
+    h.transfers = [transfer({ id: "tr-1" }), transfer({ id: "tr-2", cells: ["A18"], point_text: "Mirror OpenRates" })];
     page();
     const list = screen.getByTestId("recent-transfers");
     const undo = within(list).getAllByRole("button", { name: "Undo" });

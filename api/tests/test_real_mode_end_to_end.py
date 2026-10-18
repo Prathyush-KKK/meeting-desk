@@ -25,7 +25,7 @@ from tests.google_mock import MockGoogleApi, json_response
 
 IST = ZoneInfo("Asia/Kolkata")
 KEY = generate_key()
-SECOND = "ansul.s@simpleo.ai"
+SECOND = "alex.s@example.com"
 
 
 def _real_app(tmp_path: Path, api: MockGoogleApi):
@@ -43,7 +43,7 @@ def _real_app(tmp_path: Path, api: MockGoogleApi):
     with app.state.db.session() as session:
         app.state.db.create_all()
         session.add(AllowListEntry(email=ADMIN, role="admin", added_by="setup"))
-        for email, token in ((ADMIN, "1//rt-prathyush"), (SECOND, "1//rt-ansul")):
+        for email, token in ((ADMIN, "1//rt-daniel"), (SECOND, "1//rt-alex")):
             enc, version = cipher.encrypt(token)
             session.add(
                 Connection(
@@ -62,7 +62,7 @@ def _real_app(tmp_path: Path, api: MockGoogleApi):
 
 def _token_endpoint(request: httpx.Request) -> httpx.Response:
     form = dict(httpx.QueryParams(request.content.decode()))
-    if form["refresh_token"] == "1//rt-ansul":
+    if form["refresh_token"] == "1//rt-alex":
         return json_response("token_refresh_invalid_grant.json", 400)
     return json_response(
         {"access_token": f"at-for-{form['refresh_token']}", "expires_in": 3599, "token_type": "Bearer"}
@@ -86,13 +86,13 @@ def test_the_meeting_list_comes_from_google_and_a_dead_connection_is_marked_expi
     with TestClient(app) as client:
         body = client.get("/meetings/list").json()
         titles = [i["title"] for i in body["items"]]
-        assert titles == ["Team offsite", "Sprinto vendor call", "Nutrition roadmap review"]
+        assert titles == ["Team offsite", "Northwind vendor call", "Mobile roadmap review"]
         assert body["items"][2]["start"] == "16:00"
-        assert body["items"][2]["attachments"][0]["file_id"] == "1qX9Lm3kNotesDocIdForNutrition"
+        assert body["items"][2]["attachments"][0]["file_id"] == "1qX9Lm3kNotesDocIdForMobile"
 
-        # Only Prathyush's connection got a bearer token; Ansul's refresh was refused.
+        # Only Daniel's connection got a bearer token; Alex's refresh was refused.
         events = api.sent("GET", "/calendars/primary/events")
-        assert {r.headers["Authorization"] for r in events} == {"Bearer at-for-1//rt-prathyush"}
+        assert {r.headers["Authorization"] for r in events} == {"Bearer at-for-1//rt-daniel"}
         assert len(api.sent("POST", "/token")) == 2
 
         connections = {c["email"]: c for c in client.get("/admin/connections").json()["connections"]}
@@ -108,7 +108,7 @@ def test_the_meeting_list_comes_from_google_and_a_dead_connection_is_marked_expi
         )
         assert created.status_code == 201
         assert created.json()["ical_uid"] == "3icfcbtqoeit5ggbjb4b5ukadq@google.com"
-        assert created.json()["organizer_name"] == "Prathyush Kodhanpur"
+        assert created.json()["organizer_name"] == "Daniel Okafor"
 
 
 def test_sources_and_the_doc_import_go_through_the_first_connection_that_can_read(tmp_path: Path) -> None:
@@ -123,7 +123,7 @@ def test_sources_and_the_doc_import_go_through_the_first_connection_that_can_rea
                 lambda r: json_response("calendar_events_page2.json"),
             ],
         )
-        .on("GET", "/v1/documents/1qX9Lm3kNotesDocIdForNutrition", "docs_document_tabs.json")
+        .on("GET", "/v1/documents/1qX9Lm3kNotesDocIdForMobile", "docs_document_tabs.json")
         .on("GET", "/gmail/v1/users/me/messages/18f2c1a9b7e4d3f0", "gmail_message_full.json")
         .on("GET", "/gmail/v1/users/me/messages", "gmail_messages_list.json")
     )
@@ -132,7 +132,7 @@ def test_sources_and_the_doc_import_go_through_the_first_connection_that_can_rea
         card = next(
             i
             for i in client.get("/meetings/list").json()["items"]
-            if i["title"] == "Nutrition roadmap review"
+            if i["title"] == "Mobile roadmap review"
         )
         meeting_id = client.post(
             "/meetings/from-calendar", json={"calendar_event_id": card["calendar_event_id"]}
@@ -148,14 +148,14 @@ def test_sources_and_the_doc_import_go_through_the_first_connection_that_can_rea
         assert sources["transcript"]["available"] is True
         assert sources["recap_email"]["available"] is True
         gmail_query = MockGoogleApi.params(api.sent("GET", "/gmail/v1/users/me/messages")[0])["q"][0]
-        assert gmail_query == 'from:gemini-notes@google.com "Nutrition roadmap review" after:2026/09/19'
+        assert gmail_query == 'from:gemini-notes@google.com "Mobile roadmap review" after:2026/09/19'
 
         imported = client.post(
             "/notes/import",
             json={
                 "meeting_id": meeting_id,
                 "source": "gemini_doc",
-                "origin_ref": "1qX9Lm3kNotesDocIdForNutrition",
+                "origin_ref": "1qX9Lm3kNotesDocIdForMobile",
             },
         )
         assert imported.status_code == 201, imported.text
@@ -165,12 +165,12 @@ def test_sources_and_the_doc_import_go_through_the_first_connection_that_can_rea
 
         recap = client.post("/notes/import", json={"meeting_id": meeting_id, "source": "recap_email"})
         assert recap.status_code == 201, recap.text
-        assert recap.json()["note"]["title"] == "Recap: Nutrition roadmap review"
+        assert recap.json()["note"]["title"] == "Recap: Mobile roadmap review"
 
         # Extraction (fake LLM) then runs on the real-mode notes, resolving owners from attendees.
         extracted = client.post(f"/meetings/{meeting_id}/extract").json()
         owners = {p["owner_text"]: p["owner_email"] for p in extracted["points"] if p["owner_text"]}
-        assert owners["Anushka Mohanty"] == "anushka.mohanty@simpleo.ai"
+        assert owners["Anna Moreno"] == "anna.moreno@example.com"
 
 
 def test_a_workbook_connects_reads_and_writes_through_the_real_sheets_client(tmp_path: Path) -> None:
@@ -209,7 +209,7 @@ def test_a_workbook_connects_reads_and_writes_through_the_real_sheets_client(tmp
             "/workbooks/connect", json={"url": f"https://docs.google.com/spreadsheets/d/{book}/edit#gid=0"}
         )
         assert connected.status_code == 201, connected.text
-        assert connected.json()["name"] == "Nutrition Sialet Product Roadmap"
+        assert connected.json()["name"] == "Mobile App Product Roadmap"
         assert connected.json()["can_edit"] is True
         assert connected.json()["read_through"] == ADMIN
         assert [t["sheet_id"] for t in connected.json()["tabs"]] == ["0", "1487211930", "22"]
@@ -241,7 +241,7 @@ def test_a_workbook_connects_reads_and_writes_through_the_real_sheets_client(tmp
                 }
             }
         ]
-        assert post.headers["Authorization"] == "Bearer at-for-1//rt-prathyush"
+        assert post.headers["Authorization"] == "Bearer at-for-1//rt-daniel"
 
 
 def test_a_sheets_429_becomes_a_503_with_retry_after_and_is_counted(tmp_path: Path) -> None:
@@ -275,11 +275,11 @@ def test_a_sheets_429_becomes_a_503_with_retry_after_and_is_counted(tmp_path: Pa
     with app.state.db.session() as session:
         app.state.db.create_all()
         session.add(AllowListEntry(email=ADMIN, role="admin", added_by="setup"))
-        enc, version = cipher.encrypt("1//rt-prathyush")
+        enc, version = cipher.encrypt("1//rt-daniel")
         session.add(
             Connection(
                 email=ADMIN,
-                name="Prathyush",
+                name="Daniel",
                 scopes=["spreadsheets"],
                 refresh_token_enc=enc,
                 key_version=version,

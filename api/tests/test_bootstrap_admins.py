@@ -18,8 +18,8 @@ from app.main import create_app
 from app.models import Activity, AllowListEntry, Connection, User
 from tests.conftest import ADMIN, MEMBER, make_settings
 
-FIRST = "first.admin@simpleo.ai"
-SECOND = "second.admin@simpleo.ai"
+FIRST = "first.admin@example.com"
+SECOND = "second.admin@example.com"
 
 
 def _real_mode(tmp_path: Path, **overrides) -> Settings:
@@ -43,7 +43,7 @@ def _entries(app) -> dict[str, str]:
 
 
 def test_parsing_trims_lowercases_and_dedupes(tmp_path: Path) -> None:
-    raw = " First.Admin@simpleo.ai ,, second.admin@simpleo.ai,First.Admin@simpleo.ai,notanemail "
+    raw = " First.Admin@example.com ,, second.admin@example.com,First.Admin@example.com,notanemail "
     s = _real_mode(tmp_path, bootstrap_admins=raw)
     assert s.bootstrap_admin_emails == [FIRST, SECOND]
 
@@ -110,7 +110,7 @@ def test_promoted_member_is_admin_on_the_next_request(tmp_path: Path) -> None:
 
 
 def test_local_real_mode_sign_in_refuses_a_weak_session_secret(tmp_path: Path) -> None:
-    """The Mac launch: ENVIRONMENT=local, FAKE_GOOGLE=0, no dev user - the cookie secret must be real."""
+    """The live launch: ENVIRONMENT=local, FAKE_GOOGLE=0, no dev user - the cookie secret must be real."""
     import pytest
 
     from app.main import UnsafeConfiguration
@@ -145,7 +145,7 @@ def test_a_new_admin_is_sent_to_the_connect_flow_after_signing_in(tmp_path: Path
         assert parse_qs(parsed.query) == {"email": [FIRST], "next": ["/"]}
 
         # A member is never asked; an admin whose account is connected is not asked again.
-        assert first_signin_redirect(db, settings, _user("member", "m@simpleo.ai")) is None
+        assert first_signin_redirect(db, settings, _user("member", "m@example.com")) is None
         db.add(Connection(email=FIRST, name="First", scopes=[], status="ok", key_version=1))
         db.commit()
         assert first_signin_redirect(db, settings, _user("admin")) is None
@@ -201,6 +201,6 @@ def test_connect_next_lands_the_person_where_they_started(tmp_path: Path) -> Non
             "/admin/connections/callback", params={"code": "c", "state": state}, follow_redirects=False
         )
         assert done.status_code == 303
-        assert done.headers["location"] == "http://localhost:5173/?connected=ansul.s%40simpleo.ai"
+        assert done.headers["location"] == "http://localhost:5173/?connected=alex.s%40example.com"
         listing = client.get("/admin/connections").json()
         assert listing["first_run"] is False and listing["first_run_notice"] == ""

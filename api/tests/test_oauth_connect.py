@@ -44,15 +44,15 @@ def test_connect_redirects_to_google_with_offline_access_forced_consent_and_the_
         assert query["access_type"] == ["offline"]
         assert query["prompt"] == ["consent"]
         assert query["include_granted_scopes"] == ["true"]
-        assert query["hd"] == ["simpleo.ai"]
+        assert query["hd"] == ["example.com"]
         assert query["scope"][0].split() == CONNECTION_SCOPES
         assert query["state"][0]
 
         # A reconnect pre-selects the account.
         again = client.get(
-            "/admin/connections/connect", params={"email": "ansul.s@simpleo.ai"}, follow_redirects=False
+            "/admin/connections/connect", params={"email": "alex.s@example.com"}, follow_redirects=False
         )
-        assert parse_qs(urlparse(again.headers["location"]).query)["login_hint"] == ["ansul.s@simpleo.ai"]
+        assert parse_qs(urlparse(again.headers["location"]).query)["login_hint"] == ["alex.s@example.com"]
 
 
 def test_the_callback_exchanges_the_code_and_stores_the_encrypted_refresh_token(tmp_path) -> None:
@@ -72,7 +72,7 @@ def test_the_callback_exchanges_the_code_and_stores_the_encrypted_refresh_token(
             follow_redirects=False,
         )
         assert done.status_code == 303
-        assert done.headers["location"] == "http://localhost:5173/admin?connected=ansul.s%40simpleo.ai"
+        assert done.headers["location"] == "http://localhost:5173/admin?connected=alex.s%40example.com"
 
         exchange = api.sent("POST", "/token")[0]
         form = dict(httpx.QueryParams(exchange.content.decode()))
@@ -86,21 +86,21 @@ def test_the_callback_exchanges_the_code_and_stores_the_encrypted_refresh_token(
         )
 
         with app.state.db.session() as session:
-            connection = session.query(Connection).filter_by(email="ansul.s@simpleo.ai").one()
+            connection = session.query(Connection).filter_by(email="alex.s@example.com").one()
             assert connection.status == "ok"
-            assert connection.name == "Ansul S"
+            assert connection.name == "Alex S"
             assert connection.key_version == 3
             assert connection.refresh_token_enc and "1//0gXyZ" not in connection.refresh_token_enc
             cipher = TokenCipher(KEY, version=3)
             assert (
                 cipher.decrypt(connection.refresh_token_enc, connection.key_version)
-                == "1//0gXyZ-refresh-token-for-ansul"
+                == "1//0gXyZ-refresh-token-for-alex"
             )
             assert connection.scopes == list(SCOPE_LABELS.values())
             assert connection.last_error is None
 
         activity = client.get("/admin/activity").json()
-        assert activity[0]["text"] == "Reconnected Google account ansul.s@simpleo.ai"
+        assert activity[0]["text"] == "Reconnected Google account alex.s@example.com"
         assert activity[0]["actor"] == ADMIN
 
 
@@ -109,7 +109,7 @@ def test_a_new_account_is_created_and_a_missing_scope_is_reported(tmp_path) -> N
     token["scope"] = token["scope"].replace(" https://www.googleapis.com/auth/gmail.readonly", "")
     info = {
         **json_response("oauth_userinfo.json").json(),
-        "email": "new.admin@simpleo.ai",
+        "email": "new.admin@example.com",
         "name": "New Admin",
     }
     api = MockGoogleApi().on("POST", "/token", token).on("GET", "/v1/userinfo", info)
@@ -121,10 +121,10 @@ def test_a_new_account_is_created_and_a_missing_scope_is_reported(tmp_path) -> N
             "/admin/connections/callback", params={"code": "c", "state": state}, follow_redirects=False
         )
         assert done.headers["location"].endswith(
-            "/admin?connected=new.admin%40simpleo.ai&missing=gmail.readonly"
+            "/admin?connected=new.admin%40example.com&missing=gmail.readonly"
         )
         emails = [c["email"] for c in client.get("/admin/connections").json()["connections"]]
-        assert "new.admin@simpleo.ai" in emails
+        assert "new.admin@example.com" in emails
 
 
 def test_a_wrong_state_or_a_foreign_domain_is_refused(tmp_path) -> None:
@@ -140,7 +140,7 @@ def test_a_wrong_state_or_a_foreign_domain_is_refused(tmp_path) -> None:
         state = parse_qs(urlparse(start.headers["location"]).query)["state"][0]
         refused = client.get("/admin/connections/callback", params={"code": "c", "state": state})
         assert refused.status_code == 403
-        assert "simpleo.ai" in refused.json()["detail"]
+        assert "example.com" in refused.json()["detail"]
 
 
 def test_google_saying_no_goes_back_to_the_admin_page_with_the_error(tmp_path) -> None:
@@ -189,13 +189,13 @@ def test_rotate_keys_re_encrypts_stored_tokens(tmp_path) -> None:
     app = _app(tmp_path, api, token_key=new_key, token_key_previous=KEY, token_key_version=2)
     with TestClient(app) as client:
         with app.state.db.session() as session:
-            row = session.query(Connection).filter_by(email="ansul.s@simpleo.ai").one()
+            row = session.query(Connection).filter_by(email="alex.s@example.com").one()
             row.refresh_token_enc, row.key_version = old.encrypt("1//old")
             session.commit()
         response = client.post("/admin/connections/rotate-keys")
-        assert response.json() == {"key_version": 2, "rotated": ["ansul.s@simpleo.ai"]}
+        assert response.json() == {"key_version": 2, "rotated": ["alex.s@example.com"]}
         with app.state.db.session() as session:
-            row = session.query(Connection).filter_by(email="ansul.s@simpleo.ai").one()
+            row = session.query(Connection).filter_by(email="alex.s@example.com").one()
             assert row.key_version == 2
             assert TokenCipher(new_key, version=2).decrypt(row.refresh_token_enc, 2) == "1//old"
         assert client.post("/admin/connections/rotate-keys").json()["rotated"] == []

@@ -129,7 +129,7 @@ export function PointRow({ point, owners, workstreams, onPatch, onDefer, onResto
 
 /**
  * The point's text on a phone (screen review R4-01): it wraps and the box grows with it, so the
- * whole point reads without scrolling inside a one-line field ("Send the Sprinto questionnaire by
+ * whole point reads without scrolling inside a one-line field ("Send the Northwind questionnaire by
  * Frida"). A point is one line in the sheet, so Enter does not add a line break; the wrapping is
  * only how it is shown. Same value, same onChange as the desktop input, so autosave and the caret
  * behave the same way.

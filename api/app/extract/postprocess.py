@@ -3,7 +3,7 @@
 Spec section 5. Owners resolve deterministically - attendees by full name, then first name if it is
 unique among them, then the directory, then the alias table. Two candidates set
 ``owner_ambiguous`` and leave the verbatim text alone; nothing is ever guessed. Due dates are
-parsed by code, never by the model, with the meeting start in Asia/Kolkata as the base.
+parsed by code, never by the model, with the meeting start in the display timezone as the base.
 """
 
 from __future__ import annotations
@@ -11,15 +11,13 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import datetime
-from zoneinfo import ZoneInfo
 
 import dateparser
 
 from app.extract.provider import ExtractionContext
 from app.extract.schema import ExtractionOutput
 from app.relative_dates import resolve as resolve_relative
-
-IST = ZoneInfo("Asia/Kolkata")
+from app.tz import as_zone
 
 # Words that look like an owner but are not a person.
 NON_PERSONS = {"unassigned", "everyone", "all", "team", "tbd", "product", "someone", "n a", "na", "none"}
@@ -66,7 +64,7 @@ def _edit_distance(a: str, b: str) -> int:
 def _first_name_matches(mention: str, name: str) -> bool:
     """Exact, or one letter apart on a name of four letters or more.
 
-    Notes are transcribed by ear: "Prathyush" and "Pratyush" are the same sound, and when both are
+    Notes are transcribed by ear: "Daniel" and "Daniela" are the same sound, and when both are
     in the room neither may be guessed. When only one of them is, the near match is the person.
     """
     first = _first(name)
@@ -136,12 +134,12 @@ def resolve_owner(
 _LEADING_WORDS = ("by", "before", "on", "due", "until", "till", "within", "next", "end of", "eod", "eow")
 
 
-def parse_due(text: str, base: datetime | None = None, timezone: str = "Asia/Kolkata") -> datetime | None:
+def parse_due(text: str, base: datetime | None = None, timezone: str = "") -> datetime | None:
     """The meeting's own shorthand first, then dateparser. What neither reads stays empty."""
     value = _clean(text)
     if not value:
         return None
-    tz = ZoneInfo(timezone)
+    tz = as_zone(timezone)
     base_dt = (base.astimezone(tz) if base.tzinfo else base.replace(tzinfo=tz)) if base else datetime.now(tz)
     explicit = resolve_relative(value, base_dt.date())
     if explicit is not None:
@@ -150,7 +148,7 @@ def parse_due(text: str, base: datetime | None = None, timezone: str = "Asia/Kol
         "RELATIVE_BASE": base_dt.replace(tzinfo=None),
         "PREFER_DATES_FROM": "future",
         "RETURN_AS_TIMEZONE_AWARE": False,
-        "TIMEZONE": timezone,
+        "TIMEZONE": tz.key,
         "DATE_ORDER": "DMY",
     }
     for candidate in _candidates(value):

@@ -16,7 +16,7 @@ const h = vi.hoisted(() => ({ addRow: vi.fn() }));
 
 vi.mock("@/api/hooks", () => ({
   useAddRow: () => ({ mutateAsync: h.addRow, isPending: false }),
-  useMeetings: () => ({ data: { items: [{ id: "m-1", title: "Vendor call with Madhu" }] } }),
+  useMeetings: () => ({ data: { items: [{ id: "m-1", title: "Vendor call with Maya" }] } }),
   usePoints: () => ({ data: [] }),
 }));
 
@@ -25,10 +25,10 @@ const tab: TabState = {
   sheet_id: "t1",
   title: "Roadmap",
   values: [
-    ["Nutrition roadmap", "", "", "", ""],
+    ["Mobile roadmap", "", "", "", ""],
     ["ID", "Task", "Owner", "Due", "Status"],
-    ["T-101", "Mirror Open Food Facts", "Ansul S", "3 Oct", "open"],
-    ["T-102", "Send the Sprinto questionnaire", "Nishchay S", "26 Sep", "open"],
+    ["T-101", "Mirror OpenRates", "Alex S", "3 Oct", "open"],
+    ["T-102", "Send the Northwind questionnaire", "Noah S", "26 Sep", "open"],
   ],
   dropdowns: { "4": ["open", "in progress", "done"] },
   formula_cols: [],

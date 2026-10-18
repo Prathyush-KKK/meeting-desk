@@ -306,7 +306,7 @@ function ManualForm({
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean)
-      .map((name) => ({ name, email: `${name.toLowerCase().replace(/\s+/g, ".")}@simpleo.ai`, response: "accepted" }));
+      .map((name) => ({ name, email: `${name.toLowerCase().replace(/\s+/g, ".")}@example.com`, response: "accepted" }));
     try {
       await patch.mutateAsync({
         id: meeting.id!,
@@ -334,7 +334,7 @@ function ManualForm({
             {workstreams.map((w) => <option key={w}>{w}</option>)}
           </select>
         </Field>
-        <Field id="ma" label="Attendees, comma separated" full><Input id="ma" value={f.attendeesText} onChange={(e) => setF({ ...f, attendeesText: e.target.value })} placeholder="Ansul S, Prathyush Kodhanpur" /></Field>
+        <Field id="ma" label="Attendees, comma separated" full><Input id="ma" value={f.attendeesText} onChange={(e) => setF({ ...f, attendeesText: e.target.value })} placeholder="Alex S, Daniel Okafor" /></Field>
         <Field id="mloc" label="Location"><Input id="mloc" value={f.location} onChange={(e) => setF({ ...f, location: e.target.value })} /></Field>
         <Field id="mdesc" label="Description" full><Textarea id="mdesc" rows={3} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
       </div>

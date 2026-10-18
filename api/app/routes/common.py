@@ -21,6 +21,7 @@ from app.google.interface import AuthExpired, GoogleSuite, TabRead
 from app.google.picker import Pick, first_able
 from app.models import Connection, Meeting, Point, SheetLayout, Workbook
 from app.sheets.layout import Layout, detect_date_cols, detect_formula_cols, detect_layout, region_hash
+from app.tz import display_zone
 
 SPREADSHEET_URL_RE = re.compile(r"/spreadsheets/d/([a-zA-Z0-9-_]+)")
 # A bare id pasted without the URL around it. Google's file ids are long base64url strings, so
@@ -28,14 +29,11 @@ SPREADSHEET_URL_RE = re.compile(r"/spreadsheets/d/([a-zA-Z0-9-_]+)")
 # an id - it must not reach the Sheets API as one.
 BARE_SPREADSHEET_ID_RE = re.compile(r"[A-Za-z0-9_-]{20,}")
 
-IST = ZoneInfo("Asia/Kolkata")
-
-
-def aware(value: datetime | None, tz: ZoneInfo = IST) -> datetime | None:
+def aware(value: datetime | None, tz: ZoneInfo | None = None) -> datetime | None:
     """SQLite drops the offset, so datetimes read back naive. Put it back before comparing."""
     if value is None or value.tzinfo is not None:
         return value
-    return value.replace(tzinfo=tz)
+    return value.replace(tzinfo=tz or display_zone())
 
 
 def get_clock(request: Request) -> Clock:

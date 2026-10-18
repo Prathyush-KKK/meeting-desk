@@ -14,6 +14,7 @@ from zoneinfo import ZoneInfo
 
 from app.google.http import GoogleHttp
 from app.google.interface import GEMINI_NOTES_MARKER, DriveFile, NotFoundError, PermissionDenied
+from app.tz import as_zone, display_zone
 
 BASE = "https://www.googleapis.com/drive/v3"
 DOC_MIME = "application/vnd.google-apps.document"
@@ -44,9 +45,9 @@ def gemini_notes_query(
 
 
 class RealDriveClient:
-    def __init__(self, http: GoogleHttp, display_tz: ZoneInfo | str = "Asia/Kolkata") -> None:
+    def __init__(self, http: GoogleHttp, display_tz: ZoneInfo | str | None = None) -> None:
         self.http = http
-        self.tz = ZoneInfo(display_tz) if isinstance(display_tz, str) else display_tz
+        self.tz = as_zone(display_tz)
 
     def search(
         self,
@@ -112,5 +113,5 @@ def _parse_dt(raw: Any, tz: ZoneInfo) -> datetime | None:
 
 def _rfc3339(value: datetime) -> str:
     if value.tzinfo is None:
-        value = value.replace(tzinfo=ZoneInfo("Asia/Kolkata"))
+        value = value.replace(tzinfo=display_zone())
     return value.astimezone(ZoneInfo("UTC")).strftime("%Y-%m-%dT%H:%M:%SZ")

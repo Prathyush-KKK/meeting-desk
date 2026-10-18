@@ -547,6 +547,6 @@ def _as_datetime(value: Any) -> datetime | None:
 
 
 def _aware(value: datetime) -> datetime:
-    from zoneinfo import ZoneInfo
+    from app.tz import display_zone
 
-    return value if value.tzinfo else value.replace(tzinfo=ZoneInfo("Asia/Kolkata"))
+    return value if value.tzinfo else value.replace(tzinfo=display_zone())

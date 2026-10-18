@@ -15,7 +15,7 @@
     ],
     [
       "",
-      "Phase goal: all five logging paths ship; menu scan is ours alone",
+      "Phase goal: all five capture flows ship; receipt scan is ours alone",
       "",
       "",
       "",
@@ -95,8 +95,8 @@
     ],
     [
       "T-101",
-      "Photo logging path",
-      "Anushka Mohanty",
+      "Photo capture flow",
+      "Anna Moreno",
       "5 Sep",
       "P0",
       "M",
@@ -105,8 +105,8 @@
     ],
     [
       "T-102",
-      "Search logging path",
-      "Anushka Mohanty",
+      "Manual entry flow",
+      "Anna Moreno",
       "5 Sep",
       "P0",
       "S",
@@ -115,8 +115,8 @@
     ],
     [
       "T-103",
-      "Barcode logging path",
-      "Shambhavi Singh",
+      "Card import flow",
+      "Sofia Silva",
       "12 Sep",
       "P1",
       "S",
@@ -125,18 +125,18 @@
     ],
     [
       "T-104",
-      "Menu scan logging path",
-      "Prathyush Kodhanpur",
+      "Receipt scan flow",
+      "Daniel Okafor",
       "12 Sep",
       "P1",
       "M",
       "blocked",
-      "portion accuracy unmeasured"
+      "OCR accuracy unmeasured"
     ],
     [
       "T-105",
-      "Sprinto vendor verification call with Madhu",
-      "Ansul S",
+      "Northwind vendor verification call with Maya",
+      "Alex S",
       "",
       "P2",
       "XS",
@@ -145,8 +145,8 @@
     ],
     [
       "T-106",
-      "Mirror Open Food Facts before launch",
-      "Prathyush Kodhanpur",
+      "Mirror OpenRates before launch",
+      "Daniel Okafor",
       "3 Oct",
       "P0",
       "S",
@@ -155,8 +155,8 @@
     ],
     [
       "T-107",
-      "Confirmation screen for food scanning",
-      "Prathyush Kodhanpur",
+      "Confirmation screen for receipt scanning",
+      "Daniel Okafor",
       "3 Oct",
       "P1",
       "M",
@@ -233,8 +233,8 @@
     {
       "id": "p1",
       "kind": "action",
-      "text": "Mirror Open Food Facts before launch",
-      "owner": "Prathyush Kodhanpur",
+      "text": "Mirror OpenRates before launch",
+      "owner": "Daniel Okafor",
       "due": "3 Oct",
       "status": "open",
       "meeting_label": "Platform squad sync · 22 Sep"
@@ -251,8 +251,8 @@
     {
       "id": "p3",
       "kind": "risk",
-      "text": "Photo portion accuracy is unmeasured",
-      "owner": "Anushka Mohanty",
+      "text": "Receipt OCR accuracy is unmeasured",
+      "owner": "Anna Moreno",
       "due": "",
       "status": "blocked",
       "meeting_label": "Platform squad sync · 22 Sep"
@@ -329,7 +329,7 @@
           "ref": "B17",
           "r": 16,
           "c": 1,
-          "value": "Mirror Open Food Facts before launch",
+          "value": "Mirror OpenRates before launch",
           "kind": "new",
           "existing": null
         },
@@ -337,7 +337,7 @@
           "ref": "C17",
           "r": 16,
           "c": 2,
-          "value": "Prathyush Kodhanpur",
+          "value": "Daniel Okafor",
           "kind": "new",
           "existing": null
         },
@@ -409,7 +409,7 @@
           "ref": "B19",
           "r": 18,
           "c": 1,
-          "value": "Photo portion accuracy is unmeasured",
+          "value": "Receipt OCR accuracy is unmeasured",
           "kind": "new",
           "existing": null
         },
@@ -417,7 +417,7 @@
           "ref": "C19",
           "r": 18,
           "c": 2,
-          "value": "Anushka Mohanty",
+          "value": "Anna Moreno",
           "kind": "new",
           "existing": null
         },
@@ -454,7 +454,7 @@
         ],
         [
           "",
-          "Phase goal: all five logging paths ship; menu scan is ours alone",
+          "Phase goal: all five capture flows ship; receipt scan is ours alone",
           "",
           "",
           "",
@@ -534,8 +534,8 @@
         ],
         [
           "T-101",
-          "Photo logging path",
-          "Anushka Mohanty",
+          "Photo capture flow",
+          "Anna Moreno",
           "5 Sep",
           "P0",
           "M",
@@ -544,8 +544,8 @@
         ],
         [
           "T-102",
-          "Search logging path",
-          "Anushka Mohanty",
+          "Manual entry flow",
+          "Anna Moreno",
           "5 Sep",
           "P0",
           "S",
@@ -554,8 +554,8 @@
         ],
         [
           "T-103",
-          "Barcode logging path",
-          "Shambhavi Singh",
+          "Card import flow",
+          "Sofia Silva",
           "12 Sep",
           "P1",
           "S",
@@ -564,18 +564,18 @@
         ],
         [
           "T-104",
-          "Menu scan logging path",
-          "Prathyush Kodhanpur",
+          "Receipt scan flow",
+          "Daniel Okafor",
           "12 Sep",
           "P1",
           "M",
           "blocked",
-          "portion accuracy unmeasured"
+          "OCR accuracy unmeasured"
         ],
         [
           "T-105",
-          "Sprinto vendor verification call with Madhu",
-          "Ansul S",
+          "Northwind vendor verification call with Maya",
+          "Alex S",
           "",
           "P2",
           "XS",
@@ -584,8 +584,8 @@
         ],
         [
           "T-106",
-          "Mirror Open Food Facts before launch",
-          "Prathyush Kodhanpur",
+          "Mirror OpenRates before launch",
+          "Daniel Okafor",
           "3 Oct",
           "P0",
           "S",
@@ -594,8 +594,8 @@
         ],
         [
           "T-107",
-          "Confirmation screen for food scanning",
-          "Prathyush Kodhanpur",
+          "Confirmation screen for receipt scanning",
+          "Daniel Okafor",
           "3 Oct",
           "P1",
           "M",
@@ -604,8 +604,8 @@
         ],
         [
           "T-108",
-          "Mirror Open Food Facts before launch",
-          "Prathyush Kodhanpur",
+          "Mirror OpenRates before launch",
+          "Daniel Okafor",
           "3 Oct",
           "",
           "",
@@ -624,8 +624,8 @@
         ],
         [
           "T-110",
-          "Photo portion accuracy is unmeasured",
-          "Anushka Mohanty",
+          "Receipt OCR accuracy is unmeasured",
+          "Anna Moreno",
           "",
           "",
           "",
@@ -685,17 +685,17 @@
             "ref": "B11",
             "r": 10,
             "c": 1,
-            "value": "Search logging path",
+            "value": "Manual entry flow",
             "kind": "conflict",
-            "existing": "Search logging path"
+            "existing": "Manual entry flow"
           },
           {
             "ref": "C11",
             "r": 10,
             "c": 2,
-            "value": "Anushka Mohanty",
+            "value": "Anna Moreno",
             "kind": "conflict",
-            "existing": "Anushka Mohanty"
+            "existing": "Anna Moreno"
           },
           {
             "ref": "D11",
@@ -733,9 +733,9 @@
             "ref": "B12",
             "r": 11,
             "c": 1,
-            "value": "Barcode logging path",
+            "value": "Card import flow",
             "kind": "conflict",
-            "existing": "Barcode logging path"
+            "existing": "Card import flow"
           },
           {
             "ref": "G12",
@@ -765,17 +765,17 @@
             "ref": "B13",
             "r": 12,
             "c": 1,
-            "value": "Menu scan logging path",
+            "value": "Receipt scan flow",
             "kind": "conflict",
-            "existing": "Menu scan logging path"
+            "existing": "Receipt scan flow"
           },
           {
             "ref": "C13",
             "r": 12,
             "c": 2,
-            "value": "Prathyush Kodhanpur",
+            "value": "Daniel Okafor",
             "kind": "conflict",
-            "existing": "Prathyush Kodhanpur"
+            "existing": "Daniel Okafor"
           },
           {
             "ref": "G13",
@@ -789,9 +789,9 @@
             "ref": "H13",
             "r": 12,
             "c": 7,
-            "value": "portion accuracy unmeasured",
+            "value": "OCR accuracy unmeasured",
             "kind": "conflict",
-            "existing": "portion accuracy unmeasured"
+            "existing": "OCR accuracy unmeasured"
           },
           {
             "ref": "A13",
@@ -862,7 +862,7 @@
           ],
           [
             "",
-            "Phase goal: all five logging paths ship; menu scan is ours alone",
+            "Phase goal: all five capture flows ship; receipt scan is ours alone",
             "",
             "",
             "",
@@ -942,8 +942,8 @@
           ],
           [
             "T-101",
-            "Photo logging path",
-            "Anushka Mohanty",
+            "Photo capture flow",
+            "Anna Moreno",
             "5 Sep",
             "P0",
             "M",
@@ -952,8 +952,8 @@
           ],
           [
             "T-102",
-            "Search logging path",
-            "Anushka Mohanty",
+            "Manual entry flow",
+            "Anna Moreno",
             "5 Sep",
             "P0",
             "S",
@@ -962,8 +962,8 @@
           ],
           [
             "T-103",
-            "Barcode logging path",
-            "Shambhavi Singh",
+            "Card import flow",
+            "Sofia Silva",
             "12 Sep",
             "P1",
             "S",
@@ -972,18 +972,18 @@
           ],
           [
             "T-104",
-            "Menu scan logging path",
-            "Prathyush Kodhanpur",
+            "Receipt scan flow",
+            "Daniel Okafor",
             "12 Sep",
             "P1",
             "M",
             "blocked",
-            "portion accuracy unmeasured"
+            "OCR accuracy unmeasured"
           ],
           [
             "T-105",
-            "Sprinto vendor verification call with Madhu",
-            "Ansul S",
+            "Northwind vendor verification call with Maya",
+            "Alex S",
             "",
             "P2",
             "XS",
@@ -992,8 +992,8 @@
           ],
           [
             "T-106",
-            "Mirror Open Food Facts before launch",
-            "Prathyush Kodhanpur",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
             "3 Oct",
             "P0",
             "S",
@@ -1002,8 +1002,8 @@
           ],
           [
             "T-107",
-            "Confirmation screen for food scanning",
-            "Prathyush Kodhanpur",
+            "Confirmation screen for receipt scanning",
+            "Daniel Okafor",
             "3 Oct",
             "P1",
             "M",
@@ -1073,17 +1073,17 @@
             "ref": "B11",
             "r": 10,
             "c": 1,
-            "value": "Mirror Open Food Facts before launch",
+            "value": "Mirror OpenRates before launch",
             "kind": "conflict",
-            "existing": "Search logging path"
+            "existing": "Manual entry flow"
           },
           {
             "ref": "C11",
             "r": 10,
             "c": 2,
-            "value": "Prathyush Kodhanpur",
+            "value": "Daniel Okafor",
             "kind": "conflict",
-            "existing": "Anushka Mohanty"
+            "existing": "Anna Moreno"
           },
           {
             "ref": "D11",
@@ -1123,7 +1123,7 @@
             "c": 1,
             "value": "Owner column holds a person, not a team",
             "kind": "conflict",
-            "existing": "Barcode logging path"
+            "existing": "Card import flow"
           },
           {
             "ref": "G12",
@@ -1153,17 +1153,17 @@
             "ref": "B13",
             "r": 12,
             "c": 1,
-            "value": "Photo portion accuracy is unmeasured",
+            "value": "Receipt OCR accuracy is unmeasured",
             "kind": "conflict",
-            "existing": "Menu scan logging path"
+            "existing": "Receipt scan flow"
           },
           {
             "ref": "C13",
             "r": 12,
             "c": 2,
-            "value": "Anushka Mohanty",
+            "value": "Anna Moreno",
             "kind": "conflict",
-            "existing": "Prathyush Kodhanpur"
+            "existing": "Daniel Okafor"
           },
           {
             "ref": "G13",
@@ -1179,7 +1179,7 @@
             "c": 7,
             "value": "Platform squad sync · 22 Sep",
             "kind": "conflict",
-            "existing": "portion accuracy unmeasured"
+            "existing": "OCR accuracy unmeasured"
           },
           {
             "ref": "A13",
@@ -1250,7 +1250,7 @@
           ],
           [
             "",
-            "Phase goal: all five logging paths ship; menu scan is ours alone",
+            "Phase goal: all five capture flows ship; receipt scan is ours alone",
             "",
             "",
             "",
@@ -1330,8 +1330,8 @@
           ],
           [
             "T-101",
-            "Photo logging path",
-            "Anushka Mohanty",
+            "Photo capture flow",
+            "Anna Moreno",
             "5 Sep",
             "P0",
             "M",
@@ -1340,8 +1340,8 @@
           ],
           [
             "T-108",
-            "Mirror Open Food Facts before launch",
-            "Prathyush Kodhanpur",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
             "3 Oct",
             "P0",
             "S",
@@ -1351,7 +1351,7 @@
           [
             "T-109",
             "Owner column holds a person, not a team",
-            "Shambhavi Singh",
+            "Sofia Silva",
             "12 Sep",
             "P1",
             "S",
@@ -1360,8 +1360,8 @@
           ],
           [
             "T-110",
-            "Photo portion accuracy is unmeasured",
-            "Anushka Mohanty",
+            "Receipt OCR accuracy is unmeasured",
+            "Anna Moreno",
             "12 Sep",
             "P1",
             "M",
@@ -1370,8 +1370,8 @@
           ],
           [
             "T-105",
-            "Sprinto vendor verification call with Madhu",
-            "Ansul S",
+            "Northwind vendor verification call with Maya",
+            "Alex S",
             "",
             "P2",
             "XS",
@@ -1380,8 +1380,8 @@
           ],
           [
             "T-106",
-            "Mirror Open Food Facts before launch",
-            "Prathyush Kodhanpur",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
             "3 Oct",
             "P0",
             "S",
@@ -1390,8 +1390,8 @@
           ],
           [
             "T-107",
-            "Confirmation screen for food scanning",
-            "Prathyush Kodhanpur",
+            "Confirmation screen for receipt scanning",
+            "Daniel Okafor",
             "3 Oct",
             "P1",
             "M",
@@ -1463,7 +1463,7 @@
             "ref": "B11",
             "r": 10,
             "c": 1,
-            "value": "Mirror Open Food Facts before launch",
+            "value": "Mirror OpenRates before launch",
             "kind": "new",
             "existing": null
           },
@@ -1471,7 +1471,7 @@
             "ref": "C11",
             "r": 10,
             "c": 2,
-            "value": "Prathyush Kodhanpur",
+            "value": "Daniel Okafor",
             "kind": "new",
             "existing": null
           },
@@ -1543,7 +1543,7 @@
             "ref": "B13",
             "r": 12,
             "c": 1,
-            "value": "Photo portion accuracy is unmeasured",
+            "value": "Receipt OCR accuracy is unmeasured",
             "kind": "new",
             "existing": null
           },
@@ -1551,7 +1551,7 @@
             "ref": "C13",
             "r": 12,
             "c": 2,
-            "value": "Anushka Mohanty",
+            "value": "Anna Moreno",
             "kind": "new",
             "existing": null
           },
@@ -1626,7 +1626,7 @@
           ],
           [
             "",
-            "Phase goal: all five logging paths ship; menu scan is ours alone",
+            "Phase goal: all five capture flows ship; receipt scan is ours alone",
             "",
             "",
             "",
@@ -1706,8 +1706,8 @@
           ],
           [
             "T-101",
-            "Photo logging path",
-            "Anushka Mohanty",
+            "Photo capture flow",
+            "Anna Moreno",
             "5 Sep",
             "P0",
             "M",
@@ -1716,8 +1716,8 @@
           ],
           [
             "T-108",
-            "Mirror Open Food Facts before launch",
-            "Prathyush Kodhanpur",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
             "3 Oct",
             "",
             "",
@@ -1736,8 +1736,8 @@
           ],
           [
             "T-110",
-            "Photo portion accuracy is unmeasured",
-            "Anushka Mohanty",
+            "Receipt OCR accuracy is unmeasured",
+            "Anna Moreno",
             "",
             "",
             "",
@@ -1746,8 +1746,8 @@
           ],
           [
             "T-102",
-            "Search logging path",
-            "Anushka Mohanty",
+            "Manual entry flow",
+            "Anna Moreno",
             "5 Sep",
             "P0",
             "S",
@@ -1756,8 +1756,8 @@
           ],
           [
             "T-103",
-            "Barcode logging path",
-            "Shambhavi Singh",
+            "Card import flow",
+            "Sofia Silva",
             "12 Sep",
             "P1",
             "S",
@@ -1766,18 +1766,18 @@
           ],
           [
             "T-104",
-            "Menu scan logging path",
-            "Prathyush Kodhanpur",
+            "Receipt scan flow",
+            "Daniel Okafor",
             "12 Sep",
             "P1",
             "M",
             "blocked",
-            "portion accuracy unmeasured"
+            "OCR accuracy unmeasured"
           ],
           [
             "T-105",
-            "Sprinto vendor verification call with Madhu",
-            "Ansul S",
+            "Northwind vendor verification call with Maya",
+            "Alex S",
             "",
             "P2",
             "XS",
@@ -1786,8 +1786,8 @@
           ],
           [
             "T-106",
-            "Mirror Open Food Facts before launch",
-            "Prathyush Kodhanpur",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
             "3 Oct",
             "P0",
             "S",
@@ -1796,8 +1796,8 @@
           ],
           [
             "T-107",
-            "Confirmation screen for food scanning",
-            "Prathyush Kodhanpur",
+            "Confirmation screen for receipt scanning",
+            "Daniel Okafor",
             "3 Oct",
             "P1",
             "M",

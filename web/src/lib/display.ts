@@ -26,7 +26,7 @@ export const KIND_TITLE: Record<Kind, string> = {
 };
 
 /** The workstreams the workspace uses; anything already on a meeting is merged in at runtime. */
-export const WORKSTREAMS = ["Nutrition", "Platform", "Household & CDP", "SIApoints", "Prod ops", "Hiring"];
+export const WORKSTREAMS = ["Mobile", "Platform", "Billing", "Rewards", "Prod ops", "Hiring"];
 
 export function mergeWorkstreams(extra: (string | null | undefined)[]): string[] {
   const seen = new Set(WORKSTREAMS);
@@ -112,7 +112,7 @@ export function ago(minutes: number): string {
 }
 
 /** A tab title if the transfer's snapshot carries one; today's snapshots do not, so the sheet id. */
-/** "Nutrition Roadmap / Backlog" from the names the transfer kept; older rows have only the sheet id. */
+/** "Mobile Roadmap / Backlog" from the names the transfer kept; older rows have only the sheet id. */
 export function transferSheet(t: Pick<Transfer, "sheet_id" | "snapshot">): string {
   const book = t.snapshot?.workbook_name;
   const tab = t.snapshot?.sheet_title;

@@ -23,14 +23,14 @@ def test_sources_come_from_the_record(client: TestClient) -> None:
 
 
 def test_a_doc_shared_with_only_the_second_admin_is_still_readable(client: TestClient) -> None:
-    meeting_id = saved_meeting_id(client, "Eshan Interview Task Handover")
+    meeting_id = saved_meeting_id(client, "Ethan Interview Task Handover")
     sources = _sources(client, meeting_id)
     assert sources["gemini_doc"]["available"] is True
-    assert sources["gemini_doc"]["connection"] == "ansul.s@simpleo.ai"
+    assert sources["gemini_doc"]["connection"] == "alex.s@example.com"
 
 
 def test_a_doc_shared_with_nobody_says_so_and_offers_paste(client: TestClient) -> None:
-    meeting_id = saved_meeting_id(client, "Household and wealth workflows")
+    meeting_id = saved_meeting_id(client, "Billing and payments workflows")
     sources = _sources(client, meeting_id)
     assert sources["gemini_doc"]["available"] is False
     assert "not shared with an admin account" in sources["gemini_doc"]["message"]
@@ -38,7 +38,7 @@ def test_a_doc_shared_with_nobody_says_so_and_offers_paste(client: TestClient) -
 
 
 def test_a_meeting_without_a_doc_says_not_generated_yet(client: TestClient) -> None:
-    meeting_id = meeting_by_title(client, "Sprinto call prep")["id"]
+    meeting_id = meeting_by_title(client, "Northwind call prep")["id"]
     sources = _sources(client, meeting_id)
     assert sources["gemini_doc"]["message"] == "not generated yet"
 
@@ -52,7 +52,7 @@ def test_import_prefers_the_full_notes_tab(client: TestClient) -> None:
     )
     assert response.status_code == 201
     assert response.json()["tab"] == "Full notes"
-    assert "Mirror Open Food Facts" in response.json()["note"]["text"]
+    assert "Mirror OpenRates" in response.json()["note"]["text"]
 
 
 def test_importing_the_transcript_tab(client: TestClient) -> None:
@@ -67,7 +67,7 @@ def test_importing_the_transcript_tab(client: TestClient) -> None:
 
 
 def test_importing_an_unshared_doc_is_refused_with_a_reason(client: TestClient) -> None:
-    meeting_id = saved_meeting_id(client, "Household and wealth workflows")
+    meeting_id = saved_meeting_id(client, "Billing and payments workflows")
     response = client.post(
         "/notes/import", json={"meeting_id": meeting_id, "source": "gemini_doc", "origin_ref": "doc-m5"}
     )
@@ -79,13 +79,13 @@ def test_recap_email_import(client: TestClient) -> None:
     meeting_id = saved_meeting_id(client, "Platform squad sync")
     response = client.post("/notes/import", json={"meeting_id": meeting_id, "source": "recap_email"})
     assert response.status_code == 201
-    assert response.json()["connection"] == "prathyush.kodhanpur@simpleo.ai"
+    assert response.json()["connection"] == "daniel.okafor@example.com"
     assert "Next steps" in response.json()["note"]["text"]
 
 
 def test_the_same_text_twice_is_reported_not_stored_twice(client: TestClient) -> None:
     meeting_id = saved_meeting_id(client, "Platform squad sync")
-    payload = {"meeting_id": meeting_id, "text": "Nishchay: finish the alert standard"}
+    payload = {"meeting_id": meeting_id, "text": "Noah: finish the alert standard"}
     first = client.post("/notes/paste", json=payload)
     second = client.post("/notes/paste", json=payload)
     assert first.json()["created"] is True
@@ -100,12 +100,12 @@ def test_markdown_from_a_gemini_chat_is_normalised_on_save(client: TestClient) -
         "/notes/paste",
         json={
             "meeting_id": meeting_id,
-            "text": "**The Next Steps**\n* Ansul S: call Madhu\n- Nishchay: alerts",
+            "text": "**The Next Steps**\n* Alex S: call Maya\n- Noah: alerts",
         },
     )
     text = response.json()["note"]["text"]
     assert "**" not in text
-    assert text.splitlines() == ["The Next Steps", "Ansul S: call Madhu", "Nishchay: alerts"]
+    assert text.splitlines() == ["The Next Steps", "Alex S: call Maya", "Noah: alerts"]
 
 
 def test_paste_moves_the_meeting_to_the_notes_step(client: TestClient) -> None:
@@ -125,15 +125,15 @@ def test_quick_paste_with_a_meeting_saves_a_note_on_it(client: TestClient) -> No
 def test_quick_paste_without_a_meeting_creates_one_from_the_first_line(client: TestClient) -> None:
     response = client.post(
         "/notes/quick",
-        json={"text": "**Vendor call with Madhu**\nAnsul S: send the questionnaire\nNishchay: book the slot"},
+        json={"text": "**Vendor call with Maya**\nAlex S: send the questionnaire\nNoah: book the slot"},
     )
     assert response.status_code == 201
     body = response.json()
     assert body["created_meeting"] is True
-    assert body["meeting"]["title"] == "Vendor call with Madhu"
+    assert body["meeting"]["title"] == "Vendor call with Maya"
     assert body["meeting"]["source"] == "manual"
     assert body["meeting"]["step"] == "notes"
-    assert body["note"]["text"].startswith("Vendor call with Madhu")
+    assert body["note"]["text"].startswith("Vendor call with Maya")
 
 
 def test_quick_paste_of_nothing_is_refused(client: TestClient) -> None:
@@ -152,8 +152,8 @@ def test_include_toggle(client: TestClient) -> None:
 
 def test_a_note_can_be_moved_to_another_meeting(client: TestClient) -> None:
     wrong = saved_meeting_id(client, "Platform squad sync")
-    right = meeting_by_title(client, "Sprinto call prep")["id"]
-    note = client.post("/notes/paste", json={"meeting_id": wrong, "text": "belongs to Sprinto"}).json()[
+    right = meeting_by_title(client, "Northwind call prep")["id"]
+    note = client.post("/notes/paste", json={"meeting_id": wrong, "text": "belongs to Northwind"}).json()[
         "note"
     ]
 
@@ -166,7 +166,7 @@ def test_a_note_can_be_moved_to_another_meeting(client: TestClient) -> None:
 
 def test_moving_onto_a_meeting_that_already_has_the_note_is_refused(client: TestClient) -> None:
     a = saved_meeting_id(client, "Platform squad sync")
-    b = meeting_by_title(client, "Sprinto call prep")["id"]
+    b = meeting_by_title(client, "Northwind call prep")["id"]
     text = "the same words"
     note = client.post("/notes/paste", json={"meeting_id": a, "text": text}).json()["note"]
     client.post("/notes/paste", json={"meeting_id": b, "text": text})

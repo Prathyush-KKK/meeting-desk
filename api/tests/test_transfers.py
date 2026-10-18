@@ -12,12 +12,12 @@ def _tab(client: TestClient, workbook_id: str, sheet_id: str) -> dict:
 
 
 def _points(client: TestClient, n: int = 2) -> list[str]:
-    meeting_id = meeting_by_title(client, "Nutrition roadmap review")["id"]
+    meeting_id = meeting_by_title(client, "Mobile roadmap review")["id"]
     return [p["id"] for p in client.get("/points", params={"meeting_id": meeting_id}).json()[:n]]
 
 
 def test_append_preview_plans_rows_after_the_table(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     point_ids = _points(client, 2)
     response = client.post(
         "/transfers/preview",
@@ -34,7 +34,7 @@ def test_append_preview_plans_rows_after_the_table(client: TestClient) -> None:
 
 
 def test_append_writes_one_batch_and_records_the_transfer(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     point_ids = _points(client, 2)
     tab = _tab(client, workbook["id"], "t1")
     google = client.app.state.google
@@ -61,13 +61,13 @@ def test_append_writes_one_batch_and_records_the_transfer(client: TestClient) ->
 
     after = _tab(client, workbook["id"], "t1")
     assert after["values"][16][0] == "T-108"
-    assert after["values"][16][1] == "Review dataset for weight information"
-    assert after["values"][16][2] == "Anushka Mohanty"
+    assert after["values"][16][1] == "Review dataset for currency information"
+    assert after["values"][16][2] == "Anna Moreno"
 
 
 def test_transferred_points_are_removed_from_the_tool(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
-    meeting_id = meeting_by_title(client, "Nutrition roadmap review")["id"]
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
+    meeting_id = meeting_by_title(client, "Mobile roadmap review")["id"]
     point_ids = _points(client, 2)
     tab = _tab(client, workbook["id"], "t1")
 
@@ -94,7 +94,7 @@ def test_transferred_points_are_removed_from_the_tool(client: TestClient) -> Non
 
 
 def test_a_changed_tab_between_preview_and_write_gives_409_with_the_fresh_grid(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     point_ids = _points(client, 1)
     stale = _tab(client, workbook["id"], "t1")["region_hash"]
 
@@ -123,7 +123,7 @@ def test_a_changed_tab_between_preview_and_write_gives_409_with_the_fresh_grid(c
 
 
 def test_keys_are_allocated_after_the_re_read(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     point_ids = _points(client, 1)
     tab = _tab(client, workbook["id"], "t1")
 
@@ -141,8 +141,8 @@ def test_keys_are_allocated_after_the_re_read(client: TestClient) -> None:
 
 
 def test_status_is_mapped_to_the_columns_dropdown_and_unmapped_is_flagged(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
-    meeting_id = meeting_by_title(client, "Nutrition roadmap review")["id"]
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
+    meeting_id = meeting_by_title(client, "Mobile roadmap review")["id"]
 
     # "in progress" is in the P1 tab's dropdown, so it is written as the sheet spells it.
     in_progress = next(
@@ -164,7 +164,7 @@ def test_status_is_mapped_to_the_columns_dropdown_and_unmapped_is_flagged(client
 
     # The Decisions tab allows only decided/open/superseded, so a blocked point's status stays blank.
     blocked = client.post(
-        "/points", json={"meeting_id": meeting_id, "text": "Mirror Open Food Facts", "status": "blocked"}
+        "/points", json={"meeting_id": meeting_id, "text": "Mirror OpenRates", "status": "blocked"}
     ).json()
     preview = client.post(
         "/transfers/preview",
@@ -181,7 +181,7 @@ def test_status_is_mapped_to_the_columns_dropdown_and_unmapped_is_flagged(client
 
 
 def test_the_notes_column_carries_the_meeting_title_and_date(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     preview = client.post(
         "/transfers/preview",
         json={
@@ -192,11 +192,11 @@ def test_the_notes_column_carries_the_meeting_title_and_date(client: TestClient)
         },
     ).json()
     notes_cell = next(w for w in preview["plan"]["writes"] if w["ref"] == "H17")
-    assert notes_cell["value"] == "Nutrition roadmap review · 19 Sep"
+    assert notes_cell["value"] == "Mobile roadmap review · 19 Sep"
 
 
 def test_custom_fill_with_skip_leaves_existing_cells_alone(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     tab = _tab(client, workbook["id"], "t1")
     point_ids = _points(client, 2)
     response = client.post(
@@ -217,7 +217,7 @@ def test_custom_fill_with_skip_leaves_existing_cells_alone(client: TestClient) -
 
 
 def test_custom_fill_with_overwrite_records_the_previous_values(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     tab = _tab(client, workbook["id"], "t1")
     before = tab["values"][10][1]
     response = client.post(
@@ -239,7 +239,7 @@ def test_custom_fill_with_overwrite_records_the_previous_values(client: TestClie
 
 
 def test_an_anchor_in_the_header_is_blocked(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     response = client.post(
         "/transfers/preview",
         json={
@@ -255,7 +255,7 @@ def test_an_anchor_in_the_header_is_blocked(client: TestClient) -> None:
 
 
 def test_a_protected_range_names_the_protection_and_its_owner(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     tab = _tab(client, workbook["id"], "t4")  # Risks is protected in the fake
     response = client.post(
         "/transfers/execute",
@@ -269,7 +269,7 @@ def test_a_protected_range_names_the_protection_and_its_owner(client: TestClient
     )
     assert response.status_code == 403
     assert "protected" in response.json()["detail"]
-    assert "ansul.s@simpleo.ai" in response.json()["detail"]
+    assert "alex.s@example.com" in response.json()["detail"]
 
 
 def test_a_read_only_workbook_cannot_be_written_to(client: TestClient) -> None:
@@ -292,8 +292,8 @@ def test_a_read_only_workbook_cannot_be_written_to(client: TestClient) -> None:
 
 
 def test_transferring_the_same_text_twice_needs_an_explicit_choice(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
-    meeting_id = meeting_by_title(client, "Nutrition roadmap review")["id"]
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
+    meeting_id = meeting_by_title(client, "Mobile roadmap review")["id"]
     point = client.get("/points", params={"meeting_id": meeting_id}).json()[0]
     tab = _tab(client, workbook["id"], "t1")
     client.post(
@@ -364,8 +364,8 @@ def test_date_columns_are_written_as_dates(client: TestClient) -> None:
 
 
 def test_undo_removes_inserted_rows_and_brings_the_points_back(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
-    meeting_id = meeting_by_title(client, "Nutrition roadmap review")["id"]
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
+    meeting_id = meeting_by_title(client, "Mobile roadmap review")["id"]
     point_ids = _points(client, 2)
     tab = _tab(client, workbook["id"], "t1")
     rows_before = len(tab["values"])
@@ -391,7 +391,7 @@ def test_undo_removes_inserted_rows_and_brings_the_points_back(client: TestClien
 
 
 def test_undo_refuses_when_the_rows_were_touched_since(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     tab = _tab(client, workbook["id"], "t1")
     batch = client.post(
         "/transfers/execute",
@@ -413,7 +413,7 @@ def test_undo_refuses_when_the_rows_were_touched_since(client: TestClient) -> No
 
 
 def test_undo_expires_after_ten_minutes(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     tab = _tab(client, workbook["id"], "t1")
     batch = client.post(
         "/transfers/execute",
@@ -433,7 +433,7 @@ def test_undo_expires_after_ten_minutes(client: TestClient) -> None:
 
 
 def test_a_transfer_with_no_points_is_refused(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     response = client.post(
         "/transfers/preview",
         json={"workbook_id": workbook["id"], "sheet_id": "t1", "mode": "append", "point_ids": []},
@@ -442,8 +442,8 @@ def test_a_transfer_with_no_points_is_refused(client: TestClient) -> None:
 
 
 def test_the_meeting_step_becomes_done_when_the_last_point_leaves(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
-    meeting_id = meeting_by_title(client, "Nutrition roadmap review")["id"]
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
+    meeting_id = meeting_by_title(client, "Mobile roadmap review")["id"]
     all_ids = [p["id"] for p in client.get("/points", params={"meeting_id": meeting_id}).json()]
     tab = _tab(client, workbook["id"], "t1")
     response = client.post(
@@ -464,7 +464,7 @@ def test_the_meeting_step_becomes_done_when_the_last_point_leaves(client: TestCl
 def test_the_log_says_which_lines_can_still_be_undone(client: TestClient) -> None:
     """Screen review R1-20: the Sheets page offers Undo on the recent-transfer lines, which needs the
     server's word on the ten-minute window - the toast that carried Undo is gone after ten seconds."""
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     tab = _tab(client, workbook["id"], "t1")
     batch = client.post(
         "/transfers/execute",
@@ -486,7 +486,7 @@ def test_the_log_says_which_lines_can_still_be_undone(client: TestClient) -> Non
 
 
 def test_an_undone_transfer_cannot_be_undone_again_from_the_log(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     tab = _tab(client, workbook["id"], "t1")
     batch = client.post(
         "/transfers/execute",
@@ -507,7 +507,7 @@ def test_an_undone_transfer_cannot_be_undone_again_from_the_log(client: TestClie
 
 def test_the_preview_counts_in_words_not_with_brackets(client: TestClient) -> None:
     """Screen review R3-01: "11 cell(s) already have content" and "1 point(s)" on screen."""
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     one = _points(client, 1)
     fill = client.post(
         "/transfers/preview",

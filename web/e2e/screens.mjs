@@ -28,17 +28,17 @@ const STAMP = new Date().toISOString().slice(11, 19).replace(/:/g, "");
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 
-const NOTES = `Vendor call with Madhu ${STAMP}
+const NOTES = `Vendor call with Maya ${STAMP}
 
 The Next Steps
-Ansul S: Send the Sprinto questionnaire by Friday
-Prathyush Kodhanpur: Mirror Open Food Facts before 3 Oct
-Shambhavi Singh: Confirm the barcode fallback copy with design by 30 Sep
+Alex S: Send the Northwind questionnaire by Friday
+Daniel Okafor: Mirror OpenRates before 3 Oct
+Sofia Silva: Confirm the barcode fallback copy with design by 30 Sep
 Decided: the Owner column holds a person, not a team
 Risk: the upload flag has no rollback plan
 `;
 const LONG_TITLE =
-  "Quarterly planning with the nutrition, platform and prod ops squads, including the SIApoints discount rules and the household wealth roadmap";
+  "Quarterly planning with the mobile, platform and prod ops squads, including the rewards discount rules and the billing roadmap";
 
 const metrics = [];
 const failures = [];
@@ -206,11 +206,11 @@ async function main() {
     end: "16:00",
     workstream: "Platform",
     description: "Agenda in the planning doc.",
-    attendees: [{ name: "Ansul S", email: "ansul.s@simpleo.ai", response: "accepted" }],
+    attendees: [{ name: "Alex S", email: "alex.s@example.com", response: "accepted" }],
   });
   const list = await api("GET", "/meetings/list");
-  const nutrition = list.items.find((m) => m.title === "Nutrition roadmap review");
-  const workbook = (await api("GET", "/workbooks")).find((w) => w.name === "Nutrition Sialet Product Roadmap");
+  const roadmap = list.items.find((m) => m.title === "Mobile roadmap review");
+  const workbook = (await api("GET", "/workbooks")).find((w) => w.name === "Mobile App Product Roadmap");
   let pasted = null; // the meeting the paste creates
 
   // ================================================================ 1280, light ====================
@@ -228,19 +228,19 @@ async function main() {
       await page.getByTestId("meeting-detail").getByLabel("Close").click();
     });
     await screen("step 1 detail (manual)", async () => {
-      await page.locator("[data-testid=meeting-row]", { hasText: "Sprinto call prep" }).getByLabel("Show meeting details").click();
+      await page.locator("[data-testid=meeting-row]", { hasText: "Northwind call prep" }).getByLabel("Show meeting details").click();
       await page.getByTestId("meeting-detail").waitFor();
       await shot(page, "step1-detail-manual");
       await page.getByTestId("meeting-detail").getByLabel("Close").click();
     });
     await screen("step 1 manual edit", async () => {
-      await page.locator("[data-testid=meeting-row]", { hasText: "Sprinto call prep" }).getByLabel("Edit meeting").click();
+      await page.locator("[data-testid=meeting-row]", { hasText: "Northwind call prep" }).getByLabel("Edit meeting").click();
       await page.getByTestId("meeting-detail").waitFor();
       await shot(page, "step1-manual-edit");
       await page.getByTestId("meeting-detail").getByLabel("Close").click();
     });
     await screen("step 1 selected + focus", async () => {
-      await page.locator("[data-testid=meeting-row]", { hasText: "Nutrition roadmap review" }).click();
+      await page.locator("[data-testid=meeting-row]", { hasText: "Mobile roadmap review" }).click();
       // Keyboard: from the paste box, Tab lands on the first card.
       await page.locator("#quickpaste").focus();
       await page.keyboard.press("Tab");
@@ -257,12 +257,12 @@ async function main() {
       await page.getByRole("button", { name: "Save and continue" }).click();
       await page.getByRole("heading", { name: "Saved notes" }).waitFor({ timeout: 20_000 });
       const meetings = await api("GET", "/meetings/list");
-      pasted = meetings.items.find((m) => m.title.startsWith(`Vendor call with Madhu ${STAMP}`));
-      await page.fill("#paste", "Follow-up from Slack\nAnsul S: share the Sprinto login with Nishchay by Monday");
+      pasted = meetings.items.find((m) => m.title.startsWith(`Vendor call with Maya ${STAMP}`));
+      await page.fill("#paste", "Follow-up from Slack\nAlex S: share the Northwind login with Noah by Monday");
       await shot(page, "step2-notes-paste", { full: true });
     });
     await screen("step 2 sources (calendar meeting)", async () => {
-      await goto(page, `page=capture&step=notes&meeting=${nutrition.id}`);
+      await goto(page, `page=capture&step=notes&meeting=${roadmap.id}`);
       await page.getByRole("heading", { name: "Saved notes" }).waitFor({ timeout: 20_000 });
       await page.getByText("Looking…").waitFor({ state: "detached", timeout: 20_000 }).catch(() => {});
       await shot(page, "step2-sources", { full: true });
@@ -343,7 +343,7 @@ async function main() {
             items: [],
             fetched_at: new Date().toISOString(),
             age_minutes: 4,
-            connections: ["prathyush.kodhanpur@simpleo.ai"],
+            connections: ["daniel.okafor@example.com"],
             empty_hint: "No meeting here? Add one, or paste the notes straight into the box above.",
           }),
         }),
@@ -372,7 +372,7 @@ async function main() {
       await page.getByTestId("meeting-detail").waitFor({ state: "detached", timeout: 5_000 });
     });
     await screen("390 step 1 manual edit overlay", async () => {
-      await page.locator("[data-testid=meeting-row]", { hasText: "Sprinto call prep" }).getByLabel("Edit meeting").click();
+      await page.locator("[data-testid=meeting-row]", { hasText: "Northwind call prep" }).getByLabel("Edit meeting").click();
       await page.getByTestId("meeting-detail").waitFor();
       await shot(page, "step1-manual-edit-overlay", { full: true });
       await page.goBack();
@@ -384,10 +384,10 @@ async function main() {
       await page.fill("#quickpaste", "");
     });
     await screen("390 step 2", async () => {
-      await goto(page, `page=capture&step=notes&meeting=${nutrition.id}`);
+      await goto(page, `page=capture&step=notes&meeting=${roadmap.id}`);
       await page.getByRole("heading", { name: "Saved notes" }).waitFor({ timeout: 20_000 });
       await page.waitForTimeout(800);
-      await page.fill("#paste", "Follow-up from Slack\nAnsul S: share the Sprinto login with Nishchay by Monday");
+      await page.fill("#paste", "Follow-up from Slack\nAlex S: share the Northwind login with Noah by Monday");
       await shot(page, "step2-notes", { full: true });
     });
     await screen("390 step 3", async () => {
@@ -478,7 +478,7 @@ async function main() {
     });
     await screen("sheets filter + search", async () => {
       await page.getByRole("button", { name: "Open", exact: true }).click();
-      await page.fill("#sheetq", "Prathyush");
+      await page.fill("#sheetq", "Daniel");
       await shot(page, "sheets-filter-search");
       await page.fill("#sheetq", "");
       await page.getByRole("button", { name: "All", exact: true }).click();
@@ -526,7 +526,7 @@ async function main() {
         route.fulfill({
           status: 200,
           contentType: "application/json",
-          body: JSON.stringify({ id: "u-2", email: "nishchay.s@simpleo.ai", name: "Nishchay S", role: "member", is_admin: false }),
+          body: JSON.stringify({ id: "u-2", email: "noah.s@example.com", name: "Noah S", role: "member", is_admin: false }),
         }),
       );
       await p2.route("**/api/admin/connections/status", (route) =>
@@ -534,7 +534,7 @@ async function main() {
           status: 200,
           contentType: "application/json",
           body: JSON.stringify({
-            banner: "Google connection needs reconnecting: ansul.s@simpleo.ai. Paste, points and manual meetings keep working.",
+            banner: "Google connection needs reconnecting: alex.s@example.com. Paste, points and manual meetings keep working.",
             first_run: false,
             first_run_notice: "",
             can_connect: false,
@@ -634,7 +634,7 @@ async function main() {
         route.fulfill({
           status: 403,
           contentType: "application/json",
-          body: JSON.stringify({ detail: "This Google account is not on the Meeting Desk allow-list. Ask an admin to add it: prathyush.kodhanpur@simpleo.ai." }),
+          body: JSON.stringify({ detail: "This Google account is not on the Meeting Desk allow-list. Ask an admin to add it: daniel.okafor@example.com." }),
         }),
       );
       await p2.reload({ waitUntil: "domcontentloaded" });
@@ -729,7 +729,7 @@ async function main() {
         route.fulfill({
           status: 403,
           contentType: "application/json",
-          body: JSON.stringify({ detail: "This Google account is not on the Meeting Desk allow-list. Ask an admin to add it: prathyush.kodhanpur@simpleo.ai." }),
+          body: JSON.stringify({ detail: "This Google account is not on the Meeting Desk allow-list. Ask an admin to add it: daniel.okafor@example.com." }),
         }),
       );
       await p2.reload({ waitUntil: "domcontentloaded" });
@@ -762,7 +762,7 @@ async function main() {
   {
     const { context, page } = await open(browser, 1280, 900, { dark: true });
     await screen("dark step 3", async () => {
-      await goto(page, `page=capture&step=points&meeting=${nutrition.id}`);
+      await goto(page, `page=capture&step=points&meeting=${roadmap.id}`);
       await page.locator("[data-testid=point-row]").first().waitFor({ timeout: 20_000 });
       await shot(page, "dark-step3-points");
     });
@@ -783,7 +783,7 @@ async function main() {
       await page.getByRole("button", { name: "Discard" }).click();
     });
     await screen("dark step 4", async () => {
-      await goto(page, `page=capture&step=points&meeting=${nutrition.id}`);
+      await goto(page, `page=capture&step=points&meeting=${roadmap.id}`);
       await page.locator("[data-testid=point-row]").first().waitFor({ timeout: 20_000 });
       const transfer = page.locator("button", { hasText: /^Transfer \d+$/ }).first();
       if (await transfer.isDisabled()) {

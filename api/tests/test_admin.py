@@ -13,7 +13,7 @@ from tests.conftest import ADMIN, make_settings, meeting_by_title
 def test_connections_are_listed_with_their_status(client: TestClient) -> None:
     body = client.get("/admin/connections").json()
     emails = [c["email"] for c in body["connections"]]
-    assert emails == ["prathyush.kodhanpur@simpleo.ai", "ansul.s@simpleo.ai"]
+    assert emails == ["daniel.okafor@example.com", "alex.s@example.com"]
     assert all(c["status"] == "ok" for c in body["connections"])
     assert body["warning"] == ""  # two connections, so no warning
     assert body["banner"] == ""
@@ -23,13 +23,13 @@ def test_an_expired_connection_raises_a_banner(client: TestClient) -> None:
     from app.models import Connection
 
     with client.app.state.db.session() as session:
-        connection = session.query(Connection).filter_by(email="ansul.s@simpleo.ai").one()
+        connection = session.query(Connection).filter_by(email="alex.s@example.com").one()
         connection.status = "expired"
         connection.last_error = "token revoked"
         session.commit()
 
     body = client.get("/admin/connections").json()
-    assert "ansul.s@simpleo.ai" in body["banner"]
+    assert "alex.s@example.com" in body["banner"]
     assert "keep working" in body["banner"]
 
 
@@ -39,7 +39,7 @@ def test_one_connection_warns_until_there_are_two(tmp_path: Path) -> None:
     app = create_app(make_settings(tmp_path))
     with TestClient(app) as client:
         with app.state.db.session() as session:
-            session.delete(session.query(Connection).filter_by(email="ansul.s@simpleo.ai").one())
+            session.delete(session.query(Connection).filter_by(email="alex.s@example.com").one())
             session.commit()
         assert "Connect a second" in client.get("/admin/connections").json()["warning"]
 
@@ -51,34 +51,34 @@ def test_the_health_job_marks_nothing_when_everything_is_fine(client: TestClient
 
 
 def test_allow_list_crud_is_admin_only(client: TestClient, member_client: TestClient) -> None:
-    added = client.post("/admin/allow-list", json={"email": "New.Person@simpleo.ai", "role": "member"})
+    added = client.post("/admin/allow-list", json={"email": "New.Person@example.com", "role": "member"})
     assert added.status_code == 201
-    assert added.json()["email"] == "new.person@simpleo.ai"
+    assert added.json()["email"] == "new.person@example.com"
     assert added.json()["added_by"] == ADMIN
     assert added.json()["signed_in"] is False
 
-    assert client.post("/admin/allow-list", json={"email": "new.person@simpleo.ai"}).status_code == 409
+    assert client.post("/admin/allow-list", json={"email": "new.person@example.com"}).status_code == 409
 
-    promoted = client.patch("/admin/allow-list/new.person@simpleo.ai", json={"role": "admin"})
+    promoted = client.patch("/admin/allow-list/new.person@example.com", json={"role": "admin"})
     assert promoted.json()["role"] == "admin"
 
-    removed = client.delete("/admin/allow-list/new.person@simpleo.ai")
+    removed = client.delete("/admin/allow-list/new.person@example.com")
     assert removed.json()["ok"] is True
-    assert "new.person@simpleo.ai" not in [e["email"] for e in client.get("/admin/allow-list").json()]
+    assert "new.person@example.com" not in [e["email"] for e in client.get("/admin/allow-list").json()]
 
-    assert member_client.delete("/admin/allow-list/nishchay.s@simpleo.ai").status_code == 403
+    assert member_client.delete("/admin/allow-list/noah.s@example.com").status_code == 403
 
 
 def test_an_admin_can_fix_an_email_in_place(client: TestClient) -> None:
-    client.post("/admin/allow-list", json={"email": "arya.kumari@simpleo.ai"})
+    client.post("/admin/allow-list", json={"email": "arya.kumari@example.com"})
     patched = client.patch(
-        "/admin/allow-list/arya.kumari@simpleo.ai", json={"email": "arya.kumari1@simpleo.ai"}
+        "/admin/allow-list/arya.kumari@example.com", json={"email": "arya.kumari1@example.com"}
     )
     assert patched.status_code == 200
-    assert patched.json()["email"] == "arya.kumari1@simpleo.ai"
+    assert patched.json()["email"] == "arya.kumari1@example.com"
     emails = [e["email"] for e in client.get("/admin/allow-list").json()]
-    assert "arya.kumari1@simpleo.ai" in emails
-    assert "arya.kumari@simpleo.ai" not in emails
+    assert "arya.kumari1@example.com" in emails
+    assert "arya.kumari@example.com" not in emails
 
 
 def test_you_cannot_remove_your_own_access(client: TestClient) -> None:
@@ -87,15 +87,15 @@ def test_you_cannot_remove_your_own_access(client: TestClient) -> None:
 
 
 def test_patching_an_unknown_entry_is_a_404(client: TestClient) -> None:
-    assert client.patch("/admin/allow-list/nobody@simpleo.ai", json={"role": "admin"}).status_code == 404
+    assert client.patch("/admin/allow-list/nobody@example.com", json={"role": "admin"}).status_code == 404
 
 
 def test_activity_records_who_did_what(client: TestClient) -> None:
-    meeting_id = meeting_by_title(client, "Nutrition roadmap review")["id"]
+    meeting_id = meeting_by_title(client, "Mobile roadmap review")["id"]
     client.post("/notes/paste", json={"meeting_id": meeting_id, "text": "a fresh note"})
     activity = client.get("/admin/activity").json()
     assert activity[0]["actor"] == ADMIN
-    assert activity[0]["text"] == "Saved a note on Nutrition roadmap review"
+    assert activity[0]["text"] == "Saved a note on Mobile roadmap review"
     assert len(activity) > 1  # the seeded entries are there too
 
 
@@ -140,13 +140,13 @@ def test_the_banner_reaches_members_too(client: TestClient, member_client: TestC
     }
 
     with client.app.state.db.session() as session:
-        connection = session.query(Connection).filter_by(email="ansul.s@simpleo.ai").one()
+        connection = session.query(Connection).filter_by(email="alex.s@example.com").one()
         connection.status = "expired"
         session.commit()
 
     for who, can_connect in ((member_client, False), (client, True)):
         body = who.get("/admin/connections/status").json()
-        assert "ansul.s@simpleo.ai" in body["banner"]
+        assert "alex.s@example.com" in body["banner"]
         assert "keep working" in body["banner"]
         assert body["can_connect"] is can_connect
         # Only what the banner says: no scopes, no list of accounts.
@@ -172,7 +172,7 @@ def test_first_run_tells_a_member_whom_to_ask(tmp_path: Path) -> None:
 def test_first_run_notice_for_a_member_names_the_admins(tmp_path: Path) -> None:
     from app.models import Connection
 
-    app = create_app(make_settings(tmp_path, auth_dev_user="nishchay.s@simpleo.ai"))
+    app = create_app(make_settings(tmp_path, auth_dev_user="noah.s@example.com"))
     with TestClient(app) as member:
         with app.state.db.session() as session:
             for connection in session.query(Connection).all():

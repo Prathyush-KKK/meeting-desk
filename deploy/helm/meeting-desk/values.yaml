@@ -1,7 +1,8 @@
 # Meeting Desk - chart defaults.
 #
 # Nothing here is a credential and nothing here may become one. Every secret is pulled from
-# Infisical by External Secrets Operator from /meeting-desk/<KEY> (see externalSecrets below).
+# your secret store (Infisical, Vault, AWS Secrets Manager, ...) by External Secrets Operator from
+# /meeting-desk/<KEY> (see externalSecrets below).
 
 nameOverride: ""
 fullnameOverride: ""
@@ -10,7 +11,7 @@ fullnameOverride: ""
 # earlier stage and copies web/dist in as WEB_DIST). The worker runs the same image with a
 # different command, so there is exactly one tag to move per release.
 image:
-  repository: ghcr.io/hellosia/meeting-desk
+  repository: ghcr.io/prathyush-kkk/meeting-desk
   tag: "0.1.0"
   pullPolicy: IfNotPresent
 imagePullSecrets: []
@@ -106,7 +107,7 @@ service:
 
 # --- ingress: internal only --------------------------------------------------------------------
 # The class and the annotations are values because the cluster's internal ingress is named
-# differently per environment. The default is the internal NLB path from the spec; there is no
+# differently per environment. The default is an internal load balancer; there is no
 # public ingress for this service and /metrics is not on this port at all.
 ingress:
   enabled: true
@@ -116,7 +117,7 @@ ingress:
     # The controller's Service is the internal NLB; kept here so `helm template` shows the intent.
     service.beta.kubernetes.io/aws-load-balancer-internal: "true"
     service.beta.kubernetes.io/aws-load-balancer-scheme: internal
-  host: meeting-desk.internal.simpleo.ai
+  host: meeting-desk.example.com
   path: /
   pathType: Prefix
   tls:
@@ -125,7 +126,7 @@ ingress:
 
 # --- Prometheus ---------------------------------------------------------------------------------
 serviceMonitor:
-  enabled: false        # on in values-internal.yaml
+  enabled: false        # on in values-production.example.yaml
   interval: 30s
   scrapeTimeout: 10s
   # Extra labels the cluster's Prometheus selects ServiceMonitors by (e.g. release: kube-prometheus)
@@ -134,7 +135,7 @@ serviceMonitor:
   metricRelabelings: []
 
 prometheusRule:
-  enabled: false        # on in values-internal.yaml
+  enabled: false        # on in values-production.example.yaml
   labels: {}
   # Thresholds. Every rule carries service and severity labels and a remediation annotation
   # written in the event tokens app/telemetry/events.py emits.
@@ -157,36 +158,36 @@ env:
   AUTH_DEV_USER: ""
   CORS_ORIGINS: "[]"
   WEB_DIST: /srv/web/dist
-  WEB_BASE_URL: https://meeting-desk.internal.simpleo.ai
-  GOOGLE_OIDC_REDIRECT_URI: https://meeting-desk.internal.simpleo.ai/auth/callback
-  GOOGLE_CONNECT_REDIRECT_URI: https://meeting-desk.internal.simpleo.ai/admin/connections/callback
-  GOOGLE_HOSTED_DOMAIN: simpleo.ai
+  WEB_BASE_URL: https://meeting-desk.example.com
+  GOOGLE_OIDC_REDIRECT_URI: https://meeting-desk.example.com/auth/callback
+  GOOGLE_CONNECT_REDIRECT_URI: https://meeting-desk.example.com/admin/connections/callback
+  GOOGLE_HOSTED_DOMAIN: ""
   MEETING_DESK_TOKEN_KEY_VERSION: "1"
-  DISPLAY_TIMEZONE: Asia/Kolkata
+  DISPLAY_TIMEZONE: UTC
   SHEETS_MAX_ROWS: "5000"
   EXTRACTION_PROVIDER: vertex
   VERTEX_PROJECT: ""
-  VERTEX_LOCATION: asia-south1
+  VERTEX_LOCATION: us-central1
   VERTEX_MODEL: gemini-2.5-flash
-  BEDROCK_REGION: ap-south-1
+  BEDROCK_REGION: us-east-1
   BEDROCK_MODEL: anthropic.claude-3-5-sonnet-20240620-v1:0
   EXTRACT_FALLBACK_TO_BEDROCK: "1"
   JOBS_ENABLED: "1"
   METRICS_ENABLED: "1"
   LOG_LEVEL: INFO
   # dateparser needs an explicit zone; a host TZ like Asia/Calcutta trips tzlocal.
-  TZ: Asia/Kolkata
+  TZ: UTC
 
-# --- secrets: Infisical through External Secrets Operator ----------------------------------------
-# Every key below is read from /meeting-desk/<KEY> in Infisical. No value is ever in this repo.
+# --- secrets: a secret store through External Secrets Operator ----------------------------------
+# Every key below is read from /meeting-desk/<KEY> in the store. No value is ever in this repo.
 externalSecrets:
   enabled: true
   refreshInterval: 1h
   secretStore:
-    name: infisical
+    name: my-secret-store
     kind: ClusterSecretStore
   basePath: /meeting-desk
-  # Becomes one Secret, mounted with envFrom. Every key here must exist in Infisical or the
+  # Becomes one Secret, mounted with envFrom. Every key here must exist in the store or the
   # ExternalSecret never syncs and the pods start with no secrets at all.
   keys:
     - SESSION_SECRET

@@ -14,17 +14,17 @@ from app.google.people import RealPeopleClient
 from tests.google_mock import MockGoogleApi, json_response
 
 IST = ZoneInfo("Asia/Kolkata")
-ME = "prathyush.kodhanpur@simpleo.ai"
+ME = "daniel.okafor@example.com"
 
 
 # --- Docs -------------------------------------------------------------------------------------------
 
 
 def test_documents_get_asks_for_tabs_content_and_walks_the_tab_tree() -> None:
-    api = MockGoogleApi().on("GET", "/v1/documents/1qX9Lm3kNotesDocIdForNutrition", "docs_document_tabs.json")
-    doc = RealDocsClient(api.http()).get_document(ME, "1qX9Lm3kNotesDocIdForNutrition")
+    api = MockGoogleApi().on("GET", "/v1/documents/1qX9Lm3kNotesDocIdForMobile", "docs_document_tabs.json")
+    doc = RealDocsClient(api.http()).get_document(ME, "1qX9Lm3kNotesDocIdForMobile")
     assert MockGoogleApi.params(api.requests[0]) == {"includeTabsContent": ["true"]}
-    assert doc.id == "1qX9Lm3kNotesDocIdForNutrition"
+    assert doc.id == "1qX9Lm3kNotesDocIdForMobile"
     assert doc.title.endswith("Notes by Gemini")
     # Depth-first, document order: the transcript is nested two levels down.
     assert [(t.id, t.title) for t in doc.tabs] == [
@@ -37,20 +37,20 @@ def test_documents_get_asks_for_tabs_content_and_walks_the_tab_tree() -> None:
 
 def test_tab_text_keeps_headings_bullets_tables_and_people_as_lines() -> None:
     api = MockGoogleApi().on("GET", "/v1/documents/", "docs_document_tabs.json")
-    doc = RealDocsClient(api.http()).get_document(ME, "1qX9Lm3kNotesDocIdForNutrition")
+    doc = RealDocsClient(api.http()).get_document(ME, "1qX9Lm3kNotesDocIdForMobile")
     text = doc.tab("Full notes").text
-    assert text.startswith("Nutrition roadmap review\n\nSummary\n")
-    assert "\n\nThe Next Steps\n- Anushka Mohanty: Review dataset for weight information by 3 Oct\n" in text
+    assert text.startswith("Mobile roadmap review\n\nSummary\n")
+    assert "\n\nThe Next Steps\n- Anna Moreno: Review dataset for currency information by 3 Oct\n" in text
     assert (
-        "- Weight data: the Open Food Facts mirror is missing portion weights for 40% of Indian items.\n"
+        "- Weight data: the OpenRates mirror is missing portion weights for 40% of Indian items.\n"
         in text
     )
-    assert "  - Anushka Mohanty will review the dataset for weight information.\n" in text  # nested bullet
-    assert "Item | Owner\nVendor questionnaire | Ansul S\n" in text  # the table
-    assert "- Prathyush: Mirror Open Food Facts before launch\n" in text  # a smart-chip person
+    assert "  - Anna Moreno will review the dataset for currency information.\n" in text  # nested bullet
+    assert "Item | Owner\nVendor questionnaire | Alex S\n" in text  # the table
+    assert "- Daniel: Mirror OpenRates before launch\n" in text  # a smart-chip person
     assert "\n\n\n" not in text  # runs of blank paragraphs collapse
     assert text.endswith("Risk: the upload flag has no rollback plan")
-    assert doc.tab("Transcript").text.startswith("00:00 Prathyush Kodhanpur:")
+    assert doc.tab("Transcript").text.startswith("00:00 Daniel Okafor:")
 
 
 def test_a_doc_without_tabs_is_one_tab_named_after_the_document() -> None:
@@ -79,9 +79,9 @@ def test_a_doc_not_shared_with_the_connection_is_permission_denied() -> None:
 
 
 def test_recap_query_and_its_quoted_phrase() -> None:
-    q = recap_query('Nutrition "roadmap" review', datetime(2026, 9, 19, 16, 0, tzinfo=IST))
-    assert q == 'from:gemini-notes@google.com "Nutrition  roadmap  review" after:2026/09/19'
-    assert quoted_phrase(q) == "Nutrition  roadmap  review"
+    q = recap_query('Mobile "roadmap" review', datetime(2026, 9, 19, 16, 0, tzinfo=IST))
+    assert q == 'from:gemini-notes@google.com "Mobile  roadmap  review" after:2026/09/19'
+    assert quoted_phrase(q) == "Mobile  roadmap  review"
     assert quoted_phrase("Recap: Platform squad sync") == "Recap: Platform squad sync"
 
 
@@ -91,19 +91,19 @@ def test_gmail_search_lists_then_fetches_each_message_and_turns_html_into_text()
         .on("GET", "/messages/18f2c1a9b7e4d3f0", "gmail_message_full.json")
         .on("GET", "/gmail/v1/users/me/messages", "gmail_messages_list.json")
     )
-    query = recap_query("Nutrition roadmap review", datetime(2026, 9, 19, tzinfo=IST))
+    query = recap_query("Mobile roadmap review", datetime(2026, 9, 19, tzinfo=IST))
     (message,) = RealGmailClient(api.http(), "Asia/Kolkata").search_messages(ME, query)
 
     listing, fetch = api.requests
     assert MockGoogleApi.params(listing) == {"q": [query], "maxResults": ["10"]}
     assert MockGoogleApi.params(fetch) == {"format": ["full"]}
     assert message.id == "18f2c1a9b7e4d3f0"
-    assert message.subject == "Recap: Nutrition roadmap review"
+    assert message.subject == "Recap: Mobile roadmap review"
     assert message.from_email == "gemini-notes@google.com"
     assert message.received_at == datetime(2026, 9, 19, 16, 40, 1, tzinfo=IST)
-    assert message.body.startswith("Recap: Nutrition roadmap review\n\nHi Prathyush,\nHere is the recap")
+    assert message.body.startswith("Recap: Mobile roadmap review\n\nHi Daniel,\nHere is the recap")
     assert (
-        "\nNext steps\n\n- Anushka Mohanty: Review dataset for weight information by 3 Oct\n" in message.body
+        "\nNext steps\n\n- Anna Moreno: Review dataset for currency information by 3 Oct\n" in message.body
     )
     assert "dataset gaps & agreed" in message.body  # entities decoded
     assert "track()" not in message.body and "color:red" not in message.body
@@ -128,7 +128,7 @@ def test_search_directory_people_is_a_prefix_query_over_domain_profiles() -> Non
     }
     # The primary address wins, addresses are lower-cased, a profile without mail is skipped.
     assert [(p.name, p.email) for p in people] == [
-        ("Shambhavi Singh", "shambhavi.singh@simpleo.ai"),
-        ("Shamik Bose", "shamik.bose@simpleo.ai"),
+        ("Sofia Silva", "sofia.silva@example.com"),
+        ("Shamik Bose", "shamik.bose@example.com"),
     ]
     assert RealPeopleClient(api.http()).search_directory(ME, "   ") == []

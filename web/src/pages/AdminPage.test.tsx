@@ -17,7 +17,7 @@ vi.mock("@/api/hooks", () => ({
 
 const person = (role: "admin" | "member"): Me => ({
   id: "u-1",
-  email: role === "admin" ? "prathyush.kodhanpur@simpleo.ai" : "nishchay.s@simpleo.ai",
+  email: role === "admin" ? "daniel.okafor@example.com" : "noah.s@example.com",
   name: "Somebody",
   role,
   is_admin: role === "admin",

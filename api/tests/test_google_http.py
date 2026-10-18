@@ -28,8 +28,8 @@ class FakeClock:
 
 def test_every_request_carries_the_connections_bearer_token() -> None:
     api = MockGoogleApi().on("GET", "/spreadsheets/abc", {"ok": True})
-    http = api.http(tokens=StaticTokens({"a@simpleo.ai": "token-for-a"}))
-    assert http.get("a@simpleo.ai", URL) == {"ok": True}
+    http = api.http(tokens=StaticTokens({"a@example.com": "token-for-a"}))
+    assert http.get("a@example.com", URL) == {"ok": True}
     assert api.requests[0].headers["Authorization"] == "Bearer token-for-a"
     assert api.requests[0].headers["Accept"] == "application/json"
 
@@ -42,8 +42,8 @@ def test_a_401_refreshes_the_token_once_and_retries() -> None:
     )
     tokens = StaticTokens()
     http = api.http(tokens=tokens)
-    assert http.get("a@simpleo.ai", URL) == {"ok": True}
-    assert tokens.refreshes == ["a@simpleo.ai"]
+    assert http.get("a@example.com", URL) == {"ok": True}
+    assert tokens.refreshes == ["a@example.com"]
     assert len(api.requests) == 2
 
 
@@ -51,7 +51,7 @@ def test_a_second_401_after_the_refresh_is_auth_expired() -> None:
     api = MockGoogleApi().on("GET", "/spreadsheets/abc", lambda r: json_response("error_401.json", 401))
     http = api.http()
     with pytest.raises(AuthExpired):
-        http.get("a@simpleo.ai", URL)
+        http.get("a@example.com", URL)
     assert len(api.requests) == 2
 
 
@@ -60,7 +60,7 @@ def test_429_is_retried_with_exponential_backoff_up_to_five_times() -> None:
     clock = FakeClock()
     http = api.http(sleep=clock.sleep, now=clock.now, max_retries=5, backoff_base=0.5)
     with pytest.raises(RateLimited) as err:
-        http.get("a@simpleo.ai", URL)
+        http.get("a@example.com", URL)
     assert len(api.requests) == 6  # the call and five retries
     assert clock.slept == [0.5, 1.0, 2.0, 4.0, 8.0]
     assert err.value.retry_after_seconds > 0
@@ -74,7 +74,7 @@ def test_403_rate_limit_exceeded_counts_as_a_rate_limit() -> None:
     )
     clock = FakeClock()
     http = api.http(sleep=clock.sleep, now=clock.now)
-    assert http.get("a@simpleo.ai", URL) == {"ok": True}
+    assert http.get("a@example.com", URL) == {"ok": True}
     assert clock.slept == [0.5]
 
 
@@ -89,7 +89,7 @@ def test_retry_after_header_wins_over_the_backoff_schedule() -> None:
     )
     clock = FakeClock()
     http = api.http(sleep=clock.sleep, now=clock.now)
-    http.get("a@simpleo.ai", URL)
+    http.get("a@example.com", URL)
     assert clock.slept == [3.0]
 
 
@@ -98,20 +98,20 @@ def test_a_rate_limited_connection_is_backed_off_and_the_next_call_fails_fast() 
     clock = FakeClock()
     http = api.http(sleep=clock.sleep, now=clock.now, max_retries=0, connection_backoff_seconds=60)
     with pytest.raises(RateLimited):
-        http.get("a@simpleo.ai", URL)
+        http.get("a@example.com", URL)
     assert len(api.requests) == 1
     with pytest.raises(RateLimited) as err:
-        http.get("a@simpleo.ai", URL)
+        http.get("a@example.com", URL)
     assert len(api.requests) == 1  # no network call while backed off
     assert 0 < err.value.retry_after_seconds <= 60
     # Another connection is not affected.
     api.on("GET", "/spreadsheets/xyz", {"ok": True})
-    assert http.get("b@simpleo.ai", "https://sheets.googleapis.com/v4/spreadsheets/xyz") == {"ok": True}
+    assert http.get("b@example.com", "https://sheets.googleapis.com/v4/spreadsheets/xyz") == {"ok": True}
     # The cooldown doubles on a repeat and clears after it elapses.
     clock.t += 61
     with pytest.raises(RateLimited):
-        http.get("a@simpleo.ai", URL)
-    assert http.backoff_remaining("a@simpleo.ai") > 60
+        http.get("a@example.com", URL)
+    assert http.backoff_remaining("a@example.com") > 60
 
 
 def test_5xx_is_retried_then_surfaced_as_an_api_error() -> None:
@@ -121,7 +121,7 @@ def test_5xx_is_retried_then_surfaced_as_an_api_error() -> None:
     clock = FakeClock()
     http = api.http(sleep=clock.sleep, now=clock.now, max_retries=2)
     with pytest.raises(GoogleApiError) as err:
-        http.get("a@simpleo.ai", URL)
+        http.get("a@example.com", URL)
     assert err.value.status == 503
     assert len(api.requests) == 3
 
@@ -134,9 +134,9 @@ def test_404_and_403_map_to_the_interface_errors() -> None:
     )
     http = api.http()
     with pytest.raises(NotFoundError, match="not found"):
-        http.get("a@simpleo.ai", "https://www.googleapis.com/drive/v3/files/missing")
+        http.get("a@example.com", "https://www.googleapis.com/drive/v3/files/missing")
     with pytest.raises(PermissionDenied) as err:
-        http.get("a@simpleo.ai", "https://www.googleapis.com/drive/v3/files/forbidden")
+        http.get("a@example.com", "https://www.googleapis.com/drive/v3/files/forbidden")
     assert err.value.detail == "PERMISSION_DENIED"
 
 
@@ -148,14 +148,14 @@ def test_transport_failures_are_retried_then_reported() -> None:
     clock = FakeClock()
     http = api.http(sleep=clock.sleep, now=clock.now, max_retries=1)
     with pytest.raises(Exception, match="connection reset"):
-        http.get("a@simpleo.ai", URL)
+        http.get("a@example.com", URL)
     assert len(api.requests) == 2
 
 
 def test_boolean_params_are_lowercase_strings_and_none_is_dropped() -> None:
     api = MockGoogleApi().on("GET", "/spreadsheets/abc", {"ok": True})
     http = api.http()
-    http.get("a@simpleo.ai", URL, params={"singleEvents": True, "pageToken": None, "maxResults": 5})
+    http.get("a@example.com", URL, params={"singleEvents": True, "pageToken": None, "maxResults": 5})
     params = MockGoogleApi.params(api.requests[0])
     assert params == {"singleEvents": ["true"], "maxResults": ["5"]}
 
@@ -181,4 +181,4 @@ def test_the_real_http_layer_never_touches_the_network_in_tests() -> None:
 
     http = GoogleHttp(StaticTokens(), None)
     with pytest.raises(NetworkAccessBlocked):
-        http.get("a@simpleo.ai", "http://127.0.0.1:9/never")
+        http.get("a@example.com", "http://127.0.0.1:9/never")

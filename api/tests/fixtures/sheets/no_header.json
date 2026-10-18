@@ -5,13 +5,13 @@
   "rows": [
     [
       "Fix the upload retry",
-      "Nishchay S",
+      "Noah S",
       "26 Sep",
       "open"
     ],
     [
       "Ship the telemetry dashboard",
-      "Shambhavi Singh",
+      "Sofia Silva",
       "30 Sep",
       "in progress"
     ],
@@ -37,8 +37,8 @@
     {
       "id": "p1",
       "kind": "action",
-      "text": "Mirror Open Food Facts before launch",
-      "owner": "Prathyush Kodhanpur",
+      "text": "Mirror OpenRates before launch",
+      "owner": "Daniel Okafor",
       "due": "3 Oct",
       "status": "open",
       "meeting_label": "Platform squad sync · 22 Sep"
@@ -55,8 +55,8 @@
     {
       "id": "p3",
       "kind": "risk",
-      "text": "Photo portion accuracy is unmeasured",
-      "owner": "Anushka Mohanty",
+      "text": "Receipt OCR accuracy is unmeasured",
+      "owner": "Anna Moreno",
       "due": "",
       "status": "blocked",
       "meeting_label": "Platform squad sync · 22 Sep"
@@ -110,7 +110,7 @@
           "ref": "A3",
           "r": 2,
           "c": 0,
-          "value": "Mirror Open Food Facts before launch",
+          "value": "Mirror OpenRates before launch",
           "kind": "new",
           "existing": null
         },
@@ -118,7 +118,7 @@
           "ref": "B3",
           "r": 2,
           "c": 1,
-          "value": "Prathyush Kodhanpur",
+          "value": "Daniel Okafor",
           "kind": "new",
           "existing": null
         },
@@ -158,7 +158,7 @@
           "ref": "A5",
           "r": 4,
           "c": 0,
-          "value": "Photo portion accuracy is unmeasured",
+          "value": "Receipt OCR accuracy is unmeasured",
           "kind": "new",
           "existing": null
         },
@@ -166,7 +166,7 @@
           "ref": "B5",
           "r": 4,
           "c": 1,
-          "value": "Anushka Mohanty",
+          "value": "Anna Moreno",
           "kind": "new",
           "existing": null
         },
@@ -183,19 +183,19 @@
       "applied": [
         [
           "Fix the upload retry",
-          "Nishchay S",
+          "Noah S",
           "26 Sep",
           "open"
         ],
         [
           "Ship the telemetry dashboard",
-          "Shambhavi Singh",
+          "Sofia Silva",
           "30 Sep",
           "in progress"
         ],
         [
-          "Mirror Open Food Facts before launch",
-          "Prathyush Kodhanpur",
+          "Mirror OpenRates before launch",
+          "Daniel Okafor",
           "3 Oct",
           "open"
         ],
@@ -206,8 +206,8 @@
           "decided"
         ],
         [
-          "Photo portion accuracy is unmeasured",
-          "Anushka Mohanty",
+          "Receipt OCR accuracy is unmeasured",
+          "Anna Moreno",
           "",
           "blocked"
         ],
@@ -245,9 +245,9 @@
             "ref": "B1",
             "r": 0,
             "c": 1,
-            "value": "Nishchay S",
+            "value": "Noah S",
             "kind": "conflict",
-            "existing": "Nishchay S"
+            "existing": "Noah S"
           },
           {
             "ref": "C1",
@@ -285,7 +285,7 @@
             "ref": "A3",
             "r": 2,
             "c": 0,
-            "value": "Photo portion accuracy is unmeasured",
+            "value": "Receipt OCR accuracy is unmeasured",
             "kind": "new",
             "existing": null
           },
@@ -293,7 +293,7 @@
             "ref": "B3",
             "r": 2,
             "c": 1,
-            "value": "Anushka Mohanty",
+            "value": "Anna Moreno",
             "kind": "new",
             "existing": null
           },
@@ -337,19 +337,19 @@
         "applied": [
           [
             "Fix the upload retry",
-            "Nishchay S",
+            "Noah S",
             "26 Sep",
             "open"
           ],
           [
             "Ship the telemetry dashboard",
-            "Shambhavi Singh",
+            "Sofia Silva",
             "30 Sep",
             "in progress"
           ],
           [
-            "Photo portion accuracy is unmeasured",
-            "Anushka Mohanty",
+            "Receipt OCR accuracy is unmeasured",
+            "Anna Moreno",
             "",
             "blocked"
           ],
@@ -377,7 +377,7 @@
             "ref": "A1",
             "r": 0,
             "c": 0,
-            "value": "Mirror Open Food Facts before launch",
+            "value": "Mirror OpenRates before launch",
             "kind": "conflict",
             "existing": "Fix the upload retry"
           },
@@ -385,9 +385,9 @@
             "ref": "B1",
             "r": 0,
             "c": 1,
-            "value": "Prathyush Kodhanpur",
+            "value": "Daniel Okafor",
             "kind": "conflict",
-            "existing": "Nishchay S"
+            "existing": "Noah S"
           },
           {
             "ref": "C1",
@@ -425,7 +425,7 @@
             "ref": "A3",
             "r": 2,
             "c": 0,
-            "value": "Photo portion accuracy is unmeasured",
+            "value": "Receipt OCR accuracy is unmeasured",
             "kind": "new",
             "existing": null
           },
@@ -433,7 +433,7 @@
             "ref": "B3",
             "r": 2,
             "c": 1,
-            "value": "Anushka Mohanty",
+            "value": "Anna Moreno",
             "kind": "new",
             "existing": null
           },
@@ -476,20 +476,20 @@
         "count": 3,
         "applied": [
           [
-            "Mirror Open Food Facts before launch",
-            "Prathyush Kodhanpur",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
             "3 Oct",
             "open"
           ],
           [
             "Owner column holds a person, not a team",
-            "Shambhavi Singh",
+            "Sofia Silva",
             "30 Sep",
             "decided"
           ],
           [
-            "Photo portion accuracy is unmeasured",
-            "Anushka Mohanty",
+            "Receipt OCR accuracy is unmeasured",
+            "Anna Moreno",
             "",
             "blocked"
           ],
@@ -518,7 +518,7 @@
             "ref": "A1",
             "r": 0,
             "c": 0,
-            "value": "Mirror Open Food Facts before launch",
+            "value": "Mirror OpenRates before launch",
             "kind": "new",
             "existing": null
           },
@@ -526,7 +526,7 @@
             "ref": "B1",
             "r": 0,
             "c": 1,
-            "value": "Prathyush Kodhanpur",
+            "value": "Daniel Okafor",
             "kind": "new",
             "existing": null
           },
@@ -566,7 +566,7 @@
             "ref": "A3",
             "r": 2,
             "c": 0,
-            "value": "Photo portion accuracy is unmeasured",
+            "value": "Receipt OCR accuracy is unmeasured",
             "kind": "new",
             "existing": null
           },
@@ -574,7 +574,7 @@
             "ref": "B3",
             "r": 2,
             "c": 1,
-            "value": "Anushka Mohanty",
+            "value": "Anna Moreno",
             "kind": "new",
             "existing": null
           },
@@ -610,8 +610,8 @@
         "count": 3,
         "applied": [
           [
-            "Mirror Open Food Facts before launch",
-            "Prathyush Kodhanpur",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
             "3 Oct",
             "open"
           ],
@@ -622,20 +622,20 @@
             "decided"
           ],
           [
-            "Photo portion accuracy is unmeasured",
-            "Anushka Mohanty",
+            "Receipt OCR accuracy is unmeasured",
+            "Anna Moreno",
             "",
             "blocked"
           ],
           [
             "Fix the upload retry",
-            "Nishchay S",
+            "Noah S",
             "26 Sep",
             "open"
           ],
           [
             "Ship the telemetry dashboard",
-            "Shambhavi Singh",
+            "Sofia Silva",
             "30 Sep",
             "in progress"
           ],

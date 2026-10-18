@@ -24,7 +24,7 @@ Two terminals. The API first, with the fakes, so nothing needs Google credential
 
 ```bash
 cd api
-FAKE_GOOGLE=1 FAKE_LLM=1 AUTH_DEV_USER=prathyush.kodhanpur@simpleo.ai \
+FAKE_GOOGLE=1 FAKE_LLM=1 AUTH_DEV_USER=daniel.okafor@example.com \
   DATABASE_URL=sqlite:///./meeting-desk.db \
   .venv/bin/uvicorn app.main:app --reload --port 8000
 # or, from the repo root: make run
@@ -82,11 +82,11 @@ With the API on `:8000` and the web app on `:5173`:
 1. **Paste.** On *Capture* with nothing selected, paste into the box at the top:
 
    ```
-   Vendor call with Madhu
+   Vendor call with Maya
 
    The Next Steps
-   Ansul S: Send the Sprinto questionnaire by Friday
-   Prathyush Kodhanpur: Mirror Open Food Facts before 3 Oct
+   Alex S: Send the Northwind questionnaire by Friday
+   Daniel Okafor: Mirror OpenRates before 3 Oct
    Decided: the Owner column holds a person, not a team
    Risk: the upload flag has no rollback plan
    ```
@@ -101,7 +101,7 @@ With the API on `:8000` and the web app on `:5173`:
    (or the bulk *Defer*) hides a point; *See deferred* lists the deferred ones with **Restore** and
    **Transfer**. *Remove* is a soft delete with a ten-second Undo. The Capture badge counts active
    points only.
-4. **Transfer.** *Transfer N* opens step 4. Pick the workbook and tab (**Nutrition Sialet Product
+4. **Transfer.** *Transfer N* opens step 4. Pick the workbook and tab (**Mobile Sialet Product
    Roadmap › P1 Resolve & Log**), leave *Smart append*, and the grid shows exactly where the rows
    land - the keys, the columns, what moves down. *Insert N rows and write* re-reads the region,
    writes one batch, and offers **Undo** for ten minutes. If somebody edited the tab in between the

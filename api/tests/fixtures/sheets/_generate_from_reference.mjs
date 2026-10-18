@@ -16,9 +16,9 @@ const PRIO_DD = ["P0", "P1", "P2", "P3"];
 const EFFORT_DD = ["XS", "S", "M", "L"];
 
 const POINTS = [
-  { id: "p1", kind: "action", text: "Mirror Open Food Facts before launch", owner: "Prathyush Kodhanpur", due: "3 Oct", status: "open", meetingLabel: "Platform squad sync · 22 Sep" },
+  { id: "p1", kind: "action", text: "Mirror OpenRates before launch", owner: "Daniel Okafor", due: "3 Oct", status: "open", meetingLabel: "Platform squad sync · 22 Sep" },
   { id: "p2", kind: "decision", text: "Owner column holds a person, not a team", owner: "", due: "", status: "decided", meetingLabel: "Platform squad sync · 22 Sep" },
-  { id: "p3", kind: "risk", text: "Photo portion accuracy is unmeasured", owner: "Anushka Mohanty", due: "", status: "blocked", meetingLabel: "Platform squad sync · 22 Sep" },
+  { id: "p3", kind: "risk", text: "Receipt OCR accuracy is unmeasured", owner: "Anna Moreno", due: "", status: "blocked", meetingLabel: "Platform squad sync · 22 Sep" },
 ];
 
 // --- grids -------------------------------------------------------------------------------------
@@ -26,28 +26,28 @@ const POINTS = [
 // 1. headers on row 1 (store.tsx "Decisions")
 const headersRow1 = pad([
   ["ID", "Decision", "Workstream", "Meeting", "Date", "Status", "Notes"],
-  ["D-039", "Owner column holds a person, not a team", "Nutrition", "Sheet review", "21 Sep", "decided", ""],
-  ["D-040", "Prioritise user acquisition over perfecting AI photo accuracy; add a verification step", "Nutrition", "Nutrition roadmap review", "19 Sep", "decided", ""],
-  ["Q-011", "Is a drink a meal?", "Nutrition", "Nutrition roadmap review", "19 Sep", "open", "unblocks two items"],
-  ["Q-012", "Practitioner identity model", "Nutrition", "Nutrition roadmap review", "19 Sep", "open", "sets the P6 timeline"],
+  ["D-039", "Owner column holds a person, not a team", "Mobile", "Sheet review", "21 Sep", "decided", ""],
+  ["D-040", "Prioritise user acquisition over perfecting AI receipt accuracy; add a verification step", "Mobile", "Mobile roadmap review", "19 Sep", "decided", ""],
+  ["Q-011", "Is a tip an expense?", "Mobile", "Mobile roadmap review", "19 Sep", "open", "unblocks two items"],
+  ["Q-012", "Accountant identity model", "Mobile", "Mobile roadmap review", "19 Sep", "open", "sets the P6 timeline"],
   [],
 ]);
 
 // 2. headers on row 9, banner rows above, a stray note below the table (store.tsx "P1 Resolve & Log")
 const headersRow9 = pad([
   ["P1 Resolve & Log"],
-  ["", "Phase goal: all five logging paths ship; menu scan is ours alone"],
+  ["", "Phase goal: all five capture flows ship; receipt scan is ours alone"],
   [],
   ["", "Owner is the assignee, one person (decided 21 Sep)"],
   [], [], [], [],
   ["ID", "Task", "Owner", "Due", "Priority", "Effort", "Status", "Notes"],
-  ["T-101", "Photo logging path", "Anushka Mohanty", "5 Sep", "P0", "M", "done", "v1.1"],
-  ["T-102", "Search logging path", "Anushka Mohanty", "5 Sep", "P0", "S", "done", ""],
-  ["T-103", "Barcode logging path", "Shambhavi Singh", "12 Sep", "P1", "S", "done", ""],
-  ["T-104", "Menu scan logging path", "Prathyush Kodhanpur", "12 Sep", "P1", "M", "blocked", "portion accuracy unmeasured"],
-  ["T-105", "Sprinto vendor verification call with Madhu", "Ansul S", "", "P2", "XS", "open", "from 15 Sep sync"],
-  ["T-106", "Mirror Open Food Facts before launch", "Prathyush Kodhanpur", "3 Oct", "P0", "S", "open", "503s past ~10 req/min"],
-  ["T-107", "Confirmation screen for food scanning", "Prathyush Kodhanpur", "3 Oct", "P1", "M", "in progress", ""],
+  ["T-101", "Photo capture flow", "Anna Moreno", "5 Sep", "P0", "M", "done", "v1.1"],
+  ["T-102", "Manual entry flow", "Anna Moreno", "5 Sep", "P0", "S", "done", ""],
+  ["T-103", "Card import flow", "Sofia Silva", "12 Sep", "P1", "S", "done", ""],
+  ["T-104", "Receipt scan flow", "Daniel Okafor", "12 Sep", "P1", "M", "blocked", "OCR accuracy unmeasured"],
+  ["T-105", "Northwind vendor verification call with Maya", "Alex S", "", "P2", "XS", "open", "from 15 Sep sync"],
+  ["T-106", "Mirror OpenRates before launch", "Daniel Okafor", "3 Oct", "P0", "S", "open", "503s past ~10 req/min"],
+  ["T-107", "Confirmation screen for receipt scanning", "Daniel Okafor", "3 Oct", "P1", "M", "in progress", ""],
   [],
   ["", "", "", "", "", "", "", "check dropdown on Status"],
   [], [],
@@ -55,8 +55,8 @@ const headersRow9 = pad([
 
 // 3. no header at all
 const noHeader = pad([
-  ["Fix the upload retry", "Nishchay S", "26 Sep", "open"],
-  ["Ship the telemetry dashboard", "Shambhavi Singh", "30 Sep", "in progress"],
+  ["Fix the upload retry", "Noah S", "26 Sep", "open"],
+  ["Ship the telemetry dashboard", "Sofia Silva", "30 Sep", "in progress"],
   [],
   ["", "", "", ""],
 ], 4);
@@ -65,8 +65,8 @@ const noHeader = pad([
 const twoHeaderRows = pad([
   ["Delivery tracker", "Task", "Owner", "", "", "", "", ""],
   ["ID", "Task", "Owner", "Due", "Priority", "Effort", "Status", "Notes"],
-  ["H-001", "Technical complexity evaluation", "Pratyush Chaudhary", "17 Sep", "P0", "M", "in progress", ""],
-  ["H-002", "Billing model decision", "Ansul S", "15 Sep", "P0", "S", "blocked", ""],
+  ["H-001", "Technical complexity evaluation", "Daniela Mehta", "17 Sep", "P0", "M", "in progress", ""],
+  ["H-002", "Billing model decision", "Alex S", "15 Sep", "P0", "S", "blocked", ""],
   [],
 ]);
 
@@ -74,22 +74,22 @@ const twoHeaderRows = pad([
 //    otherwise write into.
 const formulaCol = pad([
   ["ID", "Task", "Owner", "Due", "Days left", "Status", "Notes"],
-  ["T-301", "Parse CoFID vitamin sheets", "Prathyush Kodhanpur", "10 Oct", "18", "open", ""],
-  ["T-302", "Clinical review of RDA table", "product", "3 Oct", "11", "blocked", "buy an hour"],
+  ["T-301", "Parse the vendor CSV exports", "Daniel Okafor", "10 Oct", "18", "open", ""],
+  ["T-302", "Legal review of tax table", "product", "3 Oct", "11", "blocked", "buy an hour"],
   [],
 ], 7);
 const formulaColFormulas = pad([
   ["ID", "Task", "Owner", "Due", "Days left", "Status", "Notes"],
-  ["T-301", "Parse CoFID vitamin sheets", "Prathyush Kodhanpur", "10 Oct", "=DATEDIF(TODAY(),D2,\"D\")", "=IF(E2<0,\"overdue\",\"open\")", ""],
-  ["T-302", "Clinical review of RDA table", "product", "3 Oct", "=DATEDIF(TODAY(),D3,\"D\")", "=IF(E3<0,\"overdue\",\"open\")", "buy an hour"],
+  ["T-301", "Parse the vendor CSV exports", "Daniel Okafor", "10 Oct", "=DATEDIF(TODAY(),D2,\"D\")", "=IF(E2<0,\"overdue\",\"open\")", ""],
+  ["T-302", "Legal review of tax table", "product", "3 Oct", "=DATEDIF(TODAY(),D3,\"D\")", "=IF(E3<0,\"overdue\",\"open\")", "buy an hour"],
   [],
 ], 7);
 
 // 6. a date column: Due carries a DATE number format
 const dateCol = pad([
   ["ID", "Task", "Owner", "Due", "Status", "Notes"],
-  ["T-401", "Mirror Open Food Facts", "Prathyush Kodhanpur", "03/10/2026", "open", ""],
-  ["T-402", "Confirmation screen", "Prathyush Kodhanpur", "03/10/2026", "in progress", ""],
+  ["T-401", "Mirror OpenRates", "Daniel Okafor", "03/10/2026", "open", ""],
+  ["T-402", "Confirmation screen", "Daniel Okafor", "03/10/2026", "in progress", ""],
   [],
 ], 6);
 const dateColFormats = [

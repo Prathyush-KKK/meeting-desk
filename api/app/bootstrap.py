@@ -19,6 +19,7 @@ from app.extract.postprocess import normalise_text
 from app.google.interface import GoogleSuite
 from app.models import Activity, AllowListEntry, Connection, Meeting, Note, Point, User, Workbook
 from app.routes.common import text_hash, word_count
+from app.tz import display_zone_name
 
 
 def already_seeded(db: Session) -> bool:
@@ -71,7 +72,7 @@ def seed_demo(db: Session, google: GoogleSuite, clock: Clock) -> None:
             location=m["location"],
             start_at=seed_data.meeting_start(m),
             end_at=seed_data.meeting_end(m),
-            timezone="Asia/Kolkata",
+            timezone=display_zone_name(),
             organizer_email=m["organizer"],
             organizer_name=seed_data.person(m["organizer"])["name"],
             attendees=m["attendees"],

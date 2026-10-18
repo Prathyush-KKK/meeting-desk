@@ -13,8 +13,8 @@
     ],
     [
       "T-401",
-      "Mirror Open Food Facts",
-      "Prathyush Kodhanpur",
+      "Mirror OpenRates",
+      "Daniel Okafor",
       "03/10/2026",
       "open",
       ""
@@ -22,7 +22,7 @@
     [
       "T-402",
       "Confirmation screen",
-      "Prathyush Kodhanpur",
+      "Daniel Okafor",
       "03/10/2026",
       "in progress",
       ""
@@ -88,8 +88,8 @@
     {
       "id": "p1",
       "kind": "action",
-      "text": "Mirror Open Food Facts before launch",
-      "owner": "Prathyush Kodhanpur",
+      "text": "Mirror OpenRates before launch",
+      "owner": "Daniel Okafor",
       "due": "3 Oct",
       "status": "open",
       "meeting_label": "Platform squad sync · 22 Sep"
@@ -106,8 +106,8 @@
     {
       "id": "p3",
       "kind": "risk",
-      "text": "Photo portion accuracy is unmeasured",
-      "owner": "Anushka Mohanty",
+      "text": "Receipt OCR accuracy is unmeasured",
+      "owner": "Anna Moreno",
       "due": "",
       "status": "blocked",
       "meeting_label": "Platform squad sync · 22 Sep"
@@ -204,7 +204,7 @@
           "ref": "B4",
           "r": 3,
           "c": 1,
-          "value": "Mirror Open Food Facts before launch",
+          "value": "Mirror OpenRates before launch",
           "kind": "new",
           "existing": null
         },
@@ -212,7 +212,7 @@
           "ref": "C4",
           "r": 3,
           "c": 2,
-          "value": "Prathyush Kodhanpur",
+          "value": "Daniel Okafor",
           "kind": "new",
           "existing": null
         },
@@ -284,7 +284,7 @@
           "ref": "B6",
           "r": 5,
           "c": 1,
-          "value": "Photo portion accuracy is unmeasured",
+          "value": "Receipt OCR accuracy is unmeasured",
           "kind": "new",
           "existing": null
         },
@@ -292,7 +292,7 @@
           "ref": "C6",
           "r": 5,
           "c": 2,
-          "value": "Anushka Mohanty",
+          "value": "Anna Moreno",
           "kind": "new",
           "existing": null
         },
@@ -325,8 +325,8 @@
         ],
         [
           "T-401",
-          "Mirror Open Food Facts",
-          "Prathyush Kodhanpur",
+          "Mirror OpenRates",
+          "Daniel Okafor",
           "03/10/2026",
           "open",
           ""
@@ -334,15 +334,15 @@
         [
           "T-402",
           "Confirmation screen",
-          "Prathyush Kodhanpur",
+          "Daniel Okafor",
           "03/10/2026",
           "in progress",
           ""
         ],
         [
           "T-403",
-          "Mirror Open Food Facts before launch",
-          "Prathyush Kodhanpur",
+          "Mirror OpenRates before launch",
+          "Daniel Okafor",
           "3 Oct",
           "open",
           "Platform squad sync · 22 Sep"
@@ -357,8 +357,8 @@
         ],
         [
           "T-405",
-          "Photo portion accuracy is unmeasured",
-          "Anushka Mohanty",
+          "Receipt OCR accuracy is unmeasured",
+          "Anna Moreno",
           "",
           "blocked",
           "Platform squad sync · 22 Sep"
@@ -388,17 +388,17 @@
             "ref": "B2",
             "r": 1,
             "c": 1,
-            "value": "Mirror Open Food Facts",
+            "value": "Mirror OpenRates",
             "kind": "conflict",
-            "existing": "Mirror Open Food Facts"
+            "existing": "Mirror OpenRates"
           },
           {
             "ref": "C2",
             "r": 1,
             "c": 2,
-            "value": "Prathyush Kodhanpur",
+            "value": "Daniel Okafor",
             "kind": "conflict",
-            "existing": "Prathyush Kodhanpur"
+            "existing": "Daniel Okafor"
           },
           {
             "ref": "D2",
@@ -452,7 +452,7 @@
             "ref": "B4",
             "r": 3,
             "c": 1,
-            "value": "Photo portion accuracy is unmeasured",
+            "value": "Receipt OCR accuracy is unmeasured",
             "kind": "new",
             "existing": null
           },
@@ -460,7 +460,7 @@
             "ref": "C4",
             "r": 3,
             "c": 2,
-            "value": "Anushka Mohanty",
+            "value": "Anna Moreno",
             "kind": "new",
             "existing": null
           },
@@ -524,8 +524,8 @@
           ],
           [
             "T-401",
-            "Mirror Open Food Facts",
-            "Prathyush Kodhanpur",
+            "Mirror OpenRates",
+            "Daniel Okafor",
             "03/10/2026",
             "open",
             "Platform squad sync · 22 Sep"
@@ -533,15 +533,15 @@
           [
             "T-402",
             "Confirmation screen",
-            "Prathyush Kodhanpur",
+            "Daniel Okafor",
             "03/10/2026",
             "in progress",
             "Platform squad sync · 22 Sep"
           ],
           [
             "",
-            "Photo portion accuracy is unmeasured",
-            "Anushka Mohanty",
+            "Receipt OCR accuracy is unmeasured",
+            "Anna Moreno",
             "",
             "blocked",
             "Platform squad sync · 22 Sep"
@@ -566,17 +566,17 @@
             "ref": "B2",
             "r": 1,
             "c": 1,
-            "value": "Mirror Open Food Facts before launch",
+            "value": "Mirror OpenRates before launch",
             "kind": "conflict",
-            "existing": "Mirror Open Food Facts"
+            "existing": "Mirror OpenRates"
           },
           {
             "ref": "C2",
             "r": 1,
             "c": 2,
-            "value": "Prathyush Kodhanpur",
+            "value": "Daniel Okafor",
             "kind": "conflict",
-            "existing": "Prathyush Kodhanpur"
+            "existing": "Daniel Okafor"
           },
           {
             "ref": "D2",
@@ -630,7 +630,7 @@
             "ref": "B4",
             "r": 3,
             "c": 1,
-            "value": "Photo portion accuracy is unmeasured",
+            "value": "Receipt OCR accuracy is unmeasured",
             "kind": "new",
             "existing": null
           },
@@ -638,7 +638,7 @@
             "ref": "C4",
             "r": 3,
             "c": 2,
-            "value": "Anushka Mohanty",
+            "value": "Anna Moreno",
             "kind": "new",
             "existing": null
           },
@@ -702,8 +702,8 @@
           ],
           [
             "T-401",
-            "Mirror Open Food Facts before launch",
-            "Prathyush Kodhanpur",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
             "3 Oct",
             "open",
             "Platform squad sync · 22 Sep"
@@ -711,15 +711,15 @@
           [
             "T-402",
             "Owner column holds a person, not a team",
-            "Prathyush Kodhanpur",
+            "Daniel Okafor",
             "03/10/2026",
             "done",
             "Platform squad sync · 22 Sep"
           ],
           [
             "",
-            "Photo portion accuracy is unmeasured",
-            "Anushka Mohanty",
+            "Receipt OCR accuracy is unmeasured",
+            "Anna Moreno",
             "",
             "blocked",
             "Platform squad sync · 22 Sep"
@@ -746,7 +746,7 @@
             "ref": "B2",
             "r": 1,
             "c": 1,
-            "value": "Mirror Open Food Facts before launch",
+            "value": "Mirror OpenRates before launch",
             "kind": "new",
             "existing": null
           },
@@ -754,7 +754,7 @@
             "ref": "C2",
             "r": 1,
             "c": 2,
-            "value": "Prathyush Kodhanpur",
+            "value": "Daniel Okafor",
             "kind": "new",
             "existing": null
           },
@@ -810,7 +810,7 @@
             "ref": "B4",
             "r": 3,
             "c": 1,
-            "value": "Photo portion accuracy is unmeasured",
+            "value": "Receipt OCR accuracy is unmeasured",
             "kind": "new",
             "existing": null
           },
@@ -818,7 +818,7 @@
             "ref": "C4",
             "r": 3,
             "c": 2,
-            "value": "Anushka Mohanty",
+            "value": "Anna Moreno",
             "kind": "new",
             "existing": null
           },
@@ -875,8 +875,8 @@
           ],
           [
             "",
-            "Mirror Open Food Facts before launch",
-            "Prathyush Kodhanpur",
+            "Mirror OpenRates before launch",
+            "Daniel Okafor",
             "3 Oct",
             "open",
             "Platform squad sync · 22 Sep"
@@ -891,16 +891,16 @@
           ],
           [
             "",
-            "Photo portion accuracy is unmeasured",
-            "Anushka Mohanty",
+            "Receipt OCR accuracy is unmeasured",
+            "Anna Moreno",
             "",
             "blocked",
             "Platform squad sync · 22 Sep"
           ],
           [
             "T-401",
-            "Mirror Open Food Facts",
-            "Prathyush Kodhanpur",
+            "Mirror OpenRates",
+            "Daniel Okafor",
             "03/10/2026",
             "open",
             ""
@@ -908,7 +908,7 @@
           [
             "T-402",
             "Confirmation screen",
-            "Prathyush Kodhanpur",
+            "Daniel Okafor",
             "03/10/2026",
             "in progress",
             ""

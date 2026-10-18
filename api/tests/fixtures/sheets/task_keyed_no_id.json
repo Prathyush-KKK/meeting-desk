@@ -54,8 +54,8 @@
     {
       "id": "p1",
       "kind": "action",
-      "text": "Mirror Open Food Facts before launch",
-      "owner": "Prathyush Kodhanpur",
+      "text": "Mirror OpenRates before launch",
+      "owner": "Daniel Okafor",
       "due": "3 Oct",
       "status": "open",
       "meeting_label": "Platform squad sync · 22 Sep"
@@ -72,8 +72,8 @@
     {
       "id": "p3",
       "kind": "risk",
-      "text": "Photo portion accuracy is unmeasured",
-      "owner": "Anushka Mohanty",
+      "text": "Receipt OCR accuracy is unmeasured",
+      "owner": "Anna Moreno",
       "due": "",
       "status": "blocked",
       "meeting_label": "Platform squad sync · 22 Sep"
@@ -128,7 +128,7 @@
           "ref": "A5",
           "r": 4,
           "c": 0,
-          "value": "Mirror Open Food Facts before launch",
+          "value": "Mirror OpenRates before launch",
           "kind": "new",
           "existing": null
         },
@@ -160,7 +160,7 @@
           "ref": "A7",
           "r": 6,
           "c": 0,
-          "value": "Photo portion accuracy is unmeasured",
+          "value": "Receipt OCR accuracy is unmeasured",
           "kind": "new",
           "existing": null
         },
@@ -204,7 +204,7 @@
           ""
         ],
         [
-          "Mirror Open Food Facts before launch",
+          "Mirror OpenRates before launch",
           "",
           "",
           "",
@@ -218,7 +218,7 @@
           "Platform squad sync · 22 Sep"
         ],
         [
-          "Photo portion accuracy is unmeasured",
+          "Receipt OCR accuracy is unmeasured",
           "",
           "",
           "",
@@ -363,7 +363,7 @@
             "ref": "A2",
             "r": 1,
             "c": 0,
-            "value": "Mirror Open Food Facts before launch",
+            "value": "Mirror OpenRates before launch",
             "kind": "conflict",
             "existing": "Upload an ID"
           },
@@ -395,7 +395,7 @@
             "ref": "A4",
             "r": 3,
             "c": 0,
-            "value": "Photo portion accuracy is unmeasured",
+            "value": "Receipt OCR accuracy is unmeasured",
             "kind": "conflict",
             "existing": "Complete profile"
           },
@@ -438,7 +438,7 @@
             "Notes"
           ],
           [
-            "Mirror Open Food Facts before launch",
+            "Mirror OpenRates before launch",
             "100",
             "one time",
             "live",
@@ -452,7 +452,7 @@
             "Platform squad sync · 22 Sep"
           ],
           [
-            "Photo portion accuracy is unmeasured",
+            "Receipt OCR accuracy is unmeasured",
             "200",
             "one time",
             "live",
@@ -481,7 +481,7 @@
             "ref": "A2",
             "r": 1,
             "c": 0,
-            "value": "Mirror Open Food Facts before launch",
+            "value": "Mirror OpenRates before launch",
             "kind": "new",
             "existing": null
           },
@@ -513,7 +513,7 @@
             "ref": "A4",
             "r": 3,
             "c": 0,
-            "value": "Photo portion accuracy is unmeasured",
+            "value": "Receipt OCR accuracy is unmeasured",
             "kind": "new",
             "existing": null
           },
@@ -552,7 +552,7 @@
             "Notes"
           ],
           [
-            "Mirror Open Food Facts before launch",
+            "Mirror OpenRates before launch",
             "",
             "",
             "",
@@ -566,7 +566,7 @@
             "Platform squad sync · 22 Sep"
           ],
           [
-            "Photo portion accuracy is unmeasured",
+            "Receipt OCR accuracy is unmeasured",
             "",
             "",
             "",

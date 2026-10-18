@@ -1,11 +1,13 @@
-# The internal cluster: what ArgoCD points at (deploy/argocd/application.yaml).
+# An example production overlay: real Google, real extraction, the worker, Prometheus, TLS, and
+# secrets from your secret manager through External Secrets. Copy it, change the host, the domain
+# and the secret store, then:
 #
-#   helm template meeting-desk deploy/helm/meeting-desk -f deploy/helm/meeting-desk/values-internal.yaml
+#   helm template meeting-desk deploy/helm/meeting-desk -f deploy/helm/meeting-desk/values-production.example.yaml
 #
-# Still no credentials: every secret is a path in Infisical, resolved by External Secrets.
+# Still no credentials: every secret is a path in the secret store, resolved by External Secrets.
 
 image:
-  repository: ghcr.io/hellosia/meeting-desk
+  repository: ghcr.io/prathyush-kkk/meeting-desk
   tag: "0.1.0"
 
 build:
@@ -36,8 +38,8 @@ worker:
 serviceAccount:
   create: true
   annotations:
-    # Bedrock fallback, ap-south-1. The role's trust policy names this cluster's OIDC provider and
-    # system:serviceaccount:meeting-desk:meeting-desk.
+    # Only for the Bedrock fallback on EKS (IRSA). The role's trust policy names the cluster's OIDC
+    # provider and system:serviceaccount:meeting-desk:meeting-desk.
     eks.amazonaws.com/role-arn: arn:aws:iam::000000000000:role/meeting-desk-bedrock
 
 ingress:
@@ -47,9 +49,8 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-body-size: 8m
     service.beta.kubernetes.io/aws-load-balancer-internal: "true"
     service.beta.kubernetes.io/aws-load-balancer-scheme: internal
-    # Internal NLB only; there is no public record for this host.
-    external-dns.alpha.kubernetes.io/hostname: meeting-desk.internal.simpleo.ai
-  host: meeting-desk.internal.simpleo.ai
+    external-dns.alpha.kubernetes.io/hostname: meeting-desk.example.com
+  host: meeting-desk.example.com
   tls:
     enabled: true
     secretName: meeting-desk-tls
@@ -73,29 +74,29 @@ env:
   AUTH_DEV_USER: ""
   CORS_ORIGINS: "[]"
   WEB_DIST: /srv/web/dist
-  WEB_BASE_URL: https://meeting-desk.internal.simpleo.ai
-  GOOGLE_OIDC_REDIRECT_URI: https://meeting-desk.internal.simpleo.ai/auth/callback
-  GOOGLE_CONNECT_REDIRECT_URI: https://meeting-desk.internal.simpleo.ai/admin/connections/callback
-  GOOGLE_HOSTED_DOMAIN: simpleo.ai
+  WEB_BASE_URL: https://meeting-desk.example.com
+  GOOGLE_OIDC_REDIRECT_URI: https://meeting-desk.example.com/auth/callback
+  GOOGLE_CONNECT_REDIRECT_URI: https://meeting-desk.example.com/admin/connections/callback
+  GOOGLE_HOSTED_DOMAIN: example.com
   MEETING_DESK_TOKEN_KEY_VERSION: "1"
-  DISPLAY_TIMEZONE: Asia/Kolkata
+  DISPLAY_TIMEZONE: UTC
   SHEETS_MAX_ROWS: "5000"
   EXTRACTION_PROVIDER: vertex
-  VERTEX_PROJECT: hellosia-meeting-desk
-  VERTEX_LOCATION: asia-south1
+  VERTEX_PROJECT: my-gcp-project
+  VERTEX_LOCATION: us-central1
   VERTEX_MODEL: gemini-2.5-flash
-  BEDROCK_REGION: ap-south-1
+  BEDROCK_REGION: us-east-1
   BEDROCK_MODEL: anthropic.claude-3-5-sonnet-20240620-v1:0
   EXTRACT_FALLBACK_TO_BEDROCK: "1"
   JOBS_ENABLED: "1"
   METRICS_ENABLED: "1"
   LOG_LEVEL: INFO
-  TZ: Asia/Kolkata
+  TZ: UTC
 
 externalSecrets:
   enabled: true
   secretStore:
-    name: infisical
+    name: my-secret-store
     kind: ClusterSecretStore
   basePath: /meeting-desk
   keys:
