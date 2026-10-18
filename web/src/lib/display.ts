@@ -126,11 +126,15 @@ export function clip(text: string, max: number): string {
  */
 export function displayToday(now: Date = new Date()): string {
   try {
-    // en-CA writes dates as YYYY-MM-DD.
-    return new Intl.DateTimeFormat("en-CA", { timeZone: displayZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+    // From the parts, not the formatted string: no locale's date pattern is guaranteed.
+    const parts = new Intl.DateTimeFormat("en-US", { timeZone: displayZone, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(now);
+    const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? "";
+    const [y, m, d] = [part("year"), part("month"), part("day")];
+    if (/^\d{4}$/.test(y) && /^\d{2}$/.test(m) && /^\d{2}$/.test(d)) return `${y}-${m}-${d}`;
   } catch {
-    return now.toISOString().slice(0, 10);
+    // An unknown zone: fall through to UTC.
   }
+  return now.toISOString().slice(0, 10);
 }
 
 export type DayGroup = "upcoming" | "today" | "earlier";
