@@ -29,7 +29,8 @@ services:
       DATABASE_URL: postgresql+psycopg://meetingdesk:meetingdesk@db:5432/meetingdesk
       FAKE_GOOGLE: "1"
       FAKE_LLM: "1"
-      AUTH_DEV_USER: daniel.okafor@example.com
+      AUTH_DEV_USER: daniel.okafor@example.com # the demo world's admin
+      WORKSTREAMS: Mobile,Platform,Billing,Rewards,Prod ops,Hiring
       CORS_ORIGINS: '["http://localhost:5173"]'
       # /metrics is on its own port here too, so `curl localhost:8000/metrics` fails locally
       # exactly as it does through the ingress.

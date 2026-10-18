@@ -1,16 +1,20 @@
 PY := api/.venv/bin/python
 PIP := api/.venv/bin/pip
+# The demo world's admin and workstreams (api/app/seed_data.py).
+DEMO_USER := daniel.okafor@example.com
+DEMO_WORKSTREAMS := Mobile,Platform,Billing,Rewards,Prod ops,Hiring
 
-.PHONY: live live-logs live-down help venv install install-llm check check-api ci lint fmt test migrate run worker jobs-schema token-key compose-check clean web-install web-check web-dev web-build e2e helm-lint helm-template docker-build
+.PHONY: demo live live-logs live-down help venv install install-llm check check-api ci lint fmt test migrate run worker jobs-schema token-key compose-check clean web-install web-check web-dev web-build e2e helm-lint helm-template docker-build
 
 help:
+	@echo "make demo        - the demo in Docker on http://localhost:8000 (fake Google, no keys)"
 	@echo "make install     - create api/.venv and install the API with its dev extras"
-	@echo "make install-llm - add the Vertex AI and Bedrock SDKs (only needed with FAKE_LLM=0)"
+	@echo "make install-llm - add the Vertex AI, Bedrock and Anthropic SDKs (EXTRACTION_PROVIDER=openai needs none)"
 	@echo "make ci          - everything a merge needs: ruff, pytest, tsc, vitest, vite build, helm, docker"
 	@echo "make check       - ruff + pytest + the web check (the fast inner loop)"
 	@echo "make check-api   - ruff + pytest only"
 	@echo "make web-install - pnpm install in web/"
-	@echo "make live        - real Google on this machine: Google sign-in + Google sign-in via docker-compose.live.yml (make live-logs, live-down)"
+	@echo "make live        - real Google on this machine via docker-compose.live.yml (make live-logs, live-down)"
 	@echo "make web-check   - tsc, vitest and the web build"
 	@echo "make web-dev     - the Vite dev server on http://localhost:5173"
 	@echo "make e2e         - the browser walkthrough (needs make run and make web-dev)"
@@ -64,7 +68,7 @@ token-key:
 	cd api && .venv/bin/python -c "from app.google.tokens import generate_key; print(generate_key())"
 
 run:
-	cd api && FAKE_GOOGLE=1 FAKE_LLM=1 AUTH_DEV_USER=daniel.okafor@example.com \
+	cd api && FAKE_GOOGLE=1 FAKE_LLM=1 AUTH_DEV_USER=$(DEMO_USER) WORKSTREAMS="$(DEMO_WORKSTREAMS)" \
 		DATABASE_URL=sqlite:///./meeting-desk.db \
 		.venv/bin/uvicorn app.main:app --reload --port 8000
 
@@ -107,3 +111,7 @@ live-logs:
 
 live-down:
 	scripts/live.sh down
+
+# --- the demo (docker-compose.demo.yml: one container, SQLite, fake Google) --------------------
+demo:
+	docker compose -f docker-compose.demo.yml up --build
