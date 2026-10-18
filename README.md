@@ -6,7 +6,6 @@
 
 **Turn meeting notes into action items, and write them straight into your Google Sheet.**
 
-[![CI](https://github.com/Prathyush-KKK/meeting-desk/actions/workflows/ci.yml/badge.svg)](https://github.com/Prathyush-KKK/meeting-desk/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)
 ![React 19](https://img.shields.io/badge/react-19-61DAFB?logo=react&logoColor=black)
@@ -145,8 +144,8 @@ Every setting is listed in [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 
 ## Deploy
 
-- **One container:** `ghcr.io/prathyush-kkk/meeting-desk` serves the API and the web app. Give it
-  Postgres and your settings.
+- **One container:** `deploy/Dockerfile.api` builds one image that serves the API and the web app.
+  Give it Postgres and your settings.
 - **Kubernetes:** the Helm chart in `deploy/helm/meeting-desk` includes the API, the worker, the
   migration job, External Secrets, a ServiceMonitor and Prometheus alert rules.
 
