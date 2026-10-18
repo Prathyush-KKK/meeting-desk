@@ -10,16 +10,7 @@ Three ways to run it for real, from the smallest:
 
 ## The image
 
-One image (`deploy/Dockerfile.api`) holds the API, the built SPA and the worker:
-
-Released images are published to GitHub Container Registry for amd64 and arm64, with every LLM SDK
-installed:
-
-```bash
-docker pull ghcr.io/prathyush-kkk/meeting-desk:latest
-```
-
-To build your own:
+One image (`deploy/Dockerfile.api`) holds the API, the built SPA and the worker. Build it:
 
 ```bash
 docker build -f deploy/Dockerfile.api -t meeting-desk:dev .                       # fake/openai only
