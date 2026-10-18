@@ -62,7 +62,7 @@ def save_edits(
     user: User = Depends(authenticate),
 ) -> dict[str, Any]:
     if not body.edits:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Nothing to save.")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Nothing to save.")
     # A repeat of a save that landed answers with what it answered then: the cells now hold the new
     # values, so the pre-save re-read below would report a clash against the person's own write.
     guarded = body.model_dump(mode="json", exclude={"batch_id"})
@@ -269,7 +269,7 @@ def add_row(
     at: int | None = None
     if body.position.mode == "above":
         if body.position.row is None:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Click the row to insert above.")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Click the row to insert above.")
         if state.layout.header_row >= 0 and body.position.row <= state.layout.header_row:
             raise HTTPException(
                 status.HTTP_409_CONFLICT, "That row is in or above the header. Pick a row inside the table."
@@ -298,10 +298,10 @@ def add_row(
         values[col] = value
     if unknown:
         raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY, f"No column matches: {', '.join(sorted(unknown))}."
+            status.HTTP_422_UNPROCESSABLE_CONTENT, f"No column matches: {', '.join(sorted(unknown))}."
         )
     if point is None and not values:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Fill at least one field.")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Fill at least one field.")
 
     plan = plan_add_row(
         state.read.values,

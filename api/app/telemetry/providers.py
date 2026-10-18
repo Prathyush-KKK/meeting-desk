@@ -42,6 +42,7 @@ VERTEX = "vertex"
 BEDROCK = "bedrock"
 OPENAI = "openai"  # any OpenAI-compatible endpoint: OpenAI, Ollama, OpenRouter, ...
 ANTHROPIC = "anthropic"
+WEBHOOK = "webhook"  # NOTIFY_WEBHOOK_URL: the chat message after a transfer
 POSTGRES = "postgres"
 
 #: Operations per provider. ``other`` is always allowed, so the table is total.
@@ -58,6 +59,7 @@ OPS: dict[str, tuple[str, ...]] = {
     BEDROCK: ("converse", "chat_completions"),  # the Converse API; the OpenAI-compatible endpoint
     OPENAI: ("chat_completions",),
     ANTHROPIC: ("messages_create",),
+    WEBHOOK: ("post",),
     POSTGRES: ("query",),
 }
 OTHER_OP = "other"
@@ -306,6 +308,7 @@ __all__ = [
     "POSTGRES",
     "PROVIDERS",
     "VERTEX",
+    "WEBHOOK",
     "ProviderTelemetry",
     "classify_failure",
     "classify_google",

@@ -8,25 +8,30 @@ version = "0.1.0"
 description = "Meeting Desk API: turn meeting notes into action items and write them into Google Sheets"
 requires-python = ">=3.12"
 dependencies = [
-  "fastapi==0.115.6",
-  "uvicorn[standard]==0.34.0",
-  "sqlalchemy==2.0.36",
-  "alembic==1.14.0",
-  "pydantic==2.10.4",
-  "pydantic-settings==2.7.0",
+  # 0.136.x: 0.137 nests included routers inside app.routes, which the telemetry middleware's
+  # route prediction (app/telemetry/middleware.py) walks as a flat list.
+  "fastapi==0.136.3",
+  # Floor for the Range-header DoS fix in FileResponse (the SPA is served through StaticFiles).
+  "starlette>=0.49.1",
+  "uvicorn[standard]==0.54.0",
+  "sqlalchemy==2.0.55",
+  "alembic==1.20.0",
+  "pydantic==2.14.1",
+  "pydantic-settings==2.16.0",
   # The Google clients are plain httpx against the REST endpoints (see app/google/http.py);
-  # authlib runs the OAuth flows; cryptography (Fernet) keeps refresh tokens at rest.
+  # authlib runs the OAuth flows (1.7.x: 1.8 switches to httpx2 when it is installed, which the
+  # httpx transports the tests inject cannot drive); cryptography (Fernet) keeps refresh tokens at rest.
   "httpx==0.28.1",
-  "authlib==1.4.0",
-  "cryptography>=44.0.0",
+  "authlib==1.7.2",
+  "cryptography>=46.0.0",
   "itsdangerous==2.2.0",
-  "dateparser==1.2.0",
+  "dateparser==1.4.3",
   "python-dateutil==2.9.0.post0",
-  "psycopg[binary]==3.2.3",
+  "psycopg[binary]==3.3.6",
   "psycopg-pool>=3.2",
   "procrastinate==2.15.1",
   # Telemetry per docs/TELEMETRY.md; /metrics on its own port.
-  "prometheus-client==0.21.1",
+  "prometheus-client==0.26.0",
 ]
 
 [project.optional-dependencies]

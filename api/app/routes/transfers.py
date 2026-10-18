@@ -18,10 +18,11 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app import notify
 from app.activity import log
 from app.auth.deps import authenticate
 from app.clock import Clock
@@ -91,7 +92,7 @@ def guard_hash(state: TabState, plan: Plan) -> str:
 def _load_points(db: Session, ids: list[str]) -> list[Point]:
     points = [get_point(db, pid) for pid in ids]
     if not points:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Pick at least one point to transfer.")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Pick at least one point to transfer.")
     return points
 
 
@@ -103,7 +104,7 @@ def _build_plan(state: TabState, body: TransferPreviewIn, points: list[PointForS
             raise HTTPException(status.HTTP_409_CONFLICT, "No header row was found; use Custom fill.")
         return plan_append(values, dropdowns, points, layout=state.layout)
     if body.anchor is None:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Custom fill needs an anchor cell.")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Custom fill needs an anchor cell.")
     if state.layout.header_row >= 0 and body.anchor.r <= state.layout.header_row:
         raise HTTPException(
             status.HTTP_409_CONFLICT, "The anchor is in or above the header row. Pick a cell below it."
@@ -186,6 +187,8 @@ def preview(
 @router.post("/execute")
 def execute(
     body: TransferExecuteIn,
+    request: Request,
+    background: BackgroundTasks,
     db: Session = Depends(get_session),
     google: GoogleSuite = Depends(get_google),
     clock: Clock = Depends(get_clock),
@@ -331,7 +334,24 @@ def execute(
         "undo_until": (now + timedelta(minutes=settings.transfer_undo_minutes)).isoformat(),
         "tab": fresh.to_dict(),
     }
+    if settings.notify_webhook_url:
+        # After the response, and never in the way of it: the rows are in the sheet either way.
+        text = notify.transfer_message(
+            actor=user.name or user.email,
+            workbook_name=workbook.name,
+            sheet_title=fresh.read.title,
+            sheet_url=workbook.url or f"https://docs.google.com/spreadsheets/d/{workbook.spreadsheet_id}",
+            meeting_titles=sorted({m.title for m in meetings.values() if m and m.title}),
+            points=[{"text": t.point_text, **_owner_due(t)} for t in records],
+        )
+        transport = getattr(request.app.state, "notify_transport", None)
+        background.add_task(notify.post, settings.notify_webhook_url, text, transport)
     return settle(db, batch, result, now)
+
+
+def _owner_due(record: Transfer) -> dict[str, str]:
+    point = (record.snapshot or {}).get("point") or {}
+    return {"owner": str(point.get("owner_text") or ""), "due": str(point.get("due_text") or "")}
 
 
 def _already_transferred(db: Session, points: list[Point], workbook_id: uuid.UUID) -> list[str]:

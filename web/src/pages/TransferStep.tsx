@@ -43,6 +43,9 @@ function numericDropdowns(dd: Record<string, string[]> | undefined): Record<numb
   return out;
 }
 
+/** One empty grid for every render before the tab has loaded, so the memos below stay put. */
+const NO_ROWS: string[][] = [];
+
 export function TransferStep({ meeting, pointIds, onBack, onDone }: Props) {
   const workbooks = useWorkbooks();
   const active = usePoints(meeting.id, "active");
@@ -70,7 +73,7 @@ export function TransferStep({ meeting, pointIds, onBack, onDone }: Props) {
   const wanted = new Set(ids);
   const points: Point[] = [...(active.data ?? []), ...(deferred.data ?? [])].filter((p) => wanted.has(p.id));
 
-  const values = tab.data?.values ?? [];
+  const values = tab.data?.values ?? NO_ROWS;
   const headerRow = useMemo(() => detectLayout(values).headerRow, [values]);
   // An anchor in or above the header is blocked with a one-line message. The API refuses it too;
   // blocking here keeps the side panel from offering a plan for it.
@@ -106,6 +109,7 @@ export function TransferStep({ meeting, pointIds, onBack, onDone }: Props) {
         meetingLabel: label,
       })),
     // pointsKey is the content of `points`; `points` itself is a fresh array on every render.
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
     [pointsKey, label],
   );
 

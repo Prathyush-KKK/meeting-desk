@@ -37,6 +37,9 @@ interface Props {
 
 const today = () => new Date().toISOString().slice(0, 10);
 
+/** One empty list while the meetings load, so the memos below stay put. */
+const NO_MEETINGS: MeetingItem[] = [];
+
 export function MeetingStep({ selectedKey, onSelectKey, onContinue, onOpenStep }: Props) {
   const meetings = useMeetings();
   const refresh = useRefreshMeetings();
@@ -50,7 +53,7 @@ export function MeetingStep({ selectedKey, onSelectKey, onContinue, onOpenStep }
   const pasteRef = useRef<HTMLTextAreaElement>(null);
   useAutoGrow(pasteRef, paste);
 
-  const items = meetings.data?.items ?? [];
+  const items = meetings.data?.items ?? NO_MEETINGS;
   const selected = items.find((m) => itemKey(m) === selectedKey) ?? null;
   const open = items.find((m) => itemKey(m) === openKey) ?? null;
   const workstreams = useMemo(() => mergeWorkstreams(items.map((m) => m.workstream)), [items]);
