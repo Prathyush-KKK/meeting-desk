@@ -1,6 +1,6 @@
 """Google OIDC sign-in.
 
-Scaffolded here and exercised end to end in phase 3; phase 1 and the tests use ``AUTH_DEV_USER``.
+Local runs and the tests use ``AUTH_DEV_USER`` instead.
 The flow is deliberately thin: Google identifies the person, the allow-list decides access, and the
 allow-list entry binds to the Google ``sub`` on first sign-in.
 """
@@ -65,9 +65,8 @@ async def login(request: Request, settings: Settings = Depends(get_config)) -> R
     if settings.auth_dev_user:
         return RedirectResponse(settings.web_base_url)
     client = _google(request, settings)
-    return await client.authorize_redirect(
-        request, settings.google_oidc_redirect_uri, hd=settings.google_hosted_domain
-    )
+    extra = {"hd": settings.google_hosted_domain} if settings.google_hosted_domain else {}
+    return await client.authorize_redirect(request, settings.google_oidc_redirect_uri, **extra)
 
 
 @router.get("/callback")
@@ -154,11 +153,16 @@ def logout(settings: Settings = Depends(get_config)) -> Response:
 
 
 @router.get("/me")
-def me(user: User = Depends(authenticate)) -> dict[str, Any]:
+def me(user: User = Depends(authenticate), settings: Settings = Depends(get_config)) -> dict[str, Any]:
     return {
         "id": str(user.id),
         "email": user.email,
         "name": user.name,
         "role": user.role,
         "is_admin": user.role == "admin",
+        # What the UI needs to render the workspace's way: the zone every time is shown in, the
+        # workstreams to offer, and the Workspace domain sign-in is limited to (empty: any).
+        "timezone": settings.display_timezone or "UTC",
+        "workstreams": settings.workstream_list,
+        "hosted_domain": settings.google_hosted_domain,
     }

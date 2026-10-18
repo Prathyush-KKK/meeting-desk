@@ -1,7 +1,7 @@
 """Planner parity with the TypeScript reference, plus the server-only additions.
 
-``expect`` in each fixture is what ``meeting-desk/src/lib/sheet.ts`` produced for the same grid,
-points and anchor; ``with_hooks`` is hand-written for the formula/date behaviour the prototype does
+``expect`` in each fixture is what ``web/src/lib/sheet.ts`` produced for the same grid, points and
+anchor; ``with_hooks`` is hand-written for the formula/date behaviour the TypeScript planner does
 not have.
 """
 
@@ -172,9 +172,9 @@ def test_add_row_above_a_clicked_row_lands_inside_the_section() -> None:
 
 def test_add_row_from_a_form_uses_the_given_columns() -> None:
     fx = load("headers_row_9_banner")
-    plan = plan_add_row(fx.rows, fx.dropdowns, values={1: "Write the runbook", 2: "Nishchay S", 6: "open"})
+    plan = plan_add_row(fx.rows, fx.dropdowns, values={1: "Write the runbook", 2: "Noah S", 6: "open"})
     assert plan_cells(plan) == ["A17", "B17", "C17", "G17"]
-    assert [w.value for w in plan.writes] == ["T-108", "Write the runbook", "Nishchay S", "open"]
+    assert [w.value for w in plan.writes] == ["T-108", "Write the runbook", "Noah S", "open"]
 
 
 def test_add_row_copies_formulas_from_the_row_above() -> None:

@@ -18,9 +18,9 @@ function meeting(over: Partial<MeetingItem>): MeetingItem {
     start_at: "2026-09-22T16:00:00+05:30",
     end_at: "2026-09-22T16:48:00+05:30",
     timezone: "Asia/Kolkata",
-    organizer_email: "ansul.s@simpleo.ai",
-    organizer_name: "Ansul S",
-    attendees: [{ email: "ansul.s@simpleo.ai", name: "Ansul S", response: "accepted" }],
+    organizer_email: "alex.s@example.com",
+    organizer_name: "Alex S",
+    attendees: [{ email: "alex.s@example.com", name: "Alex S", response: "accepted" }],
     conference: {},
     attachments: [],
     calendar_event_id: "evt-1",
@@ -45,7 +45,7 @@ const MANUAL = meeting({
   source: "manual",
   editable: true,
   saved: true,
-  title: "Sprinto call prep",
+  title: "Northwind call prep",
   calendar_event_id: null,
   ical_uid: null,
 });
@@ -107,7 +107,7 @@ describe("MeetingList", () => {
     expect(itemKey(MANUAL)).toBe("m-1");
   });
 
-  // Screen review round 1, R1-02: the rows' negative margins made each row wider than the list's
+  // The rows' negative margins used to make each row wider than the list's
   // scroll box, so on a phone the box scrolled sideways and cut the first letters of every title.
   it("keeps every row inside the list box", () => {
     renderList();
@@ -116,7 +116,7 @@ describe("MeetingList", () => {
     }
   });
 
-  // R1-39: a separator on its own could end a wrapped line.
+  // A separator on its own could end a wrapped line.
   it("keeps each separator with the item after it", () => {
     renderList({ items: [meeting({ points_count: 1, attendees: [] })] });
     const meta = screen.getByTestId("meeting-meta");
@@ -125,7 +125,7 @@ describe("MeetingList", () => {
     expect(parts.slice(1)).toEqual(["· 0 people", "· Calendar", "· 1 point"]);
   });
 
-  it("picks a card with Space and continues with Enter, from the keyboard (R1-45)", async () => {
+  it("picks a card with Space and continues with Enter, from the keyboard", async () => {
     const props = renderList();
     const calendarRow = screen.getAllByTestId("meeting-row")[0];
     await userEvent.tab();
@@ -197,7 +197,7 @@ describe("MeetingList groups", () => {
     expect(screen.queryByText("Today")).not.toBeInTheDocument();
   });
 
-  it("keeps Tab, Space and Enter on the rows across groups (R1-45)", async () => {
+  it("keeps Tab, Space and Enter on the rows across groups", async () => {
     at("2026-09-22");
     const upcoming = meeting({ id: "u-1", title: "Tomorrow", date: "2026-09-23" });
     const props = renderList({ items: [upcoming, CALENDAR] });

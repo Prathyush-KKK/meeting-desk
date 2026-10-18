@@ -7,18 +7,18 @@
       "values": [
         [
           "T-101",
-          "Mirror Open Food Facts",
-          "Prathyush Kodhanpur",
+          "Mirror OpenRates",
+          "Daniel Okafor",
           46298,
           "In progress",
           "P1",
           "=D4-TODAY()",
-          "Nutrition roadmap review · 19 Sep"
+          "Mobile roadmap review · 19 Sep"
         ],
         [
           "T-102",
-          "Review dataset for weight information",
-          "Anushka Mohanty",
+          "Review dataset for currency information",
+          "Anna Moreno",
           46298,
           "Open",
           "P2",
@@ -27,7 +27,7 @@
         [
           "T-103",
           "Finish the alert emission standard v1.2",
-          "Nishchay S",
+          "Noah S",
           46290,
           "Open",
           "P1",

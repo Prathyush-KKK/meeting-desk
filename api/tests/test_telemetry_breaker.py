@@ -1,9 +1,9 @@
 """The deliberate failure, exercised end to end.
 
-The standard's last verification item: break a dependency, watch the counter move, the last-success
-gauge stall, the breaker move, and the error log appear. This is that, against the real Sheets
-client and ``httpx.MockTransport`` - the same harness the phase 2 contract tests use, so nothing is
-mocked out except Google itself.
+The failure exercise in docs/TELEMETRY.md: break a dependency, watch the counter move, the
+last-success gauge stall, the breaker move, and the error log appear. This is that, against the real
+Sheets client and ``httpx.MockTransport`` - the same harness the Google client contract tests use,
+so nothing is mocked out except Google itself.
 """
 
 from __future__ import annotations
@@ -91,7 +91,7 @@ def test_a_google_failure_counts_stalls_the_gauge_and_opens_the_breaker() -> Non
 
     ok = MockGoogleApi().on("GET", f"/spreadsheets/{BOOK}", "sheets_spreadsheet_get.json")
     http = http_for(ok)
-    http.get("a@simpleo.ai", URL, params={"fields": "properties.title"})
+    http.get("a@example.com", URL, params={"fields": "properties.title"})
 
     assert counter(GOOGLE_SHEETS, "spreadsheets_get", "success") == 1
     first_success = gauge("external_provider_last_success_timestamp_seconds", GOOGLE_SHEETS)
@@ -105,7 +105,7 @@ def test_a_google_failure_counts_stalls_the_gauge_and_opens_the_breaker() -> Non
     http = http_for(broken)
     for _ in range(5):
         with pytest.raises(GoogleError):
-            http.get("a@simpleo.ai", URL, params={"fields": "properties.title"})
+            http.get("a@example.com", URL, params={"fields": "properties.title"})
 
     assert counter(GOOGLE_SHEETS, "spreadsheets_get", "error") == 5
     # The last-success gauge is untouched: it is only ever written on a success.
@@ -115,7 +115,7 @@ def test_a_google_failure_counts_stalls_the_gauge_and_opens_the_breaker() -> Non
     # The sixth call never leaves the process.
     before = len(broken.requests)
     with pytest.raises(GoogleError):
-        http.get("a@simpleo.ai", URL, params={"fields": "properties.title"})
+        http.get("a@example.com", URL, params={"fields": "properties.title"})
     assert len(broken.requests) == before, "the breaker let a call through while open"
     assert counter(GOOGLE_SHEETS, "spreadsheets_get", "rejected_by_breaker") == 1
 
@@ -142,12 +142,12 @@ def test_the_breaker_half_opens_after_thirty_seconds_and_closes_on_a_success() -
     http = http_for(broken)
     for _ in range(5):
         with pytest.raises(GoogleError):
-            http.get("a@simpleo.ai", URL)
+            http.get("a@example.com", URL)
     assert breaker.state == OPEN
 
     clock.t += 29
     with pytest.raises(GoogleError):
-        http.get("a@simpleo.ai", URL)  # still refused
+        http.get("a@example.com", URL)  # still refused
     assert breaker.state == OPEN
 
     clock.t += 2  # past the 30 s recovery window
@@ -156,7 +156,7 @@ def test_the_breaker_half_opens_after_thirty_seconds_and_closes_on_a_success() -
     assert breaker.allow() is True
     assert breaker.state == HALF_OPEN
     assert gauge("external_provider_breaker_state", GOOGLE_SHEETS) == 1
-    http.get("a@simpleo.ai", URL)
+    http.get("a@example.com", URL)
     assert breaker.state == "closed"
     assert gauge("external_provider_breaker_state", GOOGLE_SHEETS) == 0
 
@@ -199,7 +199,7 @@ def test_a_404_from_google_does_not_move_the_breaker() -> None:
     http = http_for(api)
     for _ in range(6):
         with pytest.raises(NotFoundError):
-            http.get("a@simpleo.ai", URL)
+            http.get("a@example.com", URL)
     assert counter(GOOGLE_SHEETS, "spreadsheets_get", "error") == 6
     assert telemetry.breakers[GOOGLE_SHEETS].state == "closed"
     assert gauge("external_provider_breaker_state", GOOGLE_SHEETS) == 0
@@ -236,7 +236,7 @@ def test_the_log_level_for_a_degraded_fallback_is_at_least_warning() -> None:
     )
     http = http_for(api)
     with pytest.raises(GoogleError):
-        http.get("a@simpleo.ai", URL)
+        http.get("a@example.com", URL)
     levels = {json.loads(line)["level"] for line in capture.lines}
     assert levels & {"warning", "error"}
     assert logging.WARNING  # the constant the wrapper uses

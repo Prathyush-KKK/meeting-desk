@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -77,7 +78,7 @@ def test_login_without_google_configured_says_so(tmp_path: Path) -> None:
 
 
 def test_members_cannot_change_or_read_the_allow_list(member_client: TestClient) -> None:
-    response = member_client.post("/admin/allow-list", json={"email": "new.person@simpleo.ai"})
+    response = member_client.post("/admin/allow-list", json={"email": "new.person@example.com"})
     assert response.status_code == 403
     assert member_client.get("/admin/allow-list").status_code == 403
 
@@ -99,7 +100,7 @@ def test_a_lost_race_on_the_first_sign_in_recovers_instead_of_500(
     from app.db import Database
     from app.models import User
 
-    sub, email = "dev|racer@simpleo.ai", "racer@simpleo.ai"
+    sub, email = "dev|racer@example.com", "racer@example.com"
     db = Database(f"sqlite:///{tmp_path / 'race.db'}")
     db.create_all()
     with db.session() as seed:  # the request that got there first
@@ -131,12 +132,12 @@ def test_last_seen_is_written_once_a_minute_not_once_a_request(tmp_path: Path) -
     that takes is held until the request answers - and an inline extraction answers a minute or
     two later, so every other request of the same person queued behind it and the app looked dead.
     """
-    from datetime import datetime, timedelta, timezone
+    from datetime import datetime, timedelta
 
     from app.auth import deps
     from app.db import Database
 
-    sub, email = "dev|steady@simpleo.ai", "steady@simpleo.ai"
+    sub, email = "dev|steady@example.com", "steady@example.com"
     db = Database(f"sqlite:///{tmp_path / 'seen.db'}")
     db.create_all()
     with db.session() as first:
@@ -152,7 +153,7 @@ def test_last_seen_is_written_once_a_minute_not_once_a_request(tmp_path: Path) -
 
     with db.session() as aged:  # a minute later: written
         row = aged.get(deps.User, user.id)
-        row.last_seen_at = datetime.now(timezone.utc) - timedelta(seconds=deps.LAST_SEEN_INTERVAL_SECONDS + 1)
+        row.last_seen_at = datetime.now(UTC) - timedelta(seconds=deps.LAST_SEEN_INTERVAL_SECONDS + 1)
         aged.commit()
     with db.session() as third:
         user = deps._ensure_user(third, sub, email, "Steady", "admin")

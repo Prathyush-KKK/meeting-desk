@@ -1,9 +1,9 @@
-// Every screen of the app, photographed at the widths the spec names, for the screen review loop
-// (docs/review/SCREENS-REVIEW.md).
+// Every screen of the app, photographed at desktop, phone and tablet widths - for reviewing a UI
+// change screen by screen, and for the pictures in the README (docs/images/).
 //
-//   cd api && FAKE_GOOGLE=1 FAKE_LLM=1 AUTH_DEV_USER=... uvicorn app.main:app --port 8000   (fresh DB)
-//   cd web && pnpm dev
-//   cd web && node e2e/screens.mjs <round>        -> docs/review/shots/round-<round>/*.png
+//   make run          (fresh DB: rm api/meeting-desk.db first)
+//   make web-dev
+//   cd web && node e2e/screens.mjs <name>        -> docs/screenshots/<name>/*.png (git-ignored)
 //
 // 1280x900 and 390x844 for everything, 768x1024 for the Sheets grid, and a dark pass over Step 3
 // and Sheets. Beside the PNGs it writes metrics.json: per screen, how far the page scrolls sideways
@@ -13,32 +13,34 @@
 // walkthrough's pattern. States the fake cannot reach (an empty calendar, a first-run or an expired
 // connection, no workbook, 401, 403) are produced by answering that one route in the browser.
 
-import { chromium } from "/home/claude/.npm-global/lib/node_modules/playwright/index.mjs";
+import { chromium } from "playwright";
 import { mkdirSync, writeFileSync, rmSync } from "node:fs";
 import path from "node:path";
 
 const WEB = process.env.E2E_WEB ?? "http://127.0.0.1:5173";
 const API = process.env.E2E_API ?? "http://localhost:8000";
-const EXECUTABLE = process.env.E2E_CHROMIUM ?? "/opt/pw-browsers/chromium";
+// Playwright's own Chromium (`npx playwright install chromium`) unless E2E_CHROMIUM names another.
+const EXECUTABLE = process.env.E2E_CHROMIUM || undefined;
 const ROUND = process.argv[2] ?? process.env.ROUND ?? "1";
-// `node e2e/screens.mjs final` writes the set kept for viewing, docs/review/shots/final.
-const OUT = path.resolve(import.meta.dirname, "..", "..", "docs", "review", "shots", ROUND === "final" ? "final" : `round-${ROUND}`);
-const STAMP = new Date().toISOString().slice(11, 19).replace(/:/g, "");
+const OUT = path.resolve(import.meta.dirname, "..", "..", "docs", "screenshots", ROUND);
+// A long-lived API already holds earlier runs' meetings; the stamp keeps this run's apart. Against
+// a fresh database (E2E_STAMP=0, for the README pictures) the titles stay clean.
+const STAMP = process.env.E2E_STAMP === "0" ? "" : ` ${new Date().toISOString().slice(11, 19).replace(/:/g, "")}`;
 
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 
-const NOTES = `Vendor call with Madhu ${STAMP}
+const NOTES = `Vendor call with Maya${STAMP}
 
 The Next Steps
-Ansul S: Send the Sprinto questionnaire by Friday
-Prathyush Kodhanpur: Mirror Open Food Facts before 3 Oct
-Shambhavi Singh: Confirm the barcode fallback copy with design by 30 Sep
+Alex S: Send the Northwind questionnaire by Friday
+Daniel Okafor: Mirror OpenRates before 3 Oct
+Sofia Silva: Confirm the barcode fallback copy with design by 30 Sep
 Decided: the Owner column holds a person, not a team
 Risk: the upload flag has no rollback plan
 `;
 const LONG_TITLE =
-  "Quarterly planning with the nutrition, platform and prod ops squads, including the SIApoints discount rules and the household wealth roadmap";
+  "Quarterly planning with the mobile, platform and prod ops squads, including the rewards discount rules and the billing roadmap";
 
 const metrics = [];
 const failures = [];
@@ -84,7 +86,7 @@ async function measure(page) {
       small.push(`${name} (${Math.round(box.width)}x${Math.round(box.height)})`);
     }
     // Every scroll container, not only the page: nothing on a phone may scroll sideways but a grid
-    // inside its own box (round 4). A text field scrolling its own text is how a field works, so
+    // inside its own box. A text field scrolling its own text is how a field works, so
     // inputs and selects are left out; textareas are in.
     const sideways = [];
     for (const el of document.querySelectorAll("body *")) {
@@ -206,11 +208,11 @@ async function main() {
     end: "16:00",
     workstream: "Platform",
     description: "Agenda in the planning doc.",
-    attendees: [{ name: "Ansul S", email: "ansul.s@simpleo.ai", response: "accepted" }],
+    attendees: [{ name: "Alex S", email: "alex.s@example.com", response: "accepted" }],
   });
   const list = await api("GET", "/meetings/list");
-  const nutrition = list.items.find((m) => m.title === "Nutrition roadmap review");
-  const workbook = (await api("GET", "/workbooks")).find((w) => w.name === "Nutrition Sialet Product Roadmap");
+  const roadmap = list.items.find((m) => m.title === "Mobile roadmap review");
+  const workbook = (await api("GET", "/workbooks")).find((w) => w.name === "Mobile App Product Roadmap");
   let pasted = null; // the meeting the paste creates
 
   // ================================================================ 1280, light ====================
@@ -228,19 +230,19 @@ async function main() {
       await page.getByTestId("meeting-detail").getByLabel("Close").click();
     });
     await screen("step 1 detail (manual)", async () => {
-      await page.locator("[data-testid=meeting-row]", { hasText: "Sprinto call prep" }).getByLabel("Show meeting details").click();
+      await page.locator("[data-testid=meeting-row]", { hasText: "Northwind call prep" }).getByLabel("Show meeting details").click();
       await page.getByTestId("meeting-detail").waitFor();
       await shot(page, "step1-detail-manual");
       await page.getByTestId("meeting-detail").getByLabel("Close").click();
     });
     await screen("step 1 manual edit", async () => {
-      await page.locator("[data-testid=meeting-row]", { hasText: "Sprinto call prep" }).getByLabel("Edit meeting").click();
+      await page.locator("[data-testid=meeting-row]", { hasText: "Northwind call prep" }).getByLabel("Edit meeting").click();
       await page.getByTestId("meeting-detail").waitFor();
       await shot(page, "step1-manual-edit");
       await page.getByTestId("meeting-detail").getByLabel("Close").click();
     });
     await screen("step 1 selected + focus", async () => {
-      await page.locator("[data-testid=meeting-row]", { hasText: "Nutrition roadmap review" }).click();
+      await page.locator("[data-testid=meeting-row]", { hasText: "Mobile roadmap review" }).click();
       // Keyboard: from the paste box, Tab lands on the first card.
       await page.locator("#quickpaste").focus();
       await page.keyboard.press("Tab");
@@ -257,12 +259,12 @@ async function main() {
       await page.getByRole("button", { name: "Save and continue" }).click();
       await page.getByRole("heading", { name: "Saved notes" }).waitFor({ timeout: 20_000 });
       const meetings = await api("GET", "/meetings/list");
-      pasted = meetings.items.find((m) => m.title.startsWith(`Vendor call with Madhu ${STAMP}`));
-      await page.fill("#paste", "Follow-up from Slack\nAnsul S: share the Sprinto login with Nishchay by Monday");
+      pasted = meetings.items.find((m) => m.title.startsWith(`Vendor call with Maya${STAMP}`));
+      await page.fill("#paste", "Follow-up from Slack\nAlex S: share the Northwind login with Noah by Monday");
       await shot(page, "step2-notes-paste", { full: true });
     });
     await screen("step 2 sources (calendar meeting)", async () => {
-      await goto(page, `page=capture&step=notes&meeting=${nutrition.id}`);
+      await goto(page, `page=capture&step=notes&meeting=${roadmap.id}`);
       await page.getByRole("heading", { name: "Saved notes" }).waitFor({ timeout: 20_000 });
       await page.getByText("Looking…").waitFor({ state: "detached", timeout: 20_000 }).catch(() => {});
       await shot(page, "step2-sources", { full: true });
@@ -343,7 +345,7 @@ async function main() {
             items: [],
             fetched_at: new Date().toISOString(),
             age_minutes: 4,
-            connections: ["prathyush.kodhanpur@simpleo.ai"],
+            connections: ["daniel.okafor@example.com"],
             empty_hint: "No meeting here? Add one, or paste the notes straight into the box above.",
           }),
         }),
@@ -372,7 +374,7 @@ async function main() {
       await page.getByTestId("meeting-detail").waitFor({ state: "detached", timeout: 5_000 });
     });
     await screen("390 step 1 manual edit overlay", async () => {
-      await page.locator("[data-testid=meeting-row]", { hasText: "Sprinto call prep" }).getByLabel("Edit meeting").click();
+      await page.locator("[data-testid=meeting-row]", { hasText: "Northwind call prep" }).getByLabel("Edit meeting").click();
       await page.getByTestId("meeting-detail").waitFor();
       await shot(page, "step1-manual-edit-overlay", { full: true });
       await page.goBack();
@@ -384,10 +386,10 @@ async function main() {
       await page.fill("#quickpaste", "");
     });
     await screen("390 step 2", async () => {
-      await goto(page, `page=capture&step=notes&meeting=${nutrition.id}`);
+      await goto(page, `page=capture&step=notes&meeting=${roadmap.id}`);
       await page.getByRole("heading", { name: "Saved notes" }).waitFor({ timeout: 20_000 });
       await page.waitForTimeout(800);
-      await page.fill("#paste", "Follow-up from Slack\nAnsul S: share the Sprinto login with Nishchay by Monday");
+      await page.fill("#paste", "Follow-up from Slack\nAlex S: share the Northwind login with Noah by Monday");
       await shot(page, "step2-notes", { full: true });
     });
     await screen("390 step 3", async () => {
@@ -403,7 +405,7 @@ async function main() {
       await page.getByRole("button", { name: "Hide deferred" }).click();
     });
     await screen("390 point text: caret, growth, autosave", async () => {
-      // Round 4, R4-01: the phone's point text is a growing textarea. Typed text stays where it was
+      // The phone's point text is a growing textarea. Typed text stays where it was
       // typed, focus stays, the box grows instead of scrolling, and the debounced save lands.
       const box = page.locator("[data-testid=point-row][data-lifecycle=active]").first().locator("textarea[aria-label=Point]");
       const before = await box.inputValue();
@@ -438,6 +440,9 @@ async function main() {
       };
       checks.push(result);
       console.log(`  check ${JSON.stringify(result)}`);
+      // Put the text back so the later Sheets screens show the point as it was transferred.
+      await box.fill(before);
+      await page.waitForTimeout(1200);
       if (!result.textIntact || !result.caretKept || !result.focused || result.innerScroll || !saved) {
         throw new Error(`phone point text: ${JSON.stringify(result)}`);
       }
@@ -478,7 +483,7 @@ async function main() {
     });
     await screen("sheets filter + search", async () => {
       await page.getByRole("button", { name: "Open", exact: true }).click();
-      await page.fill("#sheetq", "Prathyush");
+      await page.fill("#sheetq", "Daniel");
       await shot(page, "sheets-filter-search");
       await page.fill("#sheetq", "");
       await page.getByRole("button", { name: "All", exact: true }).click();
@@ -526,7 +531,7 @@ async function main() {
         route.fulfill({
           status: 200,
           contentType: "application/json",
-          body: JSON.stringify({ id: "u-2", email: "nishchay.s@simpleo.ai", name: "Nishchay S", role: "member", is_admin: false }),
+          body: JSON.stringify({ id: "u-2", email: "noah.s@example.com", name: "Noah S", role: "member", is_admin: false }),
         }),
       );
       await p2.route("**/api/admin/connections/status", (route) =>
@@ -534,7 +539,7 @@ async function main() {
           status: 200,
           contentType: "application/json",
           body: JSON.stringify({
-            banner: "Google connection needs reconnecting: ansul.s@simpleo.ai. Paste, points and manual meetings keep working.",
+            banner: "Google connection needs reconnecting: alex.s@example.com. Paste, points and manual meetings keep working.",
             first_run: false,
             first_run_notice: "",
             can_connect: false,
@@ -634,7 +639,7 @@ async function main() {
         route.fulfill({
           status: 403,
           contentType: "application/json",
-          body: JSON.stringify({ detail: "This Google account is not on the Meeting Desk allow-list. Ask an admin to add it: prathyush.kodhanpur@simpleo.ai." }),
+          body: JSON.stringify({ detail: "This Google account is not on the Meeting Desk allow-list. Ask an admin to add it: daniel.okafor@example.com." }),
         }),
       );
       await p2.reload({ waitUntil: "domcontentloaded" });
@@ -729,7 +734,7 @@ async function main() {
         route.fulfill({
           status: 403,
           contentType: "application/json",
-          body: JSON.stringify({ detail: "This Google account is not on the Meeting Desk allow-list. Ask an admin to add it: prathyush.kodhanpur@simpleo.ai." }),
+          body: JSON.stringify({ detail: "This Google account is not on the Meeting Desk allow-list. Ask an admin to add it: daniel.okafor@example.com." }),
         }),
       );
       await p2.reload({ waitUntil: "domcontentloaded" });
@@ -762,7 +767,7 @@ async function main() {
   {
     const { context, page } = await open(browser, 1280, 900, { dark: true });
     await screen("dark step 3", async () => {
-      await goto(page, `page=capture&step=points&meeting=${nutrition.id}`);
+      await goto(page, `page=capture&step=points&meeting=${roadmap.id}`);
       await page.locator("[data-testid=point-row]").first().waitFor({ timeout: 20_000 });
       await shot(page, "dark-step3-points");
     });
@@ -783,7 +788,7 @@ async function main() {
       await page.getByRole("button", { name: "Discard" }).click();
     });
     await screen("dark step 4", async () => {
-      await goto(page, `page=capture&step=points&meeting=${nutrition.id}`);
+      await goto(page, `page=capture&step=points&meeting=${roadmap.id}`);
       await page.locator("[data-testid=point-row]").first().waitFor({ timeout: 20_000 });
       const transfer = page.locator("button", { hasText: /^Transfer \d+$/ }).first();
       if (await transfer.isDisabled()) {

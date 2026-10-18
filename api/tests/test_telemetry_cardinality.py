@@ -1,6 +1,6 @@
 """Cardinality, derived from the code rather than asserted as a number somebody typed in.
 
-Two things the standard asks for:
+Two things docs/TELEMETRY.md asks for:
 
 * route labels are templated paths and carry no record ids - proved by driving real requests with
   real uuids through the app and reading the labels back off the registry;
@@ -70,14 +70,14 @@ def route_labels() -> set[str]:
 
 def test_no_path_parameter_value_reaches_a_route_label(client: TestClient) -> None:
     """Drive the routes that take ids, then read the labels back."""
-    meeting_id = saved_meeting_id(client, "Nutrition roadmap review")
-    client.post("/notes/paste", json={"meeting_id": meeting_id, "text": "Ansul S: send the deck by Friday"})
+    meeting_id = saved_meeting_id(client, "Mobile roadmap review")
+    client.post("/notes/paste", json={"meeting_id": meeting_id, "text": "Alex S: send the deck by Friday"})
     extraction = client.post(f"/meetings/{meeting_id}/extract").json()
     point_id = extraction["points"][0]["id"]
     workbook = connect_fixture_workbook(client)
 
     client.get(f"/meetings/{meeting_id}")
-    client.patch(f"/meetings/{meeting_id}", json={"workstream": "Nutrition"})
+    client.patch(f"/meetings/{meeting_id}", json={"workstream": "Mobile"})
     client.get(f"/meetings/{meeting_id}/extractions")
     client.get(f"/extractions/{extraction['extraction']['id']}")
     client.patch(f"/points/{point_id}", json={"text": "Send the deck by Friday"})

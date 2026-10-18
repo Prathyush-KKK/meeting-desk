@@ -1,5 +1,5 @@
 // Both paths through the grid: the plain table under 300 rows, TanStack Virtual over it.
-// Then both cell editors: the inline one from 768 px up, the bottom sheet under it (finding 23).
+// Then both cell editors: the inline one from 768 px up, the bottom sheet under it.
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen, within } from "@testing-library/react";
@@ -10,7 +10,7 @@ import { detectLayout } from "@/lib/sheet";
 function sheet(dataRows: number): string[][] {
   const rows: string[][] = [["ID", "Task", "Owner", "Due", "Status"]];
   for (let i = 1; i <= dataRows; i++) {
-    rows.push([`T-${100 + i}`, `Row ${i}`, "Ansul S", "24 Sep", "Open"]);
+    rows.push([`T-${100 + i}`, `Row ${i}`, "Alex S", "24 Sep", "Open"]);
   }
   return rows;
 }
@@ -26,7 +26,7 @@ describe("Grid", () => {
   it("renders every row of a small tab, with no virtualisation", () => {
     const { box, container, bodyRows } = grid(sheet(20));
     expect(box.dataset.virtualised).toBe("false");
-    // 21 real rows, padded to the prototype's 22-row minimum.
+    // 21 real rows, padded to the grid's 22-row minimum.
     expect(bodyRows.length).toBe(22);
     expect(container.querySelectorAll("[data-spacer]").length).toBe(0);
     expect(screen.getByText("Row 1")).toBeInTheDocument();
@@ -67,7 +67,7 @@ describe("Grid", () => {
   });
 });
 
-// --- one selection colour, finding 29 -------------------------------------------------------------
+// --- one selection colour -------------------------------------------------------------------------
 
 describe("grid marks", () => {
   const KINDS: CellMark[] = ["new", "key", "conflict", "moved", "edited"];
@@ -96,7 +96,7 @@ describe("grid marks", () => {
   });
 });
 
-// --- the two cell editors, finding 23 -------------------------------------------------------------
+// --- the two cell editors -------------------------------------------------------------------------
 
 function editableGrid(rows: string[][], narrow: boolean) {
   const listeners = new Set<() => void>();
@@ -138,7 +138,7 @@ describe("the cell editor under 768 px", () => {
     expect(editor.className).toContain("md:hidden");
     expect(within(editor).getByTestId("cell-editor-column")).toHaveTextContent("Owner");
     expect(within(editor).getByText("C3")).toBeInTheDocument();
-    expect(within(editor).getByTestId("cell-editor-current")).toHaveTextContent("Ansul S");
+    expect(within(editor).getByTestId("cell-editor-current")).toHaveTextContent("Alex S");
 
     const control = within(editor).getByLabelText("Owner");
     expect(control.tagName).toBe("INPUT");
@@ -148,10 +148,10 @@ describe("the cell editor under 768 px", () => {
     }
 
     await userEvent.clear(control);
-    await userEvent.type(control, "Nishchay S");
+    await userEvent.type(control, "Noah S");
     expect(onChange).not.toHaveBeenCalled();
     await userEvent.click(within(editor).getByRole("button", { name: "Save" }));
-    expect(onChange).toHaveBeenCalledWith(2, 2, "Nishchay S");
+    expect(onChange).toHaveBeenCalledWith(2, 2, "Noah S");
     expect(screen.queryByTestId("cell-editor")).toBeNull();
   });
 
@@ -208,8 +208,8 @@ describe("the cell editor from 768 px up", () => {
     const inline = container.querySelector('[data-cell="2,2"] input') as HTMLInputElement;
     expect(inline).toBeTruthy();
     await userEvent.clear(inline);
-    await userEvent.type(inline, "Nishchay S{Enter}");
-    expect(onChange).toHaveBeenCalledWith(2, 2, "Nishchay S");
+    await userEvent.type(inline, "Noah S{Enter}");
+    expect(onChange).toHaveBeenCalledWith(2, 2, "Noah S");
   });
 
   it("pushes no history entry for an inline edit", async () => {
@@ -220,8 +220,8 @@ describe("the cell editor from 768 px up", () => {
   });
 });
 
-// Screen review round 1, R1-13: a Smart append's rows landed below the grid's visible window, so the
-// preview did not show the one thing it is for. jsdom has no layout; the rectangles the grid reads
+// A Smart append's rows used to land below the grid's visible window, so the preview did not show
+// the one thing it is for. jsdom has no layout; the rectangles the grid reads
 // are given here - the box is 300 px high and each row 28 px under a 28 px header.
 describe("Grid revealCell", () => {
   const rect = (top: number, height: number, left = 0, width = 800) =>
@@ -257,7 +257,7 @@ describe("Grid revealCell", () => {
   });
 });
 
-// R1-46: cn() (tailwind-merge) dropped `outline` beside `outline-2`, so an anchor on a cell with no
+// cn() (tailwind-merge) dropped `outline` beside `outline-2`, so an anchor on a cell with no
 // conflict mark had no outline at all.
 describe("Grid anchor", () => {
   it("outlines the anchor cell whatever mark it carries", () => {
@@ -268,7 +268,7 @@ describe("Grid anchor", () => {
   });
 });
 
-// R1-18: the row picked for Add row's "above row N" was marked only by a darker number (its tint
+// The row picked for Add row's "above row N" was marked only by a darker number (its tint
 // lost to the header grey). The number wears the tint over the grey and every cell a top line.
 describe("Grid picked row", () => {
   it("marks the whole row an insert lands above", () => {

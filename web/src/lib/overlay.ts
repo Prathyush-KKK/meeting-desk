@@ -1,8 +1,8 @@
 // Back closes what is on top, instead of leaving the app.
 //
-// Spec section 7, "Shared state and mobile": "The detail overlay traps the back button · the
-// overlay pushes history; back closes it." Review 1, finding 23 asks for the same on the mobile
-// cell editor - on a phone both of them cover the page, and Back is the gesture people reach for.
+// The detail overlay traps the back button: it pushes history, and Back closes it. The mobile cell
+// editor does the same - on a phone both of them cover the page, and Back is the gesture people
+// reach for.
 //
 // The entry carries no URL change (App.tsx owns the query string), so the URL effect there never
 // sees a difference and never replaces what was pushed.

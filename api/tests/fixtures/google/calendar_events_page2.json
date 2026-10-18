@@ -1,7 +1,7 @@
 {
   "kind": "calendar#events",
   "etag": "\"p32ofbnlk8fpb20p\"",
-  "summary": "prathyush.kodhanpur@simpleo.ai",
+  "summary": "daniel.okafor@example.com",
   "updated": "2026-09-22T10:41:12.317Z",
   "timeZone": "Asia/Kolkata",
   "accessRole": "owner",
@@ -16,8 +16,8 @@
       "summary": "Team offsite",
       "iCalUID": "20260922_allday_offsite@google.com",
       "organizer": {
-        "email": "ansul.s@simpleo.ai",
-        "displayName": "Ansul S"
+        "email": "alex.s@example.com",
+        "displayName": "Alex S"
       },
       "start": {
         "date": "2026-09-22"
@@ -27,8 +27,8 @@
       },
       "attendees": [
         {
-          "email": "ansul.s@simpleo.ai",
-          "displayName": "Ansul S",
+          "email": "alex.s@example.com",
+          "displayName": "Alex S",
           "organizer": true,
           "responseStatus": "accepted"
         }

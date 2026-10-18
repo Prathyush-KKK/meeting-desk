@@ -8,7 +8,7 @@ from tests.conftest import meeting_by_title, saved_meeting_id
 
 
 def _meeting(client: TestClient) -> str:
-    return meeting_by_title(client, "Nutrition roadmap review")["id"]
+    return meeting_by_title(client, "Mobile roadmap review")["id"]
 
 
 def test_seeded_points_are_active(client: TestClient) -> None:
@@ -23,14 +23,14 @@ def test_patch_autosaves_one_field_and_records_who(client: TestClient) -> None:
     patched = client.patch(f"/points/{point['id']}", json={"status": "blocked"})
     assert patched.status_code == 200
     assert patched.json()["status"] == "blocked"
-    assert patched.json()["updated_by"] == "prathyush.kodhanpur@simpleo.ai"
+    assert patched.json()["updated_by"] == "daniel.okafor@example.com"
     assert patched.json()["text"] == point["text"]  # nothing else moved
 
 
 def test_editing_the_owner_resolves_the_email(client: TestClient) -> None:
     point = client.get("/points", params={"meeting_id": _meeting(client)}).json()[4]
-    patched = client.patch(f"/points/{point['id']}", json={"owner_text": "Shambhavi Singh"})
-    assert patched.json()["owner_email"] == "shambhavi.singh@simpleo.ai"
+    patched = client.patch(f"/points/{point['id']}", json={"owner_text": "Sofia Silva"})
+    assert patched.json()["owner_email"] == "sofia.silva@example.com"
     assert patched.json()["owner_ambiguous"] is False
 
 
@@ -101,26 +101,26 @@ def test_add_a_manual_point(client: TestClient) -> None:
         json={
             "meeting_id": meeting_id,
             "kind": "risk",
-            "text": "IFCT licensing cannot be engineered around",
-            "owner_text": "Prathyush Kodhanpur",
+            "text": "Card-network licensing cannot be engineered around",
+            "owner_text": "Daniel Okafor",
             "status": "open",
         },
     )
     assert response.status_code == 201
-    assert response.json()["owner_email"] == "prathyush.kodhanpur@simpleo.ai"
-    assert response.json()["workstream"] == "Nutrition"  # defaults from the meeting
+    assert response.json()["owner_email"] == "daniel.okafor@example.com"
+    assert response.json()["workstream"] == "Mobile"  # defaults from the meeting
 
 
 def test_a_first_name_shared_by_two_attendees_is_flagged_not_guessed(client: TestClient) -> None:
-    meeting_id = saved_meeting_id(client, "Household and wealth workflows")
+    meeting_id = saved_meeting_id(client, "Billing and payments workflows")
     response = client.post(
         "/points",
-        json={"meeting_id": meeting_id, "text": "check the billing branches", "owner_text": "Pratyush"},
+        json={"meeting_id": meeting_id, "text": "check the billing branches", "owner_text": "Daniela"},
     )
     body = response.json()
-    # Prathyush Kodhanpur and Pratyush Chaudhary are both in the room under near-identical
+    # Daniel Okafor and Daniela Mehta are both in the room under near-identical
     # spellings (notes are transcribed by ear), so a bare first name is flagged, never guessed.
-    assert body["owner_text"] == "Pratyush"
+    assert body["owner_text"] == "Daniela"
     assert body["owner_email"] is None
     assert body["owner_ambiguous"] is True
 
@@ -130,7 +130,7 @@ def test_copy_as_text_groups_by_kind(client: TestClient) -> None:
     response = client.post("/points/copy-text", json={"ids": [p["id"] for p in points]})
     text = response.json()["text"]
     assert "Actions" in text and "Decisions" in text
-    assert "[Anushka Mohanty]" in text
+    assert "[Anna Moreno]" in text
 
 
 def test_unknown_point_is_a_404(client: TestClient) -> None:

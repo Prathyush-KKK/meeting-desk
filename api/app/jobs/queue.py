@@ -37,7 +37,7 @@ EXTRACT_TASK = "meeting_desk.extract_meeting"
 FETCH_DOCS_TASK = "meeting_desk.fetch_missing_docs"
 TOKEN_HEALTH_TASK = "meeting_desk.token_health"
 FETCH_DOCS_CRON = "*/5 * * * *"  # every 5 minutes; the job itself limits to the hour after a meeting
-TOKEN_HEALTH_CRON = "30 21 * * *"  # 03:00 Asia/Kolkata, daily
+TOKEN_HEALTH_CRON = "30 21 * * *"  # 21:30 UTC, daily
 
 
 # --- the work ------------------------------------------------------------------------------------------

@@ -94,7 +94,7 @@ def test_only_calendar_meetings_that_ended_in_the_last_hour_are_due(client: Test
 
 
 def test_a_doc_only_the_second_admin_can_read_is_imported_through_that_connection(client: TestClient) -> None:
-    meeting_id = saved_meeting_id(client, "Eshan Interview Task Handover")
+    meeting_id = saved_meeting_id(client, "Ethan Interview Task Handover")
     clock = client.app.state.clock
     with client.app.state.db.session() as session:
         meeting = session.get(Meeting, uuid.UUID(meeting_id))
@@ -104,7 +104,7 @@ def test_a_doc_only_the_second_admin_can_read_is_imported_through_that_connectio
         session.commit()
         assert report.imported == [meeting_id]
     activity = client.get("/admin/activity").json()
-    assert any(a["text"].endswith("through ansul.s@simpleo.ai") for a in activity)
+    assert any(a["text"].endswith("through alex.s@example.com") for a in activity)
 
 
 def test_an_expired_connection_met_on_the_way_is_marked_in_the_jobs_session(client: TestClient) -> None:
@@ -153,7 +153,7 @@ def test_extract_enqueues_and_polling_reports_queued_then_done(tmp_path: Path) -
     app, connector = _queued_app(tmp_path)
     with TestClient(app) as client:
         meeting_id = saved_meeting_id(client, "Platform squad sync")
-        client.post("/notes/paste", json={"meeting_id": meeting_id, "text": "Ansul S: call Madhu by Friday"})
+        client.post("/notes/paste", json={"meeting_id": meeting_id, "text": "Alex S: call Maya by Friday"})
 
         queued = client.post(f"/meetings/{meeting_id}/extract").json()
         assert queued["queued"] is True
@@ -177,7 +177,7 @@ def test_extract_enqueues_and_polling_reports_queued_then_done(tmp_path: Path) -
         done = client.get(queued["poll"]).json()
         assert done["status"] == "done"
         assert done["provider"] == "fake"
-        assert [p["owner_email"] for p in done["points"]] == ["ansul.s@simpleo.ai"]
+        assert [p["owner_email"] for p in done["points"]] == ["alex.s@example.com"]
         assert client.get(f"/meetings/{meeting_id}").json()["step"] == "points"
         activity = client.get("/admin/activity").json()
         assert activity[0]["text"] == "Extracted 1 points from Platform squad sync"
@@ -199,7 +199,7 @@ def test_a_failing_provider_leaves_the_row_in_error_and_the_notes_untouched(tmp_
     app = create_app(settings, jobs=build_job_app(settings, connector=connector), extraction=Broken())
     with TestClient(app) as client:
         meeting_id = saved_meeting_id(client, "Platform squad sync")
-        client.post("/notes/paste", json={"meeting_id": meeting_id, "text": "Ansul S: call Madhu by Friday"})
+        client.post("/notes/paste", json={"meeting_id": meeting_id, "text": "Alex S: call Maya by Friday"})
         queued = client.post(f"/meetings/{meeting_id}/extract").json()
         result = run_extraction_job(app.state.runtime, queued["extraction"]["id"], ADMIN)
         assert result["status"] == "error"

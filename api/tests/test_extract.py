@@ -24,10 +24,10 @@ PEOPLE = [p["name"] for p in seed_data.PEOPLE]
 def test_next_steps_lines_become_action_items_with_verbatim_owners() -> None:
     output = extract_output(seed_data.GEMINI_CHAT_NOTE, PEOPLE)
     titles = [a.title for a in output.action_items]
-    assert "Review dataset for weight information" in titles
+    assert "Review dataset for currency information" in titles
     owners = {a.owner_text for a in output.action_items}
-    assert "Anushka Mohanty" in owners
-    assert "Nishchay" in owners  # verbatim, not normalised to "Nishchay S"
+    assert "Anna Moreno" in owners
+    assert "Noah" in owners  # verbatim, not normalised to "Noah S"
 
 
 def test_a_decision_line_becomes_a_decision() -> None:
@@ -47,21 +47,21 @@ def test_a_risk_line_becomes_a_risk() -> None:
 
 
 def test_bracketed_owner_style_is_understood() -> None:
-    output = extract_output("[Prathyush Kodhanpur] Mirror Open Food Facts before 3 Oct", PEOPLE)
+    output = extract_output("[Daniel Okafor] Mirror OpenRates before 3 Oct", PEOPLE)
     item = output.action_items[0]
-    assert item.owner_text == "Prathyush Kodhanpur"
-    assert item.title == "Mirror Open Food Facts before 3 Oct"
+    assert item.owner_text == "Daniel Okafor"
+    assert item.title == "Mirror OpenRates before 3 Oct"
     assert item.due_hint == "before 3 Oct"
 
 
 def test_the_same_line_twice_yields_one_item() -> None:
-    output = extract_output("Ansul S: call Madhu\nAnsul S: call Madhu", PEOPLE)
+    output = extract_output("Alex S: call Maya\nAlex S: call Maya", PEOPLE)
     assert len(output.action_items) == 1
 
 
 def test_the_provider_reports_its_name_and_usage() -> None:
-    context = ExtractionContext(attendees=[{"name": "Ansul S", "email": "ansul.s@simpleo.ai"}])
-    result = FakeExtractionProvider().extract("Ansul S: call Madhu", context)
+    context = ExtractionContext(attendees=[{"name": "Alex S", "email": "alex.s@example.com"}])
+    result = FakeExtractionProvider().extract("Alex S: call Maya", context)
     assert result.provider == "fake"
     assert result.usage["items"] == 1
     assert isinstance(result.output, ExtractionOutput)
@@ -76,62 +76,62 @@ def test_the_json_schema_is_the_v3_shape() -> None:
 # --- owner resolution -----------------------------------------------------------------------------
 
 ROOM = [
-    Person("Prathyush Kodhanpur", "prathyush.kodhanpur@simpleo.ai"),
-    Person("Anushka Mohanty", "anushka.mohanty@simpleo.ai"),
-    Person("Nishchay S", "nishchay.s@simpleo.ai"),
+    Person("Daniel Okafor", "daniel.okafor@example.com"),
+    Person("Anna Moreno", "anna.moreno@example.com"),
+    Person("Noah S", "noah.s@example.com"),
 ]
 
 
 def test_full_name_wins() -> None:
-    resolved = resolve_owner("Anushka Mohanty", ROOM)
-    assert resolved.owner_email == "anushka.mohanty@simpleo.ai"
+    resolved = resolve_owner("Anna Moreno", ROOM)
+    assert resolved.owner_email == "anna.moreno@example.com"
     assert resolved.matched_by == "attendee_full"
     assert resolved.ambiguous is False
 
 
 def test_first_name_resolves_when_unique_in_the_room() -> None:
-    resolved = resolve_owner("Nishchay", ROOM)
-    assert resolved.owner_email == "nishchay.s@simpleo.ai"
+    resolved = resolve_owner("Noah", ROOM)
+    assert resolved.owner_email == "noah.s@example.com"
     assert resolved.matched_by == "attendee_first"
 
 
 def test_two_candidates_set_the_flag_and_keep_the_text() -> None:
-    room = [*ROOM, Person("Nishchay Rao", "nishchay.rao@simpleo.ai")]
-    resolved = resolve_owner("Nishchay", room)
+    room = [*ROOM, Person("Noah Rao", "noah.rao@example.com")]
+    resolved = resolve_owner("Noah", room)
     assert resolved.ambiguous is True
     assert resolved.owner_email is None
-    assert resolved.owner_text == "Nishchay"
-    assert set(resolved.candidates) == {"nishchay.s@simpleo.ai", "nishchay.rao@simpleo.ai"}
+    assert resolved.owner_text == "Noah"
+    assert set(resolved.candidates) == {"noah.s@example.com", "noah.rao@example.com"}
 
 
 def test_similar_spellings_do_not_collide() -> None:
     room = [
-        Person("Prathyush Kodhanpur", "prathyush.kodhanpur@simpleo.ai"),
-        Person("Pratyush Chaudhary", "pratyush.chaudhary@simpleo.ai"),
+        Person("Daniel Okafor", "daniel.okafor@example.com"),
+        Person("Daniela Mehta", "daniela.mehta@example.com"),
     ]
-    assert resolve_owner("Prathyush Kodhanpur", room).owner_email == "prathyush.kodhanpur@simpleo.ai"
-    assert resolve_owner("Pratyush Chaudhary", room).owner_email == "pratyush.chaudhary@simpleo.ai"
+    assert resolve_owner("Daniel Okafor", room).owner_email == "daniel.okafor@example.com"
+    assert resolve_owner("Daniela Mehta", room).owner_email == "daniela.mehta@example.com"
 
 
-def test_a_bare_prathyush_with_both_spellings_in_the_room_is_ambiguous() -> None:
-    """The spec's case: Prathyush Kodhanpur and Pratyush Chaudhary are both attendees."""
+def test_a_bare_daniel_with_both_spellings_in_the_room_is_ambiguous() -> None:
+    """Daniel Okafor and Daniela Mehta are both attendees."""
     room = [
-        Person("Prathyush Kodhanpur", "prathyush.kodhanpur@simpleo.ai"),
-        Person("Pratyush Chaudhary", "pratyush.chaudhary@simpleo.ai"),
-        Person("Ansul S", "ansul.s@simpleo.ai"),
+        Person("Daniel Okafor", "daniel.okafor@example.com"),
+        Person("Daniela Mehta", "daniela.mehta@example.com"),
+        Person("Alex S", "alex.s@example.com"),
     ]
-    for mention in ("Prathyush", "Pratyush", "prathyush"):
+    for mention in ("Daniel", "Daniela", "daniel"):
         resolved = resolve_owner(mention, room, seed_data.DIRECTORY, seed_data.ALIASES)
         assert resolved.ambiguous is True, mention
         assert resolved.owner_email is None
         assert resolved.owner_text == mention
-        assert set(resolved.candidates) == {"prathyush.kodhanpur@simpleo.ai", "pratyush.chaudhary@simpleo.ai"}
+        assert set(resolved.candidates) == {"daniel.okafor@example.com", "daniela.mehta@example.com"}
     # With only one of them in the room, the near spelling is that person.
-    alone = resolve_owner("Pratyush", room[:1] + room[2:])
-    assert alone.owner_email == "prathyush.kodhanpur@simpleo.ai"
+    alone = resolve_owner("Daniela", room[:1] + room[2:])
+    assert alone.owner_email == "daniel.okafor@example.com"
     assert alone.ambiguous is False
     # Short names never fuzz: "Ana" is not "Anu".
-    assert resolve_owner("Ana", [Person("Anu Rao", "anu@simpleo.ai")]).owner_email is None
+    assert resolve_owner("Ana", [Person("Anu Rao", "anu@example.com")]).owner_email is None
 
 
 def test_postprocess_keeps_the_ambiguous_owner_empty_with_both_candidates() -> None:
@@ -139,16 +139,16 @@ def test_postprocess_keeps_the_ambiguous_owner_empty_with_both_candidates() -> N
         {
             "action_items": [
                 {
-                    "title": "Mirror Open Food Facts before launch",
-                    "owner_text": "Prathyush",
+                    "title": "Mirror OpenRates before launch",
+                    "owner_text": "Daniel",
                     "due_hint": "",
-                    "evidence": "Prathyush: Mirror Open Food Facts before launch",
+                    "evidence": "Daniel: Mirror OpenRates before launch",
                 },
                 {
                     "title": "Review the dataset",
-                    "owner_text": "Prathyush Kodhanpur",
+                    "owner_text": "Daniel Okafor",
                     "due_hint": "by 3 Oct",
-                    "evidence": "Prathyush Kodhanpur: Review the dataset by 3 Oct",
+                    "evidence": "Daniel Okafor: Review the dataset by 3 Oct",
                 },
             ],
             "decisions": [],
@@ -160,17 +160,17 @@ def test_postprocess_keeps_the_ambiguous_owner_empty_with_both_candidates() -> N
         meeting_title="Platform squad sync",
         meeting_start=BASE,
         attendees=[
-            {"name": "Prathyush Kodhanpur", "email": "prathyush.kodhanpur@simpleo.ai"},
-            {"name": "Pratyush Chaudhary", "email": "pratyush.chaudhary@simpleo.ai"},
+            {"name": "Daniel Okafor", "email": "daniel.okafor@example.com"},
+            {"name": "Daniela Mehta", "email": "daniela.mehta@example.com"},
         ],
     )
     bare, full = postprocess(output, context, seed_data.DIRECTORY, seed_data.ALIASES)
     assert bare.owner_ambiguous is True
     assert bare.owner_email is None
-    assert bare.owner_text == "Prathyush"
-    assert set(bare.owner_candidates) == {"prathyush.kodhanpur@simpleo.ai", "pratyush.chaudhary@simpleo.ai"}
+    assert bare.owner_text == "Daniel"
+    assert set(bare.owner_candidates) == {"daniel.okafor@example.com", "daniela.mehta@example.com"}
     assert full.owner_ambiguous is False
-    assert full.owner_email == "prathyush.kodhanpur@simpleo.ai"
+    assert full.owner_email == "daniel.okafor@example.com"
 
 
 def test_the_recorded_gemini_output_resolves_owners_the_same_way(client: TestClient) -> None:
@@ -183,7 +183,7 @@ def test_the_recorded_gemini_output_resolves_owners_the_same_way(client: TestCli
     from app.models import Meeting
 
     recorded = json.loads(
-        (Path(__file__).parent / "fixtures" / "llm" / "vertex_nutrition_review.json").read_text()
+        (Path(__file__).parent / "fixtures" / "llm" / "vertex_roadmap_review.json").read_text()
     )
 
     class Recorded:
@@ -202,34 +202,34 @@ def test_the_recorded_gemini_output_resolves_owners_the_same_way(client: TestCli
     with client.app.state.db.session() as session:
         meeting = session.get(Meeting, __import__("uuid").UUID(meeting_id))
         meeting.attendees = [
-            {"name": "Prathyush Kodhanpur", "email": "prathyush.kodhanpur@simpleo.ai"},
-            {"name": "Pratyush Chaudhary", "email": "pratyush.chaudhary@simpleo.ai"},
-            {"name": "Anushka Mohanty", "email": "anushka.mohanty@simpleo.ai"},
+            {"name": "Daniel Okafor", "email": "daniel.okafor@example.com"},
+            {"name": "Daniela Mehta", "email": "daniela.mehta@example.com"},
+            {"name": "Anna Moreno", "email": "anna.moreno@example.com"},
         ]
         extraction, created = run_extraction(
             session, meeting, Recorded(), client.app.state.clock, actor="test"
         )
         session.commit()
         by_owner = {p.owner_text: p for p in created if p.owner_text}
-        assert by_owner["Prathyush"].owner_ambiguous is True
-        assert by_owner["Prathyush"].owner_email is None
-        assert by_owner["Anushka Mohanty"].owner_email == "anushka.mohanty@simpleo.ai"
-        assert by_owner["Nishchay"].owner_email == "nishchay.s@simpleo.ai"  # via the directory
-        assert by_owner["Anushka Mohanty"].due_date.date().isoformat() == "2026-10-03"
+        assert by_owner["Daniel"].owner_ambiguous is True
+        assert by_owner["Daniel"].owner_email is None
+        assert by_owner["Anna Moreno"].owner_email == "anna.moreno@example.com"
+        assert by_owner["Noah"].owner_email == "noah.s@example.com"  # via the directory
+        assert by_owner["Anna Moreno"].due_date.date().isoformat() == "2026-10-03"
         assert extraction.provider == "vertex"
         assert extraction.output["decisions"][0]["statement"] == "The Owner column holds a person, not a team"
 
 
 def test_someone_not_in_the_room_falls_through_to_the_directory() -> None:
-    resolved = resolve_owner("Shambhavi Singh", ROOM, seed_data.DIRECTORY)
+    resolved = resolve_owner("Sofia Silva", ROOM, seed_data.DIRECTORY)
     assert resolved.matched_by == "directory"
-    assert resolved.owner_email == "shambhavi.singh@simpleo.ai"
+    assert resolved.owner_email == "sofia.silva@example.com"
 
 
 def test_the_alias_table_is_the_last_resort() -> None:
-    resolved = resolve_owner("PK", ROOM, [], seed_data.ALIASES)
+    resolved = resolve_owner("Dan", ROOM, [], seed_data.ALIASES)
     assert resolved.matched_by == "alias"
-    assert resolved.owner_email == "prathyush.kodhanpur@simpleo.ai"
+    assert resolved.owner_email == "daniel.okafor@example.com"
 
 
 def test_unassigned_is_not_a_person() -> None:
@@ -262,7 +262,7 @@ def test_a_relative_date_uses_the_meeting_start_as_the_base() -> None:
 
 
 def test_nonsense_stays_empty() -> None:
-    assert parse_due("when the clinician is free", BASE) is None
+    assert parse_due("when the accountant is free", BASE) is None
     assert parse_due("", BASE) is None
 
 
@@ -272,22 +272,22 @@ def test_normalise_text_is_stable_for_re_extraction() -> None:
 
 def test_postprocess_maps_every_kind_and_carries_the_workstream() -> None:
     output = extract_output(
-        "The Next Steps\nAnushka Mohanty: Review the dataset by 3 Oct\n"
-        "Decided: owner is one person\nRisk: portion accuracy is unmeasured\nIs a drink a meal?",
+        "The Next Steps\nAnna Moreno: Review the dataset by 3 Oct\n"
+        "Decided: owner is one person\nRisk: OCR accuracy is unmeasured\nIs a tip an expense?",
         PEOPLE,
     )
     context = ExtractionContext(
-        meeting_title="Nutrition roadmap review",
+        meeting_title="Mobile roadmap review",
         meeting_start=BASE,
-        workstream="Nutrition",
+        workstream="Mobile",
         attendees=[{"name": p.name, "email": p.email} for p in ROOM],
     )
     points = postprocess(output, context, seed_data.DIRECTORY, seed_data.ALIASES)
     kinds = {p.kind for p in points}
     assert kinds == {"action", "decision", "risk", "question"}
-    assert all(p.workstream == "Nutrition" for p in points)
+    assert all(p.workstream == "Mobile" for p in points)
     action = next(p for p in points if p.kind == "action")
-    assert action.owner_email == "anushka.mohanty@simpleo.ai"
+    assert action.owner_email == "anna.moreno@example.com"
     assert action.due_date.date().isoformat() == "2026-10-03"
     assert next(p for p in points if p.kind == "decision").status == "decided"
 
@@ -338,7 +338,7 @@ def test_re_extracting_adds_only_new_points(client: TestClient) -> None:
 def test_an_excluded_note_is_not_extracted(client: TestClient) -> None:
     meeting_id = saved_meeting_id(client, "Platform squad sync")
     note = client.post(
-        "/notes/paste", json={"meeting_id": meeting_id, "text": "Ansul S: buy the clinician hour"}
+        "/notes/paste", json={"meeting_id": meeting_id, "text": "Alex S: buy the accountant hour"}
     ).json()["note"]
     client.patch(f"/notes/{note['id']}", json={"include": False})
     assert client.post(f"/meetings/{meeting_id}/extract").status_code == 409
@@ -353,10 +353,10 @@ def test_extracting_with_no_notes_says_so(client: TestClient) -> None:
 
 def test_the_extraction_record_is_readable(client: TestClient) -> None:
     meeting_id = saved_meeting_id(client, "Platform squad sync")
-    client.post("/notes/paste", json={"meeting_id": meeting_id, "text": "Ansul S: call Madhu by Friday"})
+    client.post("/notes/paste", json={"meeting_id": meeting_id, "text": "Alex S: call Maya by Friday"})
     extraction_id = client.post(f"/meetings/{meeting_id}/extract").json()["extraction"]["id"]
 
     record = client.get(f"/extractions/{extraction_id}").json()
     assert record["schema_version"] == "v3"
-    assert record["output"]["action_items"][0]["owner_text"] == "Ansul S"
+    assert record["output"]["action_items"][0]["owner_text"] == "Alex S"
     assert len(client.get(f"/meetings/{meeting_id}/extractions").json()) == 1

@@ -57,7 +57,9 @@ class Settings(BaseSettings):
     google_client_id: str = ""
     google_client_secret: str = ""
     google_oidc_redirect_uri: str = "http://localhost:8000/auth/callback"
-    google_hosted_domain: str = "simpleo.ai"
+    # Only accounts of this Google Workspace domain may sign in or be connected. Empty: any Google
+    # account (the allow-list still decides who gets in).
+    google_hosted_domain: str = ""
     web_base_url: str = "http://localhost:5173"
     # The built web app (``web/dist``). When set, the API serves it at "/" with an SPA fallback so
     # one container answers both; empty means the API is API-only and Vite serves the app.
@@ -97,7 +99,10 @@ class Settings(BaseSettings):
     sheets_max_rows: int = 5000  # the table region is never read past this row
 
     # --- behaviour --------------------------------------------------------------------------
-    display_timezone: str = "Asia/Kolkata"
+    # The IANA zone every time is shown in (meeting list, manual meetings, due dates, "read HH:MM").
+    display_timezone: str = "UTC"
+    # The workstreams offered on a meeting, comma-separated. Anything already on a meeting is added.
+    workstreams: str = "Product,Engineering,Design,Growth,Operations,Hiring"
     calendar_cache_seconds: int = 60
     # Refresh skips the cache, but not more often than this: a held-down button must not become one
     # Calendar call per click per connection.
@@ -113,20 +118,32 @@ class Settings(BaseSettings):
     soft_delete_retention_days: int = 30
 
     # --- extraction -------------------------------------------------------------------------
-    extraction_provider: str = "fake"  # fake | vertex | bedrock | bedrock_openai
+    # fake | openai | anthropic | vertex | bedrock | bedrock_openai
+    extraction_provider: str = "fake"
+    # EXTRACTION_PROVIDER=openai: any OpenAI-compatible /chat/completions endpoint - OpenAI itself,
+    # Ollama (http://localhost:11434/v1), OpenRouter, LM Studio, vLLM. The key may stay empty for a
+    # local server. LLM_REASONING_EFFORT is only sent when set (low | medium | high | none).
+    llm_base_url: str = "https://api.openai.com/v1"
+    llm_api_key: str = Field("", validation_alias=_alias("llm_api_key", "LLM_API_KEY", "OPENAI_API_KEY"))
+    llm_model: str = "gpt-4.1-mini"
+    llm_reasoning_effort: str = ""
+    llm_timeout_seconds: float = 180.0
+    # EXTRACTION_PROVIDER=anthropic: Claude through the Anthropic SDK (``make install-llm``).
+    anthropic_api_key: str = Field("", validation_alias=_alias("anthropic_api_key", "ANTHROPIC_API_KEY"))
+    anthropic_model: str = "claude-opus-5-5"
+    anthropic_effort: str = "medium"  # output_config.effort: low | medium | high | xhigh | max
     vertex_project: str = ""
-    vertex_location: str = "asia-south1"
+    vertex_location: str = "us-central1"
     vertex_model: str = "gemini-2.5-flash"
-    bedrock_region: str = "ap-south-1"
-    # Bedrock has no Gemini; the fallback runs a Claude model in Mumbai. Confirm the id per account.
+    bedrock_region: str = "us-east-1"
+    # Bedrock has no Gemini; the fallback runs a Claude model. Confirm the id is enabled per account.
     bedrock_model: str = "anthropic.claude-3-5-sonnet-20240620-v1:0"
-    # Bedrock's OpenAI-compatible endpoint with a Bedrock API key - the credential the nutrition
-    # service already runs on, under the names its .env uses, so that block pastes as it is. With
-    # both set, EXTRACTION_PROVIDER=bedrock goes here instead of the Converse API.
+    # Bedrock's OpenAI-compatible endpoint with a Bedrock API key, under the names AWS documents for
+    # it. With both set, EXTRACTION_PROVIDER=bedrock goes here instead of the Converse API.
     bedrock_base_url: str = ""
     bedrock_api_key: str = Field("", validation_alias=_alias("bedrock_api_key", "AWS_BEARER_TOKEN_BEDROCK"))
-    # BEDROCK_MODEL_ID is the nutrition name for ``bedrock_model``. It is its own field rather than
-    # a second alias because an alias loses to BEDROCK_MODEL whenever that is present - even empty -
+    # BEDROCK_MODEL_ID is another name for ``bedrock_model``. It is its own field rather than a
+    # second alias because an alias loses to BEDROCK_MODEL whenever that is present - even empty -
     # and an .env copied from the earlier example still carries the Claude id there. Filled in, it
     # wins; empty (what docker-compose.live.yml passes when it is not given) counts as unset.
     bedrock_model_id: str = Field("", validation_alias=_alias("bedrock_model_id", "BEDROCK_MODEL_ID"))
@@ -134,8 +151,10 @@ class Settings(BaseSettings):
         False, validation_alias=_alias("bedrock_fallback_enabled", "EXTRACT_FALLBACK_TO_BEDROCK")
     )
     extraction_max_output_tokens: int = 8192
-    # Read timeout on one chat completion. The nutrition service's name for the same knob.
-    bedrock_timeout_seconds: float = Field(180.0, validation_alias=_alias("bedrock_timeout_seconds", "BEDROCK_TIMEOUT_SECONDS"))
+    # Read timeout on one chat completion on Bedrock's OpenAI-compatible endpoint.
+    bedrock_timeout_seconds: float = Field(
+        180.0, validation_alias=_alias("bedrock_timeout_seconds", "BEDROCK_TIMEOUT_SECONDS")
+    )
 
     @model_validator(mode="after")
     def _bedrock_model_id_wins(self) -> Settings:
@@ -144,11 +163,20 @@ class Settings(BaseSettings):
         return self
 
     @property
+    def workstream_list(self) -> list[str]:
+        out: list[str] = []
+        for raw in self.workstreams.split(","):
+            name = raw.strip()
+            if name and name not in out:
+                out.append(name)
+        return out
+
+    @property
     def bedrock_bearer_configured(self) -> bool:
         """Both halves of the OpenAI-compatible credential: the endpoint and the Bedrock API key."""
         return bool(self.bedrock_api_key.strip() and self.bedrock_base_url.strip())
 
-    # --- telemetry (docs/ALERT-EMISSION-STANDARD-SUMMARY.md) --------------------------------
+    # --- telemetry (docs/TELEMETRY.md) -------------------------------------------------------
     # /metrics is served by a second ASGI app on its own port, never on the API's router, so the
     # public ingress cannot reach it. Off in tests: the socket guard forbids listening sockets.
     metrics_enabled: bool = True

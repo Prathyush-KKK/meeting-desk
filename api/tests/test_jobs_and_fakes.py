@@ -68,7 +68,7 @@ def test_the_vertex_provider_refuses_to_run_unconfigured() -> None:
     from app.extract.provider import ExtractionError
 
     provider = VertexExtractionProvider(Settings())
-    assert provider.region == "asia-south1"
+    assert provider.region == "us-central1"
     assert provider.model == "gemini-2.5-flash"
     with pytest.raises(ExtractionError) as err:
         provider.extract("text", None)
@@ -78,8 +78,8 @@ def test_the_vertex_provider_refuses_to_run_unconfigured() -> None:
 def test_the_fake_calendar_window_and_dedup() -> None:
     google = FakeGoogle()
     start, end = seed_data.default_window()
-    mine = google.calendar.list_events("prathyush.kodhanpur@simpleo.ai", start, end)
-    theirs = google.calendar.list_events("ansul.s@simpleo.ai", start, end)
+    mine = google.calendar.list_events("daniel.okafor@example.com", start, end)
+    theirs = google.calendar.list_events("alex.s@example.com", start, end)
     shared = {e.ical_uid for e in mine} & {e.ical_uid for e in theirs}
     assert shared  # the same event really is on both calendars
     assert all(start <= e.start_at <= end for e in mine)
@@ -88,38 +88,38 @@ def test_the_fake_calendar_window_and_dedup() -> None:
 def test_the_fake_refuses_a_doc_that_is_not_shared() -> None:
     google = FakeGoogle()
     with pytest.raises(PermissionDenied):
-        google.docs.get_document("prathyush.kodhanpur@simpleo.ai", "doc-m4")
-    doc = google.docs.get_document("ansul.s@simpleo.ai", "doc-m4")
+        google.docs.get_document("daniel.okafor@example.com", "doc-m4")
+    doc = google.docs.get_document("alex.s@example.com", "doc-m4")
     assert [t.title for t in doc.tabs] == ["Quick notes", "Full notes"]
 
 
 def test_the_fake_docs_carry_the_three_gemini_tabs() -> None:
     google = FakeGoogle()
-    doc = google.docs.get_document("prathyush.kodhanpur@simpleo.ai", "doc-m1")
+    doc = google.docs.get_document("daniel.okafor@example.com", "doc-m1")
     assert [t.title for t in doc.tabs] == ["Quick notes", "Full notes", "Transcript"]
     assert doc.tab("Full notes").text.startswith("Platform squad sync - full notes")
 
 
 def test_the_fake_people_directory_search() -> None:
     google = FakeGoogle()
-    hits = google.people.search_directory("prathyush.kodhanpur@simpleo.ai", "shambhavi")
-    assert [p.email for p in hits] == ["shambhavi.singh@simpleo.ai"]
-    assert google.people.search_directory("prathyush.kodhanpur@simpleo.ai", "") == []
+    hits = google.people.search_directory("daniel.okafor@example.com", "sofia")
+    assert [p.email for p in hits] == ["sofia.silva@example.com"]
+    assert google.people.search_directory("daniel.okafor@example.com", "") == []
 
 
 def test_the_fake_cannot_write_where_it_cannot_edit() -> None:
     google = FakeGoogle()
-    assert google.sheets.can_edit("ansul.s@simpleo.ai", "siapoints") is True
-    assert google.sheets.can_edit("prathyush.kodhanpur@simpleo.ai", "siapoints") is False
+    assert google.sheets.can_edit("alex.s@example.com", "rewards") is True
+    assert google.sheets.can_edit("daniel.okafor@example.com", "rewards") is False
     from app.google.interface import SetCell
 
     with pytest.raises(PermissionDenied):
-        google.sheets.batch_update("prathyush.kodhanpur@simpleo.ai", "siapoints", [SetCell("t6", 5, 0, "x")])
+        google.sheets.batch_update("daniel.okafor@example.com", "rewards", [SetCell("t6", 5, 0, "x")])
 
 
 def test_the_fixture_tabs_are_available_as_a_workbook() -> None:
     google = FakeGoogle()
-    meta = google.sheets.get_spreadsheet("prathyush.kodhanpur@simpleo.ai", "plannerfixtures")
+    meta = google.sheets.get_spreadsheet("daniel.okafor@example.com", "plannerfixtures")
     titles = {t.sheet_id for t in meta.tabs}
     assert {"headers_row_1", "headers_row_9_banner", "no_header", "two_header_rows"} <= titles
 
@@ -129,7 +129,7 @@ def test_token_health_marks_a_broken_connection(client: TestClient) -> None:
 
     class Broken(FakeGoogle):
         def list_events(self, connection_email, time_min, time_max):
-            if connection_email == "ansul.s@simpleo.ai":
+            if connection_email == "alex.s@example.com":
                 # The refresh token itself refused: this, and only this, means "reconnect me".
                 raise AuthExpired("invalid_grant")
             return super().list_events(connection_email, time_min, time_max)
@@ -137,8 +137,8 @@ def test_token_health_marks_a_broken_connection(client: TestClient) -> None:
     with client.app.state.db.session() as session:
         unhealthy = check_connection_health(session, Broken(), datetime.now(IST))
         session.commit()
-        assert [c.email for c in unhealthy] == ["ansul.s@simpleo.ai"]
-        refreshed = session.query(Connection).filter_by(email="ansul.s@simpleo.ai").one()
+        assert [c.email for c in unhealthy] == ["alex.s@example.com"]
+        refreshed = session.query(Connection).filter_by(email="alex.s@example.com").one()
         assert refreshed.status == "expired"
         assert refreshed.last_error == "invalid_grant"
 
@@ -146,16 +146,16 @@ def test_token_health_marks_a_broken_connection(client: TestClient) -> None:
 def test_fetch_doc_finds_the_attached_notes_doc(client: TestClient) -> None:
     google = client.app.state.google
     with client.app.state.db.session() as session:
-        meeting = session.query(Meeting).filter_by(title="Eshan Interview Task Handover").one()
-        found = fetch_notes_doc(google, meeting, ["prathyush.kodhanpur@simpleo.ai", "ansul.s@simpleo.ai"])
+        meeting = session.query(Meeting).filter_by(title="Ethan Interview Task Handover").one()
+        found = fetch_notes_doc(google, meeting, ["daniel.okafor@example.com", "alex.s@example.com"])
         assert found is not None
         assert found.id == "doc-m4"
 
 
 def test_fetch_doc_returns_nothing_when_there_is_no_doc(client: TestClient) -> None:
     with client.app.state.db.session() as session:
-        meeting = session.query(Meeting).filter_by(title="Sprinto call prep").one()
-        assert fetch_notes_doc(client.app.state.google, meeting, ["prathyush.kodhanpur@simpleo.ai"]) is None
+        meeting = session.query(Meeting).filter_by(title="Northwind call prep").one()
+        assert fetch_notes_doc(client.app.state.google, meeting, ["daniel.okafor@example.com"]) is None
 
 
 def test_the_calendar_window_reaches_ahead_as_well_as_back() -> None:

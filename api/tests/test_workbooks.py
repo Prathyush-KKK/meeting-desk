@@ -10,23 +10,23 @@ from tests.conftest import connect_fixture_workbook, workbook_by_name
 def test_seeded_workbooks_are_listed_with_their_tabs(client: TestClient) -> None:
     workbooks = client.get("/workbooks").json()
     names = [w["name"] for w in workbooks]
-    assert "Nutrition Sialet Product Roadmap" in names
-    roadmap = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    assert "Mobile App Product Roadmap" in names
+    roadmap = workbook_by_name(client, "Mobile App Product Roadmap")
     assert [t["title"] for t in roadmap["tabs"]][:2] == ["P1 Resolve & Log", "P4 Regional & AI"]
     assert roadmap["can_edit"] is True
 
 
 def test_connect_by_url_picks_the_first_admin_connection_that_can_edit(client: TestClient) -> None:
     response = client.post(
-        "/workbooks/connect", json={"url": "https://docs.google.com/spreadsheets/d/siapoints"}
+        "/workbooks/connect", json={"url": "https://docs.google.com/spreadsheets/d/rewards"}
     )
     assert response.status_code == 201
     body = response.json()
-    assert body["name"] == "SIApoints - Earn Points"
+    assert body["name"] == "Rewards - Earn Points"
     assert body["can_edit"] is True
     # Only the second admin account can edit it, so that is the one that was chosen.
     connections = {c["id"]: c["email"] for c in client.get("/admin/connections").json()["connections"]}
-    assert connections[body["connection_id"]] == "ansul.s@simpleo.ai"
+    assert connections[body["connection_id"]] == "alex.s@example.com"
 
 
 def test_a_workbook_no_connection_can_edit_is_saved_read_only(client: TestClient) -> None:
@@ -37,13 +37,13 @@ def test_a_workbook_no_connection_can_edit_is_saved_read_only(client: TestClient
     body = response.json()
     assert body["can_edit"] is False
     assert body["connection_id"] is None
-    assert "prathyush.kodhanpur@simpleo.ai" in body["needs_edit_access_from"]
+    assert "daniel.okafor@example.com" in body["needs_edit_access_from"]
     assert "give edit access" in body["share_request"]
 
 
 def test_a_member_may_connect_a_workbook(member_client: TestClient) -> None:
     body = connect_fixture_workbook(member_client)
-    assert body["connected_by"] == "nishchay.s@simpleo.ai"
+    assert body["connected_by"] == "noah.s@example.com"
     assert body["can_edit"] is True
 
 
@@ -60,7 +60,7 @@ def test_a_workbook_no_admin_can_open_is_refused_with_the_accounts_named(client:
         "/workbooks/connect", json={"url": "https://docs.google.com/spreadsheets/d/secretbook"}
     )
     assert response.status_code == 409
-    assert "prathyush.kodhanpur@simpleo.ai" in response.json()["detail"]
+    assert "daniel.okafor@example.com" in response.json()["detail"]
 
 
 def test_a_bad_url_is_rejected(client: TestClient) -> None:
@@ -69,23 +69,23 @@ def test_a_bad_url_is_rejected(client: TestClient) -> None:
 
 def test_reconnecting_updates_in_place(client: TestClient) -> None:
     first = client.post(
-        "/workbooks/connect", json={"url": "https://docs.google.com/spreadsheets/d/siapoints"}
+        "/workbooks/connect", json={"url": "https://docs.google.com/spreadsheets/d/rewards"}
     )
     second = client.post(
-        "/workbooks/connect", json={"url": "https://docs.google.com/spreadsheets/d/siapoints"}
+        "/workbooks/connect", json={"url": "https://docs.google.com/spreadsheets/d/rewards"}
     )
     assert first.json()["id"] == second.json()["id"]
-    assert len([w for w in client.get("/workbooks").json() if w["spreadsheet_id"] == "siapoints"]) == 1
+    assert len([w for w in client.get("/workbooks").json() if w["spreadsheet_id"] == "rewards"]) == 1
 
 
 def test_disconnect_removes_it_from_the_registry(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "SIApoints - Earn Points")
+    workbook = workbook_by_name(client, "Rewards - Earn Points")
     assert client.delete(f"/workbooks/{workbook['id']}").json()["ok"] is True
-    assert "SIApoints - Earn Points" not in [w["name"] for w in client.get("/workbooks").json()]
+    assert "Rewards - Earn Points" not in [w["name"] for w in client.get("/workbooks").json()]
 
 
 def test_tab_read_returns_values_layout_dropdowns_and_a_region_hash(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     response = client.get(f"/workbooks/{workbook['id']}/tabs/t1")
     assert response.status_code == 200
     tab = response.json()
@@ -108,12 +108,12 @@ def test_tab_read_reports_formula_and_date_columns(client: TestClient) -> None:
 
 
 def test_the_layout_is_remembered_between_reads(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     first = client.get(f"/workbooks/{workbook['id']}/tabs/t1").json()
     second = client.get(f"/workbooks/{workbook['id']}/tabs/t1").json()
     assert first["region_hash"] == second["region_hash"]
 
 
 def test_an_unknown_tab_is_an_error(client: TestClient) -> None:
-    workbook = workbook_by_name(client, "Nutrition Sialet Product Roadmap")
+    workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     assert client.get(f"/workbooks/{workbook['id']}/tabs/nope").status_code in (404, 500, 502)

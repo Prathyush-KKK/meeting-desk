@@ -1,9 +1,9 @@
-"""SQLAlchemy 2 models - the tables of spec section 4.
+"""SQLAlchemy 2 models - the app's tables.
 
 Two deliberate storage choices so the same code runs on Postgres 16 and on the SQLite the tests use:
 
 * ``jsonb`` columns are ``JSON`` with a ``JSONB`` variant on Postgres.
-* the spec's ``text[]`` / ``uuid[]`` columns (``connections.scopes``, ``extractions.note_ids``,
+* the ``text[]`` / ``uuid[]`` columns (``connections.scopes``, ``extractions.note_ids``,
   ``transfers.cells``, ``sheet_layouts.formula_cols`` / ``date_cols``) are stored as JSON arrays
   rather than native Postgres arrays. Nothing queries inside them; they are read whole.
 """
@@ -30,6 +30,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+from app.tz import display_zone_name
 
 Json = JSON().with_variant(postgresql.JSONB(), "postgresql")
 
@@ -120,7 +122,7 @@ class Meeting(Base):
     location: Mapped[str] = mapped_column(Text, default="")
     start_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     end_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    timezone: Mapped[str] = mapped_column(String(64), default="Asia/Kolkata")
+    timezone: Mapped[str] = mapped_column(String(64), default=display_zone_name)
     organizer_email: Mapped[str] = mapped_column(String(320), default="")
     organizer_name: Mapped[str] = mapped_column(String(200), default="")
     attendees: Mapped[list[Any]] = mapped_column(Json, default=list)

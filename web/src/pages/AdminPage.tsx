@@ -10,7 +10,8 @@ import type { Me } from "@/api/types";
 
 export function AdminPage({ me }: { me: Me }) {
   const isAdmin = me.is_admin;
-  // The four readers are `require_admin` (Review 1, finding 28). A member is told so once, rather
+  const domain = me.hosted_domain;
+  // The four readers are `require_admin`. A member is told so once, rather
   // than shown three lists that are empty because every poll is a 403.
   const connections = useConnections(isAdmin);
   const allowList = useAllowList(isAdmin);
@@ -37,7 +38,7 @@ export function AdminPage({ me }: { me: Me }) {
     </p>
   );
 
-  // Screen review R2-04: a member used to get the three sections anyway - empty lists, a disabled
+  // A member used to get the three sections anyway - empty lists, a disabled
   // field, and a "Connect an account" link that `disabled` cannot disable on an anchor, which led
   // to a 403. For a member the notice is the page.
   if (!isAdmin) {
@@ -66,7 +67,7 @@ export function AdminPage({ me }: { me: Me }) {
         </div>
         <ul className="divide-y border-y text-[13px]">
           {(connections.data?.connections ?? []).map((c) => (
-            // R1-34: every row the same shape - who, then when and Reconnect, then the scopes on a
+            // Every row the same shape - who, then when and Reconnect, then the scopes on a
             // line of their own (a long scope list used to push the date to a second line on one
             // row and not the other).
             <li key={c.email} className="flex flex-col gap-1 py-2.5">
@@ -105,7 +106,7 @@ export function AdminPage({ me }: { me: Me }) {
             id="allow-email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="name@simpleo.ai"
+            placeholder="name@example.com"
             className="h-8 max-w-xs text-sm"
             onKeyDown={(e) => e.key === "Enter" && void add()}
           />
@@ -113,7 +114,7 @@ export function AdminPage({ me }: { me: Me }) {
         </div>
         <ul className="divide-y border-y text-[13px]">
           {(allowList.data ?? []).map((a) => (
-            // R1-40: on a phone the email has the first line to itself and role and sign-in state
+            // On a phone the email has the first line to itself and role and sign-in state
             // share the second ("not yet signed in" used to break over two lines beside it).
             <li key={a.email} className="flex items-center gap-3 py-2">
               <div className="flex min-w-0 flex-1 flex-col sm:flex-row sm:items-baseline sm:gap-3">
@@ -137,8 +138,8 @@ export function AdminPage({ me }: { me: Me }) {
           ))}
         </ul>
         <p className="mt-2 text-xs text-muted-foreground">
-          Sign-in is Google, restricted to simpleo.ai, then this list. Admins manage connections and the list; members do
-          everything else.
+          Sign-in is Google{domain ? `, restricted to ${domain},` : ""} then this list. Admins manage connections and the
+          list; members do everything else.
         </p>
       </section>
 

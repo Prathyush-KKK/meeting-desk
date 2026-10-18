@@ -23,7 +23,7 @@ from app.sheets.layout import detect_date_cols, detect_formula_cols, detect_layo
 from tests.google_mock import MockGoogleApi, json_response
 
 IST = ZoneInfo("Asia/Kolkata")
-ME = "prathyush.kodhanpur@simpleo.ai"
+ME = "daniel.okafor@example.com"
 BOOK = "1RoadmapSpreadsheetId0000000000000000000000"
 NOW = datetime(2026, 9, 22, 17, 2, tzinfo=IST)
 
@@ -79,7 +79,7 @@ def test_spreadsheets_get_carries_titles_sheet_ids_and_grid_properties_with_a_fi
     assert params["fields"] == [
         "spreadsheetId,properties.title,spreadsheetUrl,sheets(properties(sheetId,title,index,gridProperties(rowCount,columnCount)))"
     ]
-    assert meta.title == "Nutrition Sialet Product Roadmap"
+    assert meta.title == "Mobile App Product Roadmap"
     assert meta.url.endswith("/edit")
     assert [(t.sheet_id, t.title, t.index) for t in meta.tabs] == [
         ("0", "P1 Resolve & Log", 0),
@@ -261,9 +261,9 @@ def test_values_are_strings_dates_are_serials_and_blank_clears() -> None:
     assert cell_data("", as_date=True) == {}
     assert cell_data("2026-10-03", as_date=True) == {"userEnteredValue": {"numberValue": 46298}}
     assert cell_data("by 3 Oct", as_date=True, base=NOW) == {"userEnteredValue": {"numberValue": 46298}}
-    # A date column with a value that is not a date is written as text, per the spec.
-    assert cell_data("when the clinician is free", as_date=True, base=NOW) == {
-        "userEnteredValue": {"stringValue": "when the clinician is free"}
+    # A date column with a value that is not a date is written as text.
+    assert cell_data("when the accountant is free", as_date=True, base=NOW) == {
+        "userEnteredValue": {"stringValue": "when the accountant is free"}
     }
 
 
@@ -314,12 +314,12 @@ def test_a_403_on_a_protected_range_names_the_protection_and_its_editors() -> No
     assert "protected cell" in str(err.value)
     assert (
         err.value.detail
-        == "Days left formulas on P1 Resolve & Log (editors: ansul.s@simpleo.ai, prathyush.kodhanpur@simpleo.ai)"
+        == "Days left formulas on P1 Resolve & Log (editors: alex.s@example.com, daniel.okafor@example.com)"
     )
 
     with pytest.raises(PermissionDenied) as err:
         _client(api).batch_update(ME, BOOK, [InsertRows("0", at=1, count=1)])  # inside the header rows
-    assert err.value.detail == "Header rows on P1 Resolve & Log (editors: ansul.s@simpleo.ai)"
+    assert err.value.detail == "Header rows on P1 Resolve & Log (editors: alex.s@example.com)"
 
     with pytest.raises(PermissionDenied) as err:
         _client(api).batch_update(ME, BOOK, [SetCell("0", 10, 1, "x")])  # not inside any protection
@@ -327,6 +327,6 @@ def test_a_403_on_a_protected_range_names_the_protection_and_its_editors() -> No
 
 
 def test_a1_helpers_quote_titles() -> None:
-    assert quote_title("Ansul's tab") == "'Ansul''s tab'"
+    assert quote_title("Alex's tab") == "'Alex''s tab'"
     assert a1_range("P1", 0, None, 39) == "'P1'!1:40"
     assert a1_range("P1", 40, 0, 999, 7) == "'P1'!A41:H1000"

@@ -1,6 +1,6 @@
 # The web app on its own, behind nginx. NOT what the chart deploys - see the note below.
 #
-# The decision (phase 4): the SPA ships inside the API image (deploy/Dockerfile.api builds it in
+# The decision: the SPA ships inside the API image (deploy/Dockerfile.api builds it in
 # its first stage and copies `dist` in as WEB_DIST). Reasons, in order:
 #
 #   1. main.py already serves it. `mount_web` puts `web/dist` at "/" behind the routers with an

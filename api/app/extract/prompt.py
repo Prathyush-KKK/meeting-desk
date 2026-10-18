@@ -15,6 +15,7 @@ from zoneinfo import ZoneInfo
 
 from app.extract.provider import ExtractionContext
 from app.extract.schema import PROMPT_RULES, STATUS_HINTS
+from app.tz import display_zone_name
 
 MAX_INPUT_CHARS = 200_000
 
@@ -41,8 +42,8 @@ Rules:
 
 Field rules:
 - action_items[].title: the task in one line, as the notes phrase it, without the owner's name.
-- action_items[].owner_text: exactly the name or word the notes use for who does it ("Nishchay",
-  "PK", "the growth team"); empty when the notes do not say. Never expand, correct or guess a name.
+- action_items[].owner_text: exactly the name or word the notes use for who does it ("Noah",
+  "Dan", "the growth team"); empty when the notes do not say. Never expand, correct or guess a name.
 - action_items[].due_hint: the due phrase exactly as written ("by Friday", "before 3 Oct", "EOW");
   empty when the notes do not say. Never turn it into a date.
 - action_items[].status_hint: one of {", ".join(STATUS_HINTS)} only when the notes say so; else omit.
@@ -98,7 +99,7 @@ def neutralise(body: str, delimiter: str) -> str:
 
 def build_prompt(text: str, context: ExtractionContext | None) -> Prompt:
     ctx = context or ExtractionContext()
-    tz = ctx.timezone or "Asia/Kolkata"
+    tz = ctx.timezone or display_zone_name()
     lines = ["Meeting context:"]
     lines.append(f"- title: {ctx.meeting_title or '(untitled)'}")
     if ctx.meeting_start is not None:

@@ -6,7 +6,7 @@
       "majorDimension": "ROWS",
       "values": [
         [
-          "Nutrition Sialet Product Roadmap",
+          "Mobile App Product Roadmap",
           "",
           "",
           "",
@@ -37,18 +37,18 @@
         ],
         [
           "T-101",
-          "Mirror Open Food Facts",
-          "Prathyush Kodhanpur",
+          "Mirror OpenRates",
+          "Daniel Okafor",
           "3 Oct 2026",
           "In progress",
           "P1",
           "11",
-          "Nutrition roadmap review · 19 Sep"
+          "Mobile roadmap review · 19 Sep"
         ],
         [
           "T-102",
-          "Review dataset for weight information",
-          "Anushka Mohanty",
+          "Review dataset for currency information",
+          "Anna Moreno",
           "3 Oct 2026",
           "Open",
           "P2",
@@ -58,7 +58,7 @@
         [
           "T-103",
           "Finish the alert emission standard v1.2",
-          "Nishchay S",
+          "Noah S",
           "25 Sep 2026",
           "Open",
           "P1",

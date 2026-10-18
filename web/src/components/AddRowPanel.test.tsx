@@ -1,9 +1,9 @@
-// Review 1, finding 8 (the web half): "Above a row" defaulted to `header_row + 1`, so the first
-// press put the new row directly under the header - the one place the planner used to copy the
-// header's formulas and formatting from. There is no default row now: the insert goes after the
+// "Above a row" used to default to `header_row + 1`, so the first press put the new row directly
+// under the header - the one place the planner used to copy the header's formulas and formatting
+// from. There is no default row now: the insert goes after the
 // table until a row number is clicked, and the API's refusal for a header row is shown here.
 //
-// Finding 9's key rides on the same button.
+// The idempotency key (`lib/batch.ts`) rides on the same button.
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -16,7 +16,7 @@ const h = vi.hoisted(() => ({ addRow: vi.fn() }));
 
 vi.mock("@/api/hooks", () => ({
   useAddRow: () => ({ mutateAsync: h.addRow, isPending: false }),
-  useMeetings: () => ({ data: { items: [{ id: "m-1", title: "Vendor call with Madhu" }] } }),
+  useMeetings: () => ({ data: { items: [{ id: "m-1", title: "Vendor call with Maya" }] } }),
   usePoints: () => ({ data: [] }),
 }));
 
@@ -25,10 +25,10 @@ const tab: TabState = {
   sheet_id: "t1",
   title: "Roadmap",
   values: [
-    ["Nutrition roadmap", "", "", "", ""],
+    ["Mobile roadmap", "", "", "", ""],
     ["ID", "Task", "Owner", "Due", "Status"],
-    ["T-101", "Mirror Open Food Facts", "Ansul S", "3 Oct", "open"],
-    ["T-102", "Send the Sprinto questionnaire", "Nishchay S", "26 Sep", "open"],
+    ["T-101", "Mirror OpenRates", "Alex S", "3 Oct", "open"],
+    ["T-102", "Send the Northwind questionnaire", "Noah S", "26 Sep", "open"],
   ],
   dropdowns: { "4": ["open", "in progress", "done"] },
   formula_cols: [],

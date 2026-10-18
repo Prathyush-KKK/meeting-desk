@@ -1,6 +1,6 @@
 """Transfer planning.
 
-A faithful port of ``meeting-desk/src/lib/sheet.ts`` (``mapStatus``, ``valuesFor``, ``planAppend``,
+A faithful port of ``web/src/lib/sheet.ts`` (``mapStatus``, ``valuesFor``, ``planAppend``,
 ``planFill``, ``applyPlan``, ``planCells``) with three server-side additions:
 
 * ``plan_add_row`` - a one-row plan at a chosen index, for the Sheets page's "Add row".

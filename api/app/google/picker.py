@@ -2,8 +2,8 @@
 
 Every read goes through ``first_able``. It tries the connections in order, skips the ones Google
 refuses (not shared, not found, rate-limited, expired) or whose answer the caller does not accept
-(an empty search), and reports which connection answered - the spec wants the source line and the
-workbook to name it. A ``Pick`` with no email carries the last refusal for the message.
+(an empty search), and reports which connection answered - the source line and the workbook name
+it. A ``Pick`` with no email carries the last refusal for the message.
 """
 
 from __future__ import annotations
@@ -43,7 +43,7 @@ class Pick:
 
         Then "not shared with any admin account" is the wrong message: nobody was refused access,
         Google said "slower". The caller re-raises this so the route answers 503 with a
-        ``Retry-After`` and the UI can show the retry, as the friction register asks.
+        ``Retry-After`` and the UI can show the retry.
         """
         if self.ok or not self.tried or len(self.exceptions) != len(self.tried):
             return None

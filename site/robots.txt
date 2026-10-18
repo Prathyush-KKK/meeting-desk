@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://prathyush-kkk.github.io/meeting-desk/sitemap.xml

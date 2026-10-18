@@ -1,6 +1,6 @@
-// Screen review round 1, Step 2:
-//   R1-22  a saved note can be moved to another meeting (spec section 7; POST /notes/{id}/move).
-//   R1-11  no fixed model name on the page, except the wait hint while a run is pending.
+// Step 2:
+//   move   a saved note can be moved to another meeting (POST /notes/{id}/move).
+//   model  no fixed model name on the page, except the wait hint while a run is pending.
 //   wait   an extraction takes one to two minutes, so the button counts the seconds.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -27,8 +27,8 @@ vi.mock("@/api/hooks", () => ({
   useMeetings: () => ({
     data: {
       items: [
-        { id: "m-1", title: "Vendor call with Madhu" },
-        { id: "m-2", title: "Sprinto call prep" },
+        { id: "m-1", title: "Vendor call with Maya" },
+        { id: "m-2", title: "Northwind call prep" },
         { id: null, title: "Platform squad sync" },
       ],
     },
@@ -44,10 +44,10 @@ const NOTE = {
   title: "Pasted note",
   word_count: 55,
   include: true,
-  created_by: "prathyush.kodhanpur@simpleo.ai",
+  created_by: "daniel.okafor@example.com",
 } as unknown as Note;
 
-const MEETING = { id: "m-1", title: "Vendor call with Madhu" } as unknown as MeetingItem;
+const MEETING = { id: "m-1", title: "Vendor call with Maya" } as unknown as MeetingItem;
 
 beforeEach(() => {
   h.move.mockClear();
@@ -60,7 +60,7 @@ describe("NotesStep", () => {
     const select = screen.getByLabelText("Move to another meeting");
     // Not the meeting it is on, and not a calendar card that has no record yet.
     const options = Array.from(select.querySelectorAll("option")).map((o) => o.textContent);
-    expect(options).toEqual(["Move…", "Sprinto call prep"]);
+    expect(options).toEqual(["Move…", "Northwind call prep"]);
     await userEvent.selectOptions(select, "m-2");
     expect(h.move).toHaveBeenCalledWith({ id: "n-1", meeting_id: "m-2" });
   });

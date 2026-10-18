@@ -1,5 +1,5 @@
-// Screen review round 1, R1-25. Spec section 7: "Times shown in Asia/Kolkata everywhere." These
-// hold whatever zone the machine running them is in: the instant is fixed, the answer must be IST.
+// Times are shown in the display zone (DISPLAY_TIMEZONE; the test setup pins Asia/Kolkata). These
+// tests hold whatever zone the machine running them is in: the instant is fixed, the answer must be IST.
 
 import { describe, expect, it } from "vitest";
 import { clip, dayGroup, fmtClock, fmtDate, fmtStamp, localToday, meetingLabel, plural, transferSheet } from "./display";
@@ -58,7 +58,7 @@ describe("history lines", () => {
   it("names the sheet by the names the transfer kept, else by its id", () => {
     expect(transferSheet({ sheet_id: "1234", snapshot: {} })).toBe("sheet 1234");
     expect(transferSheet({ sheet_id: "1234", snapshot: { sheet_title: "Roadmap" } })).toBe("Roadmap");
-    expect(transferSheet({ sheet_id: "1234", snapshot: { workbook_name: "Nutrition", sheet_title: "Roadmap" } })).toBe("Nutrition / Roadmap");
-    expect(transferSheet({ sheet_id: "1234", snapshot: { workbook_name: "Nutrition" } })).toBe("Nutrition / sheet 1234");
+    expect(transferSheet({ sheet_id: "1234", snapshot: { workbook_name: "Mobile", sheet_title: "Roadmap" } })).toBe("Mobile / Roadmap");
+    expect(transferSheet({ sheet_id: "1234", snapshot: { workbook_name: "Mobile" } })).toBe("Mobile / sheet 1234");
   });
 });

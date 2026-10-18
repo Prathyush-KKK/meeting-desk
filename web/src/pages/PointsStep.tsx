@@ -6,6 +6,7 @@ import { PointRow, SELECT_CLASS, ROW_GRID } from "@/components/PointRow";
 import { TransferLines } from "@/components/History";
 import { cn } from "@/lib/utils";
 import { useElapsedSeconds } from "@/lib/elapsed";
+import { download, exportName, pointsToCsv, pointsToMarkdown } from "@/lib/export";
 import { KIND_ORDER, KIND_TITLE, STATUSES, STATUS_LABEL, clip, fmtClock, mergeWorkstreams } from "@/lib/display";
 import {
   useAddPoint,
@@ -91,23 +92,37 @@ export function PointsStep({ meeting, onBack, onTransfer, onKeep }: Props) {
   };
 
   const copy = async () => {
+    let text: string;
     try {
-      const { text } = await copyText.mutateAsync(points.map((p) => p.id));
-      await navigator.clipboard.writeText(`${meeting.title} · ${meeting.date}\n\n${text}`);
+      text = `${meeting.title} · ${meeting.date}\n\n${(await copyText.mutateAsync(points.map((p) => p.id))).text}`;
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not build the text");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
       toast.success("Copied");
     } catch {
-      toast.message("Clipboard is blocked here; the text is on the server route /points/copy-text");
+      // No clipboard (an insecure origin, a blocked permission): the same text as a file instead.
+      download(text, `${exportName(meeting)}.txt`, "text/plain;charset=utf-8");
+      toast.message("Clipboard is blocked here, so the text was downloaded instead");
     }
+  };
+
+  const exportAs = (format: string) => {
+    if (!points.length) return;
+    if (format === "md") download(pointsToMarkdown(points, meeting), `${exportName(meeting)}.md`, "text/markdown;charset=utf-8");
+    if (format === "csv") download(pointsToCsv(points, meeting), `${exportName(meeting)}.csv`, "text/csv;charset=utf-8");
   };
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-        {/* R1-11: this was a fixed "gemini-2.5-flash · Vertex AI asia-south1" whatever answered.
-            It is the meeting's latest extraction now, and nothing when the points came another way. */}
+        {/* The meeting's latest extraction, not a fixed model name whatever answered; nothing when
+            the points came another way. */}
         {lastExtraction && (
           <span className="hidden md:inline" data-testid="extracted-with">
-            {/* R2-02: the fake has no model worth naming ("rule-based · the local rule-based fake"). */}
+            {/* The fake has no model worth naming ("rule-based · the local rule-based fake"). */}
             {lastExtraction.provider === "fake" ? (
               "Extracted by the local rule-based fake"
             ) : (
@@ -147,9 +162,9 @@ export function PointsStep({ meeting, onBack, onTransfer, onKeep }: Props) {
         >
           {showTransferred ? "Hide transferred" : "See transferred"}
         </button>
-        {/* R4-02: on a phone the six bulk controls are two rows of three - count, Assign to, Set
-            status; Apply, Defer, Add point. Round 2 made them one strip that scrolled sideways (R2-05)
-            and Defer was cut to "D"; nothing on a phone scrolls sideways but a grid in its own box. */}
+        {/* On a phone the six bulk controls are two rows of three - count, Assign to, Set status;
+            Apply, Defer, Add point. As one strip they scrolled sideways and Defer was cut to "D";
+            nothing on a phone scrolls sideways but a grid in its own box. */}
         <div className="grid w-full grid-cols-3 items-center gap-2 md:ml-auto md:flex md:w-auto md:flex-wrap" data-testid="bulk-bar">
           <span>{selected.length} selected</span>
           <select className={SELECT_CLASS} value={bulkOwner} onChange={(e) => setBulkOwner(e.target.value)} aria-label="Assign selected to">
@@ -251,11 +266,23 @@ export function PointsStep({ meeting, onBack, onTransfer, onKeep }: Props) {
         )}
       </div>
 
-      {/* R1-10: on a phone the four buttons are a 2 x 2 block with Transfer bottom right; the row
+      {/* On a phone the four buttons are a 2 x 2 block with Transfer bottom right; the row
           used to wrap and leave Transfer alone on a second line at the left. */}
       <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center" data-testid="points-footer">
         <Button variant="outline" className="h-9" onClick={onBack}>Back</Button>
         <Button variant="outline" className="h-9" onClick={() => void copy()}>Copy as text</Button>
+        <select
+          className={cn(SELECT_CLASS, "col-span-2 h-9 md:col-span-1")}
+          value=""
+          disabled={!points.length}
+          onChange={(e) => exportAs(e.target.value)}
+          aria-label="Export points"
+          data-testid="export-points"
+        >
+          <option value="">Export…</option>
+          <option value="md">Markdown (.md)</option>
+          <option value="csv">CSV (.csv)</option>
+        </select>
         <span className="hidden text-xs text-muted-foreground md:inline">After transfer, points leave this tool.</span>
         <Button variant="outline" className="h-9 md:ml-auto" onClick={onKeep}>Keep here</Button>
         <Button className="h-9" disabled={!selected.length} onClick={() => onTransfer(selected.map((p) => p.id))}>
@@ -266,7 +293,13 @@ export function PointsStep({ meeting, onBack, onTransfer, onKeep }: Props) {
   );
 }
 
-const PROVIDER: Record<string, string> = { vertex: "Vertex AI", bedrock: "Amazon Bedrock", fake: "the local rule-based fake" };
+const PROVIDER: Record<string, string> = {
+  vertex: "Vertex AI",
+  bedrock: "Amazon Bedrock",
+  openai: "an OpenAI-compatible endpoint",
+  anthropic: "the Anthropic API",
+  fake: "the local rule-based fake",
+};
 
 /** "Vertex AI asia-south1", or "Amazon Bedrock ap-south-1, after Vertex AI failed". */
 export function providerLabel(e: { provider: string; region: string | null; fallback_from: string | null }): string {

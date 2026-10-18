@@ -1,9 +1,9 @@
 """``/metrics`` on its own port.
 
-The standard is explicit: the metrics endpoint is on a **separate container port**, unauthenticated
-and unreachable from the public ingress. So it is not a route on the API and not a mount on the API
-router - it is a second, tiny ASGI app served by a second uvicorn ``Server`` on ``METRICS_PORT``
-(9464 by default), started in a daemon thread with the API and stopped with it.
+docs/TELEMETRY.md is explicit: the metrics endpoint is on a **separate container port**,
+unauthenticated and unreachable from the public ingress. So it is not a route on the API and not a
+mount on the API router - it is a second, tiny ASGI app served by a second uvicorn ``Server`` on
+``METRICS_PORT`` (9464 by default), started in a daemon thread with the API and stopped with it.
 
 A thread rather than ``uvicorn.Server.serve()`` on the API's own loop because the API is started by
 whatever runs ``app.main:app`` (uvicorn, gunicorn, a test client) and must not have to know about

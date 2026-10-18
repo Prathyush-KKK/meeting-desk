@@ -6,7 +6,7 @@ bind the entry to the Google ``sub`` on first sign-in so a changed email keeps w
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy import select
@@ -54,7 +54,7 @@ def _ensure_user(db: Session, google_sub: str, email: str, name: str, role: str)
     if name:
         user.name = name
     user.role = role
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     # Once a minute, not once a request: every request used to write this column, and that
     # UPDATE took a row lock the request's transaction held until it answered. An extraction
     # holds its transaction across the whole model call, so for that minute every other request
@@ -62,7 +62,7 @@ def _ensure_user(db: Session, google_sub: str, email: str, name: str, role: str)
     # points), and the app looked dead. See also ``authenticate``, which commits before the route.
     seen = user.last_seen_at
     if seen is not None and seen.tzinfo is None:  # SQLite hands the column back naive
-        seen = seen.replace(tzinfo=timezone.utc)
+        seen = seen.replace(tzinfo=UTC)
     if seen is None or (now - seen).total_seconds() >= LAST_SEEN_INTERVAL_SECONDS:
         user.last_seen_at = now
     return user

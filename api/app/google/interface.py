@@ -3,8 +3,8 @@
 Everything below is a Protocol plus the plain data it exchanges. ``app/google/fake.py`` implements
 it in memory for tests and local runs; the real clients under ``app/google/`` (calendar, drive,
 docs, gmail, sheets, people) implement it against the REST endpoints. Every call takes the admin
-``connection_email`` it runs as - the spec requires reads to fall back across connections and every
-write to name the connection that made it.
+``connection_email`` it runs as - reads fall back across connections and every write names the
+connection that made it.
 """
 
 from __future__ import annotations
@@ -77,7 +77,7 @@ class CalendarEvent:
     title: str
     start_at: datetime
     end_at: datetime
-    timezone: str = "Asia/Kolkata"
+    timezone: str = ""  # the event's own zone; empty: DISPLAY_TIMEZONE
     description: str = ""
     location: str = ""
     organizer_email: str = ""

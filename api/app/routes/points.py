@@ -31,7 +31,7 @@ EDITABLE = ("kind", "text", "owner_text", "owner_email", "due_text", "status", "
 def _due_date(db: Session, point: Point, due_text: str) -> datetime | None:
     """The date the phrase means, resolved once here rather than again at write time.
 
-    Same rules as post-processing, same base: the meeting's start in Asia/Kolkata. A point typed by
+    Same rules as post-processing, same base: the meeting's start in the display timezone. A point typed by
     hand therefore carries a date exactly like an extracted one, and the Sheets writer never has to
     read "by EOW" against whatever day it happens to be run.
     """

@@ -1,19 +1,18 @@
 """Dates the way Sheets stores them: a serial number of days since 1899-12-30.
 
 A date column is written as a date when the value can be read as one (ISO first, then the same
-``dateparser`` rules the extractor uses for due hints) and as text otherwise - spec section 7,
-"Date columns".
+``dateparser`` rules the extractor uses for due hints) and as text otherwise.
 """
 
 from __future__ import annotations
 
 import re
 from datetime import date, datetime
-from zoneinfo import ZoneInfo
 
 import dateparser
 
 from app.relative_dates import resolve as resolve_relative
+from app.tz import as_zone
 
 EPOCH = date(1899, 12, 30)
 _ISO_RE = re.compile(r"^\s*(\d{4})-(\d{2})-(\d{2})")
@@ -29,7 +28,7 @@ def date_from_serial(serial: float) -> date:
     return date.fromordinal(EPOCH.toordinal() + int(serial))
 
 
-def parse_date(value: str, base: datetime | None = None, timezone: str = "Asia/Kolkata") -> date | None:
+def parse_date(value: str, base: datetime | None = None, timezone: str = "") -> date | None:
     text = (value or "").strip()
     if not text:
         return None
@@ -39,7 +38,7 @@ def parse_date(value: str, base: datetime | None = None, timezone: str = "Asia/K
             return date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
         except ValueError:
             return None
-    tz = ZoneInfo(timezone)
+    tz = as_zone(timezone)
     base_dt = (base.astimezone(tz) if base and base.tzinfo else base) or datetime.now(tz)
     explicit = resolve_relative(text, base_dt.date())
     if explicit is not None:
@@ -48,7 +47,7 @@ def parse_date(value: str, base: datetime | None = None, timezone: str = "Asia/K
         "RELATIVE_BASE": base_dt.replace(tzinfo=None),
         "PREFER_DATES_FROM": "future",
         "RETURN_AS_TIMEZONE_AWARE": False,
-        "TIMEZONE": timezone,
+        "TIMEZONE": tz.key,
         "DATE_ORDER": "DMY",
     }
     candidates = [text]

@@ -9,7 +9,7 @@ Two halves so the route and the queue share one implementation:
 
 ``run_extraction`` is the inline composite the tests and a queue-less deployment use. Job status
 lives in ``extractions.usage["job"]`` (queued, running) until the provider's usage replaces it,
-so spec section 4 stays exact and the polling route reads one row.
+so the table schema stays as it is and the polling route reads one row.
 """
 
 from __future__ import annotations
@@ -32,6 +32,7 @@ from app.telemetry import events
 from app.telemetry.events import FailureReason
 from app.telemetry.logs import get_logger, log_event
 from app.telemetry.providers import track_job
+from app.tz import display_zone_name
 
 log = get_logger("jobs.extract")
 
@@ -81,7 +82,7 @@ def context_for(meeting: Meeting, directory: list[dict[str, str]]) -> Extraction
     return ExtractionContext(
         meeting_title=meeting.title,
         meeting_start=meeting.start_at,
-        timezone=meeting.timezone or "Asia/Kolkata",
+        timezone=meeting.timezone or display_zone_name(),
         workstream=meeting.workstream,
         attendees=list(meeting.attendees or []),
         directory=list(directory),
@@ -223,7 +224,9 @@ def _perform_extraction(
         context.directory = list(people)
     known = _known_text_norms(db, meeting)
     created: list[Point] = []
-    for resolved in postprocess(result.output, context, people, aliases or seed_data.ALIASES):
+    # The demo world's nicknames only apply to the demo world; real mode has no alias table.
+    alias_table = aliases if aliases is not None else (seed_data.ALIASES if fake_side else {})
+    for resolved in postprocess(result.output, context, people, alias_table):
         norm = normalise_text(resolved.text)
         if not norm or norm in known:
             continue

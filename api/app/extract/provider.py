@@ -23,7 +23,7 @@ class ExtractionContext:
 
     meeting_title: str = ""
     meeting_start: datetime | None = None
-    timezone: str = "Asia/Kolkata"
+    timezone: str = ""  # empty: DISPLAY_TIMEZONE
     workstream: str = ""
     attendees: list[dict[str, str]] = field(default_factory=list)
     directory: list[dict[str, str]] = field(default_factory=list)
@@ -34,7 +34,7 @@ class ExtractionContext:
     def people_names(self) -> list[str]:
         """Attendees first, then the directory.
 
-        Only used to recognise the *shape* of an owner line ("Ansul S: do the thing"); a manual
+        Only used to recognise the *shape* of an owner line ("Alex S: do the thing"); a manual
         meeting has no attendee list but its notes still name people. Deciding who that is stays
         with post-processing.
         """

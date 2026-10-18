@@ -1,0 +1,25 @@
+{
+  "source": "Hand-built, not recorded: the answer text of vertex_roadmap_review.json wrapped in the OpenAI chat.completion envelope Bedrock's OpenAI-compatible endpoint answers with, so the two parse to the same ExtractionOutput.",
+  "notes": "Mobile roadmap review\n\nThe Goal\nClose the dataset gaps before the launch.\n\nThe Discussion\nWeight data: the OpenRates mirror is missing portion weights for 40% of Indian items.\nAlert standard: v1.2 lands first, then the telemetry rollout.\nPayments: the vendor spike is unfunded.\n\nThe Next Steps\nAnna Moreno: Review dataset for currency information by 3 Oct\nNoah: Finish the alert emission standard v1.2 by end of week\nDaniel: Mirror OpenRates before launch\nDecided: the Owner column holds a person, not a team\nOpen question: do we fund the payments spike this quarter?\nRisk: the upload flag has no rollback plan",
+  "response": {
+    "id": "chatcmpl-7d2f0c9e4b8a4f7e9a1c3b5d6e8f0a12",
+    "object": "chat.completion",
+    "created": 1759046400,
+    "model": "google.gemma-4-26b-a4b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n  \"action_items\": [\n    {\n      \"title\": \"Review dataset for currency information\",\n      \"detail\": \"Portion weights are missing for 40% of Indian items in the OpenRates mirror.\",\n      \"owner_text\": \"Anna Moreno\",\n      \"due_hint\": \"by 3 Oct\",\n      \"status_hint\": \"open\",\n      \"evidence\": \"Anna Moreno: Review dataset for currency information by 3 Oct\"\n    },\n    {\n      \"title\": \"Finish the alert emission standard v1.2\",\n      \"detail\": \"\",\n      \"owner_text\": \"Noah\",\n      \"due_hint\": \"by end of week\",\n      \"evidence\": \"Noah: Finish the alert emission standard v1.2 by end of week\"\n    },\n    {\n      \"title\": \"Mirror OpenRates before launch\",\n      \"detail\": \"\",\n      \"owner_text\": \"Daniel\",\n      \"due_hint\": \"\",\n      \"evidence\": \"Daniel: Mirror OpenRates before launch\"\n    }\n  ],\n  \"decisions\": [\n    {\n      \"statement\": \"The Owner column holds a person, not a team\",\n      \"evidence\": \"Decided: the Owner column holds a person, not a team\"\n    }\n  ],\n  \"risks\": [\n    {\n      \"statement\": \"The upload flag has no rollback plan\",\n      \"evidence\": \"Risk: the upload flag has no rollback plan\"\n    },\n    {\n      \"statement\": \"The vendor spike for payments is unfunded\",\n      \"evidence\": \"Payments: the vendor spike is unfunded.\"\n    }\n  ],\n  \"questions\": [\n    {\n      \"statement\": \"Do we fund the payments spike this quarter?\",\n      \"needs\": \"a budget decision\",\n      \"evidence\": \"Open question: do we fund the payments spike this quarter?\"\n    }\n  ]\n}"
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 2231,
+      "completion_tokens": 402,
+      "total_tokens": 2633
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { shortName } from "@/lib/display";
 import { useElapsedSeconds } from "@/lib/elapsed";
+import { UPLOAD_ACCEPT, UPLOAD_MAX_BYTES, uploadText } from "@/lib/transcript";
 import {
   ExtractionCancelled,
   useDeleteNote,
@@ -48,6 +49,7 @@ export function NotesStep({ meeting, onBack, onExtracted }: Props) {
   const elapsed = useElapsedSeconds(extract.isPending);
   const meetings = useMeetings();
   const [paste, setPaste] = useState("");
+  const fileInput = useRef<HTMLInputElement>(null);
   // Only saved meetings can hold a note; a calendar card that was never opened has no row yet.
   const targets = (meetings.data?.items ?? []).filter((m) => m.id && m.id !== meetingId);
 
@@ -83,6 +85,21 @@ export function NotesStep({ meeting, onBack, onExtracted }: Props) {
       toast.success(result.created ? "Saved" : "That text was already saved");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not save");
+    }
+  };
+
+  const uploadFile = async (file: File | undefined) => {
+    if (!file) return;
+    try {
+      if (file.size > UPLOAD_MAX_BYTES) throw new Error(`${file.name} is over 2 MB. Paste the part that matters instead.`);
+      const text = uploadText(file.name, await file.text());
+      const result = await pasteNote.mutateAsync({ text, title: file.name, source: "upload" });
+      if (result.truncated) toast.message("Long file: only the first 200k characters go to the model.");
+      toast.success(result.created ? `Saved ${file.name}` : "That text was already saved");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not read the file");
+    } finally {
+      if (fileInput.current) fileInput.current.value = "";
     }
   };
 
@@ -168,7 +185,7 @@ export function NotesStep({ meeting, onBack, onExtracted }: Props) {
                   <span className="min-w-0 flex-1 truncate">
                     {n.title} <span className="text-muted-foreground">· {n.word_count} words · {shortName(n.created_by)}</span>
                   </span>
-                  {/* Spec section 7: "a note can be moved to another meeting afterwards" (R1-22). */}
+                  {/* A note can be moved to another meeting afterwards. */}
                   {targets.length > 0 && (
                     <select
                       className="h-7 w-20 shrink-0 rounded border bg-background px-1 text-xs text-muted-foreground md:w-24"
@@ -194,21 +211,48 @@ export function NotesStep({ meeting, onBack, onExtracted }: Props) {
 
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="mb-1 flex items-center gap-2">
-            <h2 className="text-[15px] font-semibold">Paste</h2>
-            <Button size="sm" className="ml-auto h-8" disabled={!paste.trim() || pasteNote.isPending} onClick={() => void savePaste()}>Save note</Button>
+            <h2 className="text-[15px] font-semibold">Paste or upload</h2>
+            <input
+              ref={fileInput}
+              type="file"
+              accept={UPLOAD_ACCEPT}
+              className="hidden"
+              data-testid="upload-input"
+              onChange={(e) => void uploadFile(e.target.files?.[0])}
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              className="ml-auto h-8"
+              disabled={pasteNote.isPending}
+              onClick={() => fileInput.current?.click()}
+              title="A transcript or notes file: .txt, .md, .vtt (Meet, Zoom, Teams) or .srt"
+            >
+              Upload file
+            </Button>
+            <Button size="sm" className="h-8" disabled={!paste.trim() || pasteNote.isPending} onClick={() => void savePaste()}>Save note</Button>
           </div>
           <Textarea
             id="paste"
             value={paste}
             onChange={(e) => setPaste(e.target.value)}
-            placeholder="Paste notes, a transcript or a summary"
+            onDragOver={(e) => {
+              if (e.dataTransfer.types.includes("Files")) e.preventDefault();
+            }}
+            onDrop={(e) => {
+              const file = e.dataTransfer.files?.[0];
+              if (!file) return;
+              e.preventDefault();
+              void uploadFile(file);
+            }}
+            placeholder="Paste notes, a transcript or a summary - or drop a .txt, .md, .vtt or .srt file here"
             className="min-h-[180px] flex-1 resize-none text-[13px] leading-relaxed md:min-h-[220px]"
           />
         </div>
 
         <div className="flex items-center gap-2">
           <Button variant="outline" className="h-9" onClick={onBack}>Back</Button>
-          {/* R1-11: Step 3 names whoever actually answered. The one model named here is only a
+          {/* Step 3 names whoever actually answered. The one model named here is only a
               guide to the wait, shown while a run is pending: a bare "Extracting…" for two minutes
               reads as stuck. */}
           {extract.isPending && (

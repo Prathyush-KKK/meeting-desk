@@ -2,7 +2,7 @@
 
 Nothing here touches the network, and the socket guard below makes sure of it: any test that
 opens an internet socket fails. Each test gets a fresh database seeded from ``app/seed_data.py``
-(the prototype's store), the in-memory Google, and the rule-based extraction provider. The real
+(the demo world), the in-memory Google, and the rule-based extraction provider. The real
 Google clients are tested against ``httpx.MockTransport`` with the fixtures under
 ``tests/fixtures/google/``.
 """
@@ -21,9 +21,9 @@ from app.config import Settings
 from app.google.fake import FakeGoogle
 from app.main import create_app
 
-ADMIN = "prathyush.kodhanpur@simpleo.ai"
-MEMBER = "nishchay.s@simpleo.ai"
-OUTSIDER = "someone.else@simpleo.ai"
+ADMIN = "daniel.okafor@example.com"
+MEMBER = "noah.s@example.com"
+OUTSIDER = "someone.else@example.com"
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
@@ -54,22 +54,41 @@ def _no_network(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(socket.socket, "__init__", _guarded_socket_init)
 
 
-# The nutrition service's Bedrock names. A developer shell that exports them (for that service)
-# would otherwise switch ``EXTRACTION_PROVIDER=bedrock`` to the OpenAI-compatible endpoint, or swap
-# the model, in every test that builds ``Settings`` - so no test sees them unless it sets them.
-BEDROCK_ENV = (
+# LLM credentials a developer shell may export. They would otherwise switch the provider, the
+# endpoint or the model in every test that builds ``Settings`` - so no test sees them unless it
+# sets them.
+LLM_ENV = (
     "AWS_BEARER_TOKEN_BEDROCK",
     "BEDROCK_API_KEY",
     "BEDROCK_BASE_URL",
     "BEDROCK_MODEL_ID",
     "BEDROCK_MODEL",
+    "LLM_BASE_URL",
+    "LLM_API_KEY",
+    "LLM_MODEL",
+    "LLM_REASONING_EFFORT",
+    "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "ANTHROPIC_MODEL",
 )
+BEDROCK_ENV = LLM_ENV
+
+# The demo world the tests were written against: a Workspace domain and a timezone 5:30 off UTC,
+# so a test that confuses local time with UTC fails instead of passing by coincidence.
+TEST_ENV = {"DISPLAY_TIMEZONE": "Asia/Kolkata", "GOOGLE_HOSTED_DOMAIN": "example.com"}
 
 
 @pytest.fixture(autouse=True)
-def _no_bedrock_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    for name in BEDROCK_ENV:
+def _no_llm_env(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    from app import tz
+
+    for name in LLM_ENV:
         monkeypatch.delenv(name, raising=False)
+    for name, value in TEST_ENV.items():
+        monkeypatch.setenv(name, value)
+    tz.configure(TEST_ENV["DISPLAY_TIMEZONE"])
+    yield
+    tz.configure(TEST_ENV["DISPLAY_TIMEZONE"])
 
 
 def make_settings(tmp_path: Path, **overrides) -> Settings:

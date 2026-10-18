@@ -1,14 +1,22 @@
-"""Bedrock's OpenAI-compatible endpoint, with a Bedrock API key.
+"""Any OpenAI-compatible ``/chat/completions`` endpoint: OpenAI, Ollama, OpenRouter, LM Studio, vLLM,
+or Bedrock's OpenAI-compatible endpoint with a Bedrock API key.
 
-The credential the nutrition service already runs on, under its names: ``BEDROCK_BASE_URL`` (for
-example ``https://bedrock-mantle.us-east-1.api.aws/openai/v1``), ``AWS_BEARER_TOKEN_BEDROCK`` and
-``BEDROCK_MODEL_ID``. One ``POST {base_url}/chat/completions`` with plain httpx - no SDK and no
-SigV4, the key is a bearer token - so the image needs no extra for it.
+Two endpoints share this client:
+
+* ``EXTRACTION_PROVIDER=openai``: ``LLM_BASE_URL`` (default ``https://api.openai.com/v1``),
+  ``LLM_API_KEY`` (optional for a local server such as Ollama) and ``LLM_MODEL``.
+* ``EXTRACTION_PROVIDER=bedrock`` / ``bedrock_openai``: ``BEDROCK_BASE_URL`` (for example
+  ``https://bedrock-mantle.us-east-1.api.aws/openai/v1``), ``AWS_BEARER_TOKEN_BEDROCK`` and
+  ``BEDROCK_MODEL_ID``.
+
+One ``POST {base_url}/chat/completions`` with plain httpx - no SDK and no SigV4, the key is a
+bearer token - so the image needs no extra for it.
 
 What it shares with Vertex and the Converse API: the prompt from ``prompt.py`` (the rules, the
 meeting context, the fenced notes and the injection guard, unchanged), ``parse.py`` into the strict
 schema, one retry on an answer that is not the schema, and the telemetry - one
-``track_provider("bedrock", "chat_completions")`` per extraction, the same ``bedrock`` breaker.
+``track_provider(<vendor>, "chat_completions")`` per extraction, where the vendor is ``bedrock``
+(sharing the Converse API's breaker) or ``openai`` for every other endpoint.
 
 What differs, and why:
 
@@ -20,11 +28,12 @@ What differs, and why:
   without it; if that works, the endpoint and model are remembered for the process and not asked
   again.
 * The output cap is sent as ``max_completion_tokens``, the name the endpoint is known to take
-  for Gemma 4 (the nutrition service saw ``max_tokens`` refused with 400 "unsupported_parameter"
-  in August 2026). A 400 that names ``max_completion_tokens`` is retried once under the older
-  name, and remembered. ``reasoning_effort: "none"`` pins thinking off: the extraction is a
+  for Gemma 4 on Bedrock (``max_tokens`` was refused there with 400 "unsupported_parameter").
+  A 400 that names ``max_completion_tokens`` is retried once under the older name, and
+  remembered. On Bedrock ``reasoning_effort: "none"`` pins thinking off: the extraction is a
   transcription into a schema, and a minute of reasoning tokens is the difference between an
-  answer and a timeout.
+  answer and a timeout. Elsewhere it is only sent when ``LLM_REASONING_EFFORT`` is set, because
+  models that do not reason can refuse the field.
 * The status codes are the endpoint's own: 401/403 is the key, 404 is the model, 429 is backed
   off once. Those are answers, not outages - ``EndpointRefusal`` tells the telemetry so, and the
   breaker never moves on them. Timeouts, unreachable hosts and 5xx do count.
@@ -32,11 +41,13 @@ What differs, and why:
 
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import re
 import time
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -50,14 +61,14 @@ from app.extract.schema import EXTRACTION_JSON_SCHEMA
 from app.telemetry.breaker import BreakerOpen
 from app.telemetry.events import FailureReason
 from app.telemetry.logs import get_logger, log_event
-from app.telemetry.providers import BEDROCK, track_provider
+from app.telemetry.providers import BEDROCK, OPENAI, track_provider
 
 log = get_logger("extract.bedrock_openai")
 
 NAME = "bedrock_openai"
 OP = "chat_completions"
 ATTEMPTS = 2  # the call, then one retry with a corrective message
-TIMEOUT_SECONDS = 180.0  # default read timeout; BEDROCK_TIMEOUT_SECONDS overrides it
+TIMEOUT_SECONDS = 180.0  # default read timeout; BEDROCK_TIMEOUT_SECONDS / LLM_TIMEOUT_SECONDS override it
 TOKEN_CAP = "max_completion_tokens"  # the OpenAI-current name; the endpoint refused max_tokens for Gemma 4
 TOKEN_CAP_LEGACY = "max_tokens"
 CONNECT_TIMEOUT_SECONDS = 10.0
@@ -111,7 +122,7 @@ class EndpointRateLimited(EndpointRefusal):
 
 
 def chat_completions_url(base_url: str) -> str:
-    """``BEDROCK_BASE_URL`` as the nutrition service has it, with or without the trailing path."""
+    """The base URL as providers document it, with or without the trailing path."""
     base = base_url.strip().rstrip("/")
     return base if base.endswith("/chat/completions") else f"{base}/chat/completions"
 
@@ -222,27 +233,87 @@ def error_detail(response: httpx.Response) -> str:
     return " ".join(text.split())[:DETAIL_CHARS]
 
 
+# --- the endpoints -------------------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class Endpoint:
+    """Where the completions go, under which names, and how the messages talk about it."""
+
+    name: str  # the provider name: ``bedrock_openai`` or ``openai``
+    vendor: str  # the telemetry provider and the label on the extraction record
+    label: str  # how messages name it
+    base_url: str
+    api_key: str
+    model: str
+    timeout_seconds: float
+    url_env: str
+    key_env: str
+    model_env: str
+    key_required: bool
+    reasoning_effort: str  # sent as ``reasoning_effort`` when not empty
+    event_prefix: str
+
+
+def bedrock_endpoint(settings: Settings) -> Endpoint:
+    return Endpoint(
+        name=NAME,
+        vendor=BEDROCK,
+        label="Bedrock",
+        base_url=settings.bedrock_base_url.strip(),
+        api_key=settings.bedrock_api_key.strip(),
+        model=settings.bedrock_model.strip(),
+        timeout_seconds=float(getattr(settings, "bedrock_timeout_seconds", 0) or TIMEOUT_SECONDS),
+        url_env="BEDROCK_BASE_URL",
+        key_env="AWS_BEARER_TOKEN_BEDROCK",
+        model_env="BEDROCK_MODEL_ID (or BEDROCK_MODEL)",
+        key_required=True,
+        reasoning_effort="none",
+        event_prefix="bedrock",
+    )
+
+
+def generic_endpoint(settings: Settings) -> Endpoint:
+    return Endpoint(
+        name="openai",
+        vendor=OPENAI,
+        label="The LLM endpoint",
+        base_url=settings.llm_base_url.strip() or "https://api.openai.com/v1",
+        api_key=settings.llm_api_key.strip(),
+        model=settings.llm_model.strip(),
+        timeout_seconds=float(settings.llm_timeout_seconds or TIMEOUT_SECONDS),
+        url_env="LLM_BASE_URL",
+        key_env="LLM_API_KEY",
+        model_env="LLM_MODEL",
+        # Ollama, LM Studio and vLLM run without a key; the endpoint says so if it wants one.
+        key_required=False,
+        reasoning_effort=settings.llm_reasoning_effort.strip(),
+        event_prefix="llm",
+    )
+
+
 # --- the provider ---------------------------------------------------------------------------------------
 
 
 class OpenAICompatExtractionProvider:
-    name = NAME
-
     def __init__(
         self,
         settings: Settings,
         *,
+        endpoint: Endpoint | None = None,
         transport: httpx.BaseTransport | None = None,
         client: httpx.Client | None = None,
         sleep: Callable[[float], None] = time.sleep,
     ) -> None:
         self.settings = settings
-        self.model = settings.bedrock_model.strip()
-        self.base_url = settings.bedrock_base_url.strip()
+        self.endpoint = endpoint or bedrock_endpoint(settings)
+        self.name = self.endpoint.name
+        self.model = self.endpoint.model
+        self.base_url = self.endpoint.base_url
         self.url = chat_completions_url(self.base_url) if self.base_url else ""
         self.region = region_of(self.base_url)
-        self._api_key = settings.bedrock_api_key.strip()
-        self.timeout_seconds = float(getattr(settings, "bedrock_timeout_seconds", 0) or TIMEOUT_SECONDS)
+        self._api_key = self.endpoint.api_key
+        self.timeout_seconds = self.endpoint.timeout_seconds
         self._transport = transport
         self._client = client
         self._sleep = sleep
@@ -257,14 +328,15 @@ class OpenAICompatExtractionProvider:
         return self._client
 
     def _missing(self) -> list[str]:
+        e = self.endpoint
         return [
             name
-            for name, value in (
-                ("BEDROCK_BASE_URL", self.base_url),
-                ("AWS_BEARER_TOKEN_BEDROCK", self._api_key),
-                ("BEDROCK_MODEL_ID (or BEDROCK_MODEL)", self.model),
+            for name, value, required in (
+                (e.url_env, self.base_url, True),
+                (e.key_env, self._api_key, e.key_required),
+                (e.model_env, self.model, True),
             )
-            if not value
+            if required and not value
         ]
 
     # --- the call ------------------------------------------------------------------------------------
@@ -273,21 +345,27 @@ class OpenAICompatExtractionProvider:
         if missing:
             # Configuration, not a call: checked before the telemetry so it is neither counted
             # nor held against the breaker.
+            what = (
+                "Bedrock's OpenAI-compatible endpoint"
+                if self.endpoint.vendor == BEDROCK
+                else "The OpenAI-compatible LLM endpoint"
+            )
             raise ExtractionError(
-                "Bedrock's OpenAI-compatible endpoint is not configured: "
+                f"{what} is not configured: "
                 f"{', '.join(missing)} {'is' if len(missing) == 1 else 'are'} not set."
             )
+        label = self.endpoint.label
         try:
-            with track_provider(BEDROCK, OP):
+            with track_provider(self.endpoint.vendor, OP):
                 return self._extract(text, context)
         except BreakerOpen as exc:
             raise ExtractionError(str(exc)) from exc
         except httpx.TimeoutException as exc:
             raise ExtractionError(
-                f"Bedrock did not answer within the timeout at {self.url} ({type(exc).__name__})."
+                f"{label} did not answer within the timeout at {self.url} ({type(exc).__name__})."
             ) from exc
         except httpx.HTTPError as exc:
-            raise ExtractionError(f"could not reach Bedrock at {self.url}: {exc}") from exc
+            raise ExtractionError(f"could not reach {self._lower_label} at {self.url}: {exc}") from exc
 
     def _extract(self, text: str, context: ExtractionContext) -> ProviderResult:
         prompt = build_prompt(text, context)
@@ -307,13 +385,11 @@ class OpenAICompatExtractionProvider:
             }
             content: str | None = None
             finish = ""
-            try:
+            with contextlib.suppress(InvalidModelOutput):
                 content, finish = answer_text(body)
-            except InvalidModelOutput:
-                pass
             log_event(
                 log,
-                "bedrock_answered",
+                f"{self.endpoint.event_prefix}_answered",
                 attempt=attempt + 1,
                 json_mode=json_mode,
                 finish_reason=finish,
@@ -329,7 +405,13 @@ class OpenAICompatExtractionProvider:
             except InvalidModelOutput as exc:
                 cut = f" (finish_reason={finish})" if finish and finish != "stop" else ""
                 last_reason = f"{exc}{cut}"
-                log_event(log, "bedrock_answer_rejected", level=logging.WARNING, attempt=attempt + 1, reason=last_reason[:DETAIL_CHARS])
+                log_event(
+                    log,
+                    f"{self.endpoint.event_prefix}_answer_rejected",
+                    level=logging.WARNING,
+                    attempt=attempt + 1,
+                    reason=last_reason[:DETAIL_CHARS],
+                )
                 # The bad answer goes back as the assistant's turn - a placeholder when it was
                 # empty, so user and assistant still alternate for chat templates that insist.
                 messages = [
@@ -341,15 +423,16 @@ class OpenAICompatExtractionProvider:
             return ProviderResult(
                 output=output,
                 # The vendor that answered: the label the telemetry, the extraction record and the
-                # UI already use for Bedrock. ``name`` says which API path it went through.
-                provider=BEDROCK,
+                # UI use. ``name`` says which API path it went through.
+                provider=self.endpoint.vendor,
                 model=self.model,
                 region=self.region,
                 latency_ms=int((time.perf_counter() - started) * 1000),
                 usage=usage,
             )
         raise InvalidModelOutput(
-            f"Bedrock ({self.model}) did not return the schema after {ATTEMPTS} attempts: {last_reason}"
+            f"{self.endpoint.label} ({self.model}) did not return the schema after {ATTEMPTS} attempts: "
+            f"{last_reason}"
         )
 
     def _complete(self, messages: list[dict[str, str]]) -> tuple[dict[str, Any], bool]:
@@ -370,7 +453,7 @@ class OpenAICompatExtractionProvider:
             detail = "" if response.is_success else self._scrub(error_detail(response))
             log_event(
                 log,
-                "bedrock_round",
+                f"{self.endpoint.event_prefix}_round",
                 level=logging.INFO if response.is_success else logging.WARNING,
                 status=status,
                 json_mode=json_mode,
@@ -402,18 +485,29 @@ class OpenAICompatExtractionProvider:
                 return self._json(response), json_mode
             raise self._refusal(response)
 
-    def _headers(self) -> dict[str, str]:
-        return {"Authorization": f"Bearer {self._api_key}", "Accept": "application/json"}
+    @property
+    def _lower_label(self) -> str:
+        label = self.endpoint.label
+        return label[0].lower() + label[1:] if label.startswith("The ") else label
 
-    def _body(self, messages: list[dict[str, str]], json_mode: bool, legacy_cap: bool = False) -> dict[str, Any]:
+    def _headers(self) -> dict[str, str]:
+        headers = {"Accept": "application/json"}
+        if self._api_key:
+            headers["Authorization"] = f"Bearer {self._api_key}"
+        return headers
+
+    def _body(
+        self, messages: list[dict[str, str]], json_mode: bool, legacy_cap: bool = False
+    ) -> dict[str, Any]:
         body: dict[str, Any] = {
             "model": self.model,
             "messages": messages,
             "temperature": 0,
             (TOKEN_CAP_LEGACY if legacy_cap else TOKEN_CAP): self.settings.extraction_max_output_tokens,
-            # Thinking off, explicitly (see the module docstring); a model that ignores it is unharmed.
-            "reasoning_effort": "none",
         }
+        if self.endpoint.reasoning_effort:
+            # On Bedrock, thinking off, explicitly (see the module docstring).
+            body["reasoning_effort"] = self.endpoint.reasoning_effort
         if json_mode:
             body["response_format"] = {"type": "json_object"}
         return body
@@ -423,20 +517,25 @@ class OpenAICompatExtractionProvider:
             body = response.json()
         except ValueError as exc:
             raise ExtractionError(
-                f"Bedrock answered {response.status_code} but the body is not JSON: "
+                f"{self.endpoint.label} answered {response.status_code} but the body is not JSON: "
                 f"{self._scrub(response.text[:DETAIL_CHARS])}"
             ) from exc
         if not isinstance(body, dict):
-            raise ExtractionError(f"Bedrock answered {response.status_code} with JSON that is not an object")
+            raise ExtractionError(
+                f"{self.endpoint.label} answered {response.status_code} with JSON that is not an object"
+            )
         return body
 
     def _scrub(self, text: str) -> str:
         """Should an endpoint ever echo the key, it still never reaches a message or a log."""
-        return text.replace(self._api_key, "[AWS_BEARER_TOKEN_BEDROCK]") if self._api_key else text
+        return text.replace(self._api_key, f"[{self.endpoint.key_env}]") if self._api_key else text
 
     def _refusal(self, response: httpx.Response) -> ExtractionError:
         status = response.status_code
         detail = self._scrub(error_detail(response))
+        e = self.endpoint
+        if e.vendor != BEDROCK:
+            return self._generic_refusal(status, detail)
         where = self.region or "the endpoint's region"
         if status in (401, 403):
             return CredentialsRefused(
@@ -459,3 +558,26 @@ class OpenAICompatExtractionProvider:
         if 400 <= status < 500:
             return EndpointRefusal(f"Bedrock refused the request ({status}): {detail}", status)
         return ExtractionError(f"Bedrock answered {status}: {detail}")
+
+    def _generic_refusal(self, status: int, detail: str) -> ExtractionError:
+        if status in (401, 403):
+            return CredentialsRefused(
+                f"The LLM endpoint refused the credentials ({status}): check LLM_API_KEY, and that it may "
+                f"use {self.model!r}. The endpoint said: {detail}",
+                status,
+            )
+        if status == 404:
+            return ModelNotFound(
+                f"The LLM endpoint has no model {self.model!r} at {self.url} (404): check LLM_MODEL and "
+                f"LLM_BASE_URL. The endpoint said: {detail}",
+                status,
+            )
+        if status == 429:
+            return EndpointRateLimited(
+                f"The LLM endpoint is rate-limiting this key (429), still after one backoff; try again in "
+                f"a minute. The endpoint said: {detail}",
+                status,
+            )
+        if 400 <= status < 500:
+            return EndpointRefusal(f"The LLM endpoint refused the request ({status}): {detail}", status)
+        return ExtractionError(f"The LLM endpoint answered {status}: {detail}")

@@ -19,6 +19,7 @@ from zoneinfo import ZoneInfo
 
 from app.google.http import GoogleHttp
 from app.google.interface import GEMINI_NOTES_MARKER, Attachment, Attendee, CalendarEvent, NotFoundError
+from app.tz import as_zone, display_zone
 
 BASE = "https://www.googleapis.com/calendar/v3"
 FIELDS = (
@@ -37,12 +38,12 @@ class RealCalendarClient:
     def __init__(
         self,
         http: GoogleHttp,
-        display_tz: ZoneInfo | str = "Asia/Kolkata",
+        display_tz: ZoneInfo | str | None = None,
         cache_seconds: float = 60.0,
         now: Callable[[], float] = time.monotonic,
     ) -> None:
         self.http = http
-        self.tz = ZoneInfo(display_tz) if isinstance(display_tz, str) else display_tz
+        self.tz = as_zone(display_tz)
         self.cache_seconds = cache_seconds
         self._now = now
         self._cache: dict[tuple[str, str, str], tuple[float, list[CalendarEvent]]] = {}
@@ -155,13 +156,13 @@ def _parse_dt(raw: Any, tz: ZoneInfo) -> datetime | None:
     parsed = datetime.fromisoformat(text)
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=tz)
-    # Stored UTC-equivalent, shown in Asia/Kolkata everywhere; the event's own zone is kept apart.
+    # Stored UTC-equivalent, shown in DISPLAY_TIMEZONE everywhere; the event's own zone is kept apart.
     return parsed.astimezone(tz)
 
 
 def _rfc3339(value: datetime) -> str:
     if value.tzinfo is None:
-        value = value.replace(tzinfo=ZoneInfo("Asia/Kolkata"))
+        value = value.replace(tzinfo=display_zone())
     return value.isoformat(timespec="seconds")
 
 

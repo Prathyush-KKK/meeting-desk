@@ -1,4 +1,4 @@
-"""Telemetry per ``docs/ALERT-EMISSION-STANDARD-SUMMARY.md``.
+"""Telemetry per ``docs/TELEMETRY.md``.
 
     metrics.py     the six required metrics plus app_build_info, on their own registry
     providers.py   track_provider(): the wrapper every outbound call goes through

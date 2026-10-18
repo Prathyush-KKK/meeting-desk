@@ -70,15 +70,15 @@ def test_rotation_reads_the_previous_key_and_re_encrypts_rows(tmp_path: Path) ->
     app = create_app(make_settings(tmp_path))
     with TestClient(app):
         with app.state.db.session() as session:
-            connection = session.query(Connection).filter_by(email="ansul.s@simpleo.ai").one()
+            connection = session.query(Connection).filter_by(email="alex.s@example.com").one()
             connection.refresh_token_enc = enc_v1
             connection.key_version = 1
             session.commit()
         with app.state.db.session() as session:
-            assert rotate_connections(session, rotated) == ["ansul.s@simpleo.ai"]
+            assert rotate_connections(session, rotated) == ["alex.s@example.com"]
             session.commit()
         with app.state.db.session() as session:
-            connection = session.query(Connection).filter_by(email="ansul.s@simpleo.ai").one()
+            connection = session.query(Connection).filter_by(email="alex.s@example.com").one()
             assert connection.key_version == 2
             assert connection.refresh_token_enc != enc_v1
             assert rotated.decrypt(connection.refresh_token_enc, 2) == "1//refresh-token"
@@ -105,12 +105,12 @@ def _broker(api: MockGoogleApi, store: InMemoryRefreshTokens, now: list[float]) 
 
 def test_the_broker_refreshes_once_and_caches_until_expiry() -> None:
     api = MockGoogleApi().on("POST", "/token", "token_refresh_ok.json")
-    store = InMemoryRefreshTokens({"ansul.s@simpleo.ai": "1//rt"})
+    store = InMemoryRefreshTokens({"alex.s@example.com": "1//rt"})
     now = [1_000.0]
     broker = _broker(api, store, now)
 
-    assert broker.access_token("ansul.s@simpleo.ai") == "ya29.a0AfB_byC-fresh-token-0001"
-    assert broker.access_token("ansul.s@simpleo.ai") == "ya29.a0AfB_byC-fresh-token-0001"
+    assert broker.access_token("alex.s@example.com") == "ya29.a0AfB_byC-fresh-token-0001"
+    assert broker.access_token("alex.s@example.com") == "ya29.a0AfB_byC-fresh-token-0001"
     assert len(api.requests) == 1
     form = dict(httpx.QueryParams(api.requests[0].content.decode()))
     assert form == {
@@ -120,9 +120,9 @@ def test_the_broker_refreshes_once_and_caches_until_expiry() -> None:
         "refresh_token": "1//rt",
     }
     now[0] += 3600  # past expires_in - margin
-    broker.access_token("ansul.s@simpleo.ai")
+    broker.access_token("alex.s@example.com")
     assert len(api.requests) == 2
-    broker.access_token("ansul.s@simpleo.ai", force_refresh=True)
+    broker.access_token("alex.s@example.com", force_refresh=True)
     assert len(api.requests) == 3
 
 
@@ -135,26 +135,26 @@ def test_invalid_grant_is_auth_expired_and_drops_the_cached_token() -> None:
             lambda r: json_response("token_refresh_invalid_grant.json", 400),
         ],
     )
-    store = InMemoryRefreshTokens({"ansul.s@simpleo.ai": "1//rt"})
+    store = InMemoryRefreshTokens({"alex.s@example.com": "1//rt"})
     broker = _broker(api, store, [0.0])
-    broker.access_token("ansul.s@simpleo.ai")
+    broker.access_token("alex.s@example.com")
     with pytest.raises(AuthExpired) as err:
-        broker.access_token("ansul.s@simpleo.ai", force_refresh=True)
-    assert str(err.value) == "ansul.s@simpleo.ai: invalid_grant: Token has been expired or revoked."
+        broker.access_token("alex.s@example.com", force_refresh=True)
+    assert str(err.value) == "alex.s@example.com: invalid_grant: Token has been expired or revoked."
     # Nothing cached any more: the next call asks Google again rather than reusing a dead token.
     with pytest.raises(AuthExpired):
-        broker.access_token("ansul.s@simpleo.ai")
+        broker.access_token("alex.s@example.com")
     assert len(api.requests) == 3
 
 
 def test_an_unknown_connection_or_a_server_error_are_distinct() -> None:
     api = MockGoogleApi().on("POST", "/token", lambda r: httpx.Response(503, text="try later"))
-    store = InMemoryRefreshTokens({"ansul.s@simpleo.ai": "1//rt"})
+    store = InMemoryRefreshTokens({"alex.s@example.com": "1//rt"})
     broker = _broker(api, store, [0.0])
     with pytest.raises(AuthExpired):
-        broker.access_token("nobody@simpleo.ai")
+        broker.access_token("nobody@example.com")
     with pytest.raises(GoogleError, match="token refresh failed"):
-        broker.access_token("ansul.s@simpleo.ai")  # a 503 is not a revoked token
+        broker.access_token("alex.s@example.com")  # a 503 is not a revoked token
 
 
 def test_the_db_store_decrypts_with_the_row_key_version(tmp_path: Path) -> None:
@@ -162,16 +162,16 @@ def test_the_db_store_decrypts_with_the_row_key_version(tmp_path: Path) -> None:
     app = create_app(make_settings(tmp_path))
     with TestClient(app):
         with app.state.db.session() as session:
-            connection = session.query(Connection).filter_by(email="ansul.s@simpleo.ai").one()
+            connection = session.query(Connection).filter_by(email="alex.s@example.com").one()
             connection.refresh_token_enc, connection.key_version = cipher.encrypt("1//db-token")
             session.commit()
         store = DbRefreshTokens(app.state.db, cipher)
-        assert store.refresh_token_for("ansul.s@simpleo.ai") == "1//db-token"
+        assert store.refresh_token_for("alex.s@example.com") == "1//db-token"
         with pytest.raises(AuthExpired, match="no refresh token stored"):
-            store.refresh_token_for("prathyush.kodhanpur@simpleo.ai")
+            store.refresh_token_for("daniel.okafor@example.com")
         with pytest.raises(AuthExpired, match="not a connected account"):
-            store.refresh_token_for("nobody@simpleo.ai")
+            store.refresh_token_for("nobody@example.com")
         # A row on a key this deployment no longer has is reported as needing a reconnect.
         other = DbRefreshTokens(app.state.db, TokenCipher(KEY_V2, version=2))
         with pytest.raises(AuthExpired, match="no configured token key"):
-            other.refresh_token_for("ansul.s@simpleo.ai")
+            other.refresh_token_for("alex.s@example.com")

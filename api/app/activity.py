@@ -1,22 +1,21 @@
-"""The activity log: every change records who did it. Kept 90 days (spec section 5)."""
+"""The activity log: every change records who did it. Kept 90 days."""
 
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.models import Activity
+from app.tz import display_zone
 
 RETENTION_DAYS = 90
-IST = ZoneInfo("Asia/Kolkata")
 
 
 def now() -> datetime:
     """The log is wall-clock, not the demo clock, so entries stay in the order they happened."""
-    return datetime.now(IST)
+    return datetime.now(display_zone())
 
 
 def log(db: Session, actor: str, text: str) -> Activity:

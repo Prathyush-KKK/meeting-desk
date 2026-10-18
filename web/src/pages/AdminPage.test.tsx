@@ -1,4 +1,4 @@
-// Screen review R2-04: a member's Admin page showed the three admin sections anyway - empty lists,
+// A member's Admin page used to show the three admin sections anyway - empty lists,
 // a disabled field, and a live "Connect an account" link (an anchor ignores `disabled`) that led to
 // a 403. A member gets the notice; an admin gets the page.
 
@@ -17,7 +17,7 @@ vi.mock("@/api/hooks", () => ({
 
 const person = (role: "admin" | "member"): Me => ({
   id: "u-1",
-  email: role === "admin" ? "prathyush.kodhanpur@simpleo.ai" : "nishchay.s@simpleo.ai",
+  email: role === "admin" ? "daniel.okafor@example.com" : "noah.s@example.com",
   name: "Somebody",
   role,
   is_admin: role === "admin",

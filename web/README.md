@@ -1,8 +1,8 @@
 # web - the Meeting Desk app
 
-The prototype (`meeting-desk/`: React 19, TypeScript, Vite, Tailwind, shadcn/ui, the minimal
-black-on-white theme) moved here and is wired to the API. Its `store.tsx` is gone; the server is the
-store.
+React 19, TypeScript, Vite, Tailwind and a few shadcn/ui parts, in a minimal black-on-white theme
+with a dark mode. The server is the store: every screen reads and writes through the API with
+TanStack Query.
 
 ```
 src/api/client.ts    one typed fetch door: base URL, credentials, ApiError with the 409 payload
@@ -14,8 +14,8 @@ src/lib/display.ts   dates, clocks, status labels, the workstream list
 src/components/      Grid (the sheet), MeetingList, PointRow, AddRowPanel, ui/ (six shadcn parts)
 src/pages/           MeetingStep, NotesStep, PointsStep, TransferStep, SheetsPage, AdminPage, SignIn
 e2e/walkthrough.mjs  the README walkthrough driven through a real browser
-e2e/screens.mjs      every screen at 1280, 390 and 768 px (and dark) for the screen review:
-                     node e2e/screens.mjs <round|final> -> docs/review/shots/ (docs/review/SCREENS-REVIEW.md)
+e2e/screens.mjs      every screen at 1280, 390 and 768 px (and dark):
+                     node e2e/screens.mjs <name> -> docs/screenshots/<name>/ (git-ignored)
 ```
 
 ## Run it locally
@@ -24,7 +24,7 @@ Two terminals. The API first, with the fakes, so nothing needs Google credential
 
 ```bash
 cd api
-FAKE_GOOGLE=1 FAKE_LLM=1 AUTH_DEV_USER=prathyush.kodhanpur@simpleo.ai \
+FAKE_GOOGLE=1 FAKE_LLM=1 AUTH_DEV_USER=daniel.okafor@example.com \
   DATABASE_URL=sqlite:///./meeting-desk.db \
   .venv/bin/uvicorn app.main:app --reload --port 8000
 # or, from the repo root: make run
@@ -82,11 +82,11 @@ With the API on `:8000` and the web app on `:5173`:
 1. **Paste.** On *Capture* with nothing selected, paste into the box at the top:
 
    ```
-   Vendor call with Madhu
+   Vendor call with Maya
 
    The Next Steps
-   Ansul S: Send the Sprinto questionnaire by Friday
-   Prathyush Kodhanpur: Mirror Open Food Facts before 3 Oct
+   Alex S: Send the Northwind questionnaire by Friday
+   Daniel Okafor: Mirror OpenRates before 3 Oct
    Decided: the Owner column holds a person, not a team
    Risk: the upload flag has no rollback plan
    ```
@@ -101,7 +101,7 @@ With the API on `:8000` and the web app on `:5173`:
    (or the bulk *Defer*) hides a point; *See deferred* lists the deferred ones with **Restore** and
    **Transfer**. *Remove* is a soft delete with a ten-second Undo. The Capture badge counts active
    points only.
-4. **Transfer.** *Transfer N* opens step 4. Pick the workbook and tab (**Nutrition Sialet Product
+4. **Transfer.** *Transfer N* opens step 4. Pick the workbook and tab (**Mobile App Product
    Roadmap › P1 Resolve & Log**), leave *Smart append*, and the grid shows exactly where the rows
    land - the keys, the columns, what moves down. *Insert N rows and write* re-reads the region,
    writes one batch, and offers **Undo** for ten minutes. If somebody edited the tab in between the
@@ -127,8 +127,9 @@ pages. It is kept out of `pnpm check` because it needs both servers running, and
 notes so a re-run against a long-lived API is a fresh meeting rather than a repeat transfer.
 
 ```bash
+npx playwright install chromium     # once
 node e2e/walkthrough.mjs
-# E2E_WEB=http://127.0.0.1:5173 E2E_API=http://localhost:8000 E2E_CHROMIUM=/opt/pw-browsers/chromium
+# E2E_WEB=http://127.0.0.1:5173 E2E_API=http://localhost:8000 E2E_CHROMIUM=/path/to/chromium (optional)
 ```
 
 ## Production: the API serves this build
@@ -143,22 +144,23 @@ The routers are registered first, so every API path still answers as itself; any
 through to `index.html`. The client then calls the API on the same origin with no `/api` prefix
 (`import.meta.env.DEV` picks the prefix; `VITE_API_BASE` overrides both).
 
-## What was kept, and what changed
+## Design notes
 
-The theme, the layout and the responsive behaviour are the prototype's, untouched: system font,
-black on white, 1 px borders, 4 px radius, no colour badges, one selection colour for the grid.
-Below 768 px it is a single column, the meeting detail is a full-screen overlay, the points row wraps
-to two lines, the transfer panel drops under the grid, the Sheets sidebar becomes a select, and
-grids scroll horizontally inside their own box with sticky row numbers and column letters.
+System font, black on white, 1 px borders, 4 px radius, no colour badges, one selection colour for
+the grid; dark mode follows the system. Below 768 px it is a single column: the meeting detail is a
+full-screen overlay, the points row wraps to two lines, the transfer panel drops under the grid,
+the Sheets sidebar becomes a select, grids scroll horizontally inside their own box with sticky row
+numbers and column letters, and every control is a 44 px tap target.
 
-Gone: `src/store.tsx` (the API replaced it), `src/lib/extract.ts` (the server extracts now), the
-shadcn components nothing imports, and `src/assets`.
+`src/components/Grid.tsx` uses **TanStack Virtual** for tabs over 300 rows; under that the table
+renders every row, which is cheaper than measuring and keeps one code path for the sticky header,
+the column letters and the cell editor.
 
-Added in phase 4: **TanStack Virtual** in `src/components/Grid.tsx` for tabs over 300 rows (spec
-section 3) - under that the table renders every row, which is cheaper than measuring and keeps one
-code path for the sticky header, the column letters and the cell editor; and the **queued
-extraction loop** in `useExtract`, so a deployment with `JOBS_ENABLED=1` (where
-`POST /meetings/{id}/extract` answers `{"queued": true}`) polls `GET /extractions/{id}` every two
+The **queued extraction loop** in `useExtract` handles a deployment with `JOBS_ENABLED=1` (where
+`POST /meetings/{id}/extract` answers `{"queued": true}`): it polls `GET /extractions/{id}` every two
 seconds until the points land, with a Cancel that stops the polling and says the job itself carries
-on. With the queue off the same hook still resolves straight from the POST, so the app does not
-care which deployment it is talking to.
+on. With the queue off the same hook resolves straight from the POST, so the app does not care which
+deployment it is talking to.
+
+Times are shown in the workspace's `DISPLAY_TIMEZONE` and the workstream list is `WORKSTREAMS`,
+both sent with `GET /auth/me` (`src/lib/display.ts`, `configureDisplay`).

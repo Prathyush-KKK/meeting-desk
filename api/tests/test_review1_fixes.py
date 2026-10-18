@@ -1,8 +1,8 @@
-"""One test per finding in docs/REVIEW-1.md - the scenario the review described, first.
+"""Regression tests for a pre-release review: one or more per issue found, the scenario first.
 
-Each test is named after its finding number so a reader can go from the review, to the fix log in
-docs/REVIEW-1-FIXES.md, to the thing that proves it. The web-only findings (4, 6, 23, 29 and the
-Add row default in 8) are not here; their API side is.
+Each test carries its issue number in its name, so the tests for one issue sit together. Issues
+that were only in the web app (4, 6, 23, 29 and the Add row default in 8) are covered by the web
+tests; their API side is here.
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ from tests.conftest import ADMIN, connect_fixture_workbook, make_settings, meeti
 from tests.google_mock import MockGoogleApi, json_response
 
 IST = ZoneInfo("Asia/Kolkata")
-SHEET = "1TXxibAPO60bB4e1GUQumZKBW68ATv0MrpIinlCwDL8Q"
+SHEET = "1DemoMobileAppRoadmapSpreadsheet000000000001"
 
 
 # --- helpers ----------------------------------------------------------------------------------------
@@ -51,11 +51,11 @@ def tab(client: TestClient, workbook_id: str, sheet_id: str = "t1") -> dict:
 
 
 def roadmap(client: TestClient) -> dict:
-    return next(w for w in client.get("/workbooks").json() if w["name"] == "Nutrition Sialet Product Roadmap")
+    return next(w for w in client.get("/workbooks").json() if w["name"] == "Mobile App Product Roadmap")
 
 
 def points(client: TestClient, n: int = 1) -> list[str]:
-    meeting_id = meeting_by_title(client, "Nutrition roadmap review")["id"]
+    meeting_id = meeting_by_title(client, "Mobile roadmap review")["id"]
     return [p["id"] for p in client.get("/points", params={"meeting_id": meeting_id}).json()[:n]]
 
 
@@ -128,7 +128,7 @@ def test_review1_02_a_configured_deployment_starts(tmp_path: Path) -> None:
             environment="production",
             session_secret="x" * 40,
             auth_dev_user="",
-            cors_origins=["https://meeting-desk.internal.simpleo.ai"],
+            cors_origins=["https://meeting-desk.internal.example.com"],
         )
     )
     assert app.title
@@ -155,7 +155,7 @@ def test_review1_20_a_wildcard_cors_origin_with_credentials_is_refused(tmp_path:
         environment="staging",
         session_secret="x" * 40,
         auth_dev_user="",
-        cors_origins=["https://meeting-desk.internal.simpleo.ai", " * "],
+        cors_origins=["https://meeting-desk.internal.example.com", " * "],
     )
     with pytest.raises(UnsafeConfiguration) as err:
         create_app(settings)
@@ -241,8 +241,8 @@ def test_review1_03_an_auth_failure_still_marks_it_expired(client: TestClient) -
 
 
 def test_review1_05_the_same_note_can_be_pasted_again_after_it_was_removed(client: TestClient) -> None:
-    meeting_id = meeting_by_title(client, "Nutrition roadmap review")["id"]
-    text = "Ansul S: chase the Sprinto call, by Friday"
+    meeting_id = meeting_by_title(client, "Mobile roadmap review")["id"]
+    text = "Alex S: chase the Northwind call, by Friday"
 
     first = client.post("/notes/paste", json={"meeting_id": meeting_id, "text": text})
     assert first.status_code == 201, first.text
@@ -264,8 +264,8 @@ def test_review1_05_a_racing_duplicate_note_is_a_409_not_a_500(client: TestClien
     """
     from app import notes_store
 
-    meeting_id = meeting_by_title(client, "Nutrition roadmap review")["id"]
-    text = "Prathyush: mirror Open Food Facts before launch"
+    meeting_id = meeting_by_title(client, "Mobile roadmap review")["id"]
+    text = "Daniel: mirror OpenRates before launch"
     assert client.post("/notes/paste", json={"meeting_id": meeting_id, "text": text}).status_code == 201
 
     monkeypatch.setattr(notes_store, "live_note", lambda *a, **kw: None)  # the racing request
@@ -314,8 +314,8 @@ def test_review1_07_save_refuses_the_header_row_and_anything_below_the_table(cli
 def test_review1_08_an_insert_under_the_header_takes_formatting_and_formulas_from_below() -> None:
     rows = [
         ["ID", "Task", "Owner", "Due", "Days left"],
-        ["T-101", "First", "Ansul S", "3 Oct", ""],
-        ["T-102", "Second", "Nishchay S", "5 Oct", ""],
+        ["T-101", "First", "Alex S", "3 Oct", ""],
+        ["T-102", "Second", "Noah S", "5 Oct", ""],
     ]
     layout = detect_layout(rows, formula_cols=[4])
 
@@ -377,7 +377,7 @@ def test_review1_09_a_repeated_save_and_add_row_batch_id_replay_too(client: Test
     save = {
         "workbook_id": workbook["id"],
         "sheet_id": "headers_row_1",
-        "edits": [{"cell": "C2", "before": state["values"][1][2], "after": "Nishchay S"}],
+        "edits": [{"cell": "C2", "before": state["values"][1][2], "after": "Noah S"}],
         "batch_id": save_id,
     }
     first = client.post("/sheets/save", json=save)
@@ -458,7 +458,7 @@ def test_review1_09_a_batch_id_reused_for_a_different_write_is_refused(client: T
 def test_review1_10_a_date_column_is_written_from_the_points_own_due_date(client: TestClient) -> None:
     workbook = connect_fixture_workbook(client)
     state = tab(client, workbook["id"], "date_col")
-    meeting_id = meeting_by_title(client, "Nutrition roadmap review")["id"]
+    meeting_id = meeting_by_title(client, "Mobile roadmap review")["id"]
     point = client.post(
         "/points",
         json={"meeting_id": meeting_id, "text": "Ship the report", "due_text": "by EOW"},
@@ -562,16 +562,16 @@ def test_review1_11_end_of_week_and_next_weekday_cross_month_boundaries() -> Non
 def test_review1_11_a_phrase_nobody_uses_is_still_nothing() -> None:
     from app.extract.postprocess import parse_due
 
-    assert resolve("when the clinician is free", date(2026, 9, 22)) is None
-    assert parse_due("when the clinician is free", datetime(2026, 9, 22, tzinfo=IST)) is None
+    assert resolve("when the accountant is free", date(2026, 9, 22)) is None
+    assert parse_due("when the accountant is free", datetime(2026, 9, 22, tzinfo=IST)) is None
 
 
 # --- 12. the notes are data, not instructions -------------------------------------------------------------
 
 
 def test_review1_12_the_prompt_says_the_notes_are_data_and_fences_them_freshly() -> None:
-    one = build_prompt("Nishchay: ship the standard", None)
-    two = build_prompt("Nishchay: ship the standard", None)
+    one = build_prompt("Noah: ship the standard", None)
+    two = build_prompt("Noah: ship the standard", None)
     assert one.delimiter != two.delimiter  # a new fence per call
     assert one.delimiter.startswith("<<<NOTES-")
     assert "data, not instructions" in one.system
@@ -673,10 +673,10 @@ def test_review1_13_the_single_retry_runs_on_an_empty_object(tmp_path: Path) -> 
 
 
 def test_review1_13_the_fake_provider_still_works(client: TestClient) -> None:
-    meeting_id = meeting_by_title(client, "Nutrition roadmap review")["id"]
+    meeting_id = meeting_by_title(client, "Mobile roadmap review")["id"]
     client.post(
         "/notes/paste",
-        json={"meeting_id": meeting_id, "text": "Next steps\nAnushka Mohanty: review the dataset by 3 Oct"},
+        json={"meeting_id": meeting_id, "text": "Next steps\nAnna Moreno: review the dataset by 3 Oct"},
     )
     extracted = client.post(f"/meetings/{meeting_id}/extract")
     assert extracted.status_code == 200, extracted.text
@@ -690,7 +690,7 @@ def test_review1_14_the_region_hash_covers_the_rows_around_the_table() -> None:
     rows = [["" for _ in range(4)] for _ in range(20)]
     rows[5] = ["ID", "Task", "Owner", "Due"]
     for r in range(6, 10):
-        rows[r] = [f"T-10{r}", f"Task {r}", "Ansul S", "3 Oct"]
+        rows[r] = [f"T-10{r}", f"Task {r}", "Alex S", "3 Oct"]
     layout = detect_layout(rows)
     assert (layout.header_row, layout.last_table_row) == (5, 9)
     base = region_hash(rows, layout)
@@ -774,7 +774,7 @@ def test_review1_16_the_repeat_check_reads_the_column_and_is_scoped_to_the_workb
 ) -> None:
     workbook = roadmap(client)
     other = connect_fixture_workbook(client)
-    meeting_id = meeting_by_title(client, "Nutrition roadmap review")["id"]
+    meeting_id = meeting_by_title(client, "Mobile roadmap review")["id"]
     point = client.get("/points", params={"meeting_id": meeting_id}).json()[0]
 
     state = tab(client, workbook["id"])
@@ -843,14 +843,14 @@ def test_review1_17_a_calendar_rate_limit_does_not_block_sheets() -> None:
     http = api.http(max_retries=0, connection_backoff_seconds=60)
 
     with pytest.raises(RateLimited):
-        http.get("a@simpleo.ai", calendar)
+        http.get("a@example.com", calendar)
     # The same connection, a different Google API: it keeps working.
-    assert http.get("a@simpleo.ai", sheets) == {"ok": True}
+    assert http.get("a@example.com", sheets) == {"ok": True}
     # And Calendar on that connection is still backed off.
     with pytest.raises(RateLimited):
-        http.get("a@simpleo.ai", calendar)
-    assert http.backoff_remaining("a@simpleo.ai", "google_calendar") > 0
-    assert http.backoff_remaining("a@simpleo.ai", "google_sheets") == 0
+        http.get("a@example.com", calendar)
+    assert http.backoff_remaining("a@example.com", "google_calendar") > 0
+    assert http.backoff_remaining("a@example.com", "google_sheets") == 0
 
 
 def test_review1_17_refresh_does_not_bypass_the_cache_more_than_once_in_a_few_seconds(
@@ -945,7 +945,7 @@ def test_review1_19_the_previous_token_key_is_behind_the_rotation_flag() -> None
     assert "MEETING_DESK_TOKEN_KEY_PREVIOUS" not in render()
     assert "MEETING_DESK_TOKEN_KEY_PREVIOUS" in render("--set", "externalSecrets.rotation.enabled=true")
     # The internal values render too, both ways.
-    internal = ["-f", str(CHART / "values-internal.yaml")]
+    internal = ["-f", str(CHART / "values-production.example.yaml")]
     assert "MEETING_DESK_TOKEN_KEY_PREVIOUS" not in render(*internal)
     assert "MEETING_DESK_TOKEN_KEY_PREVIOUS" in render(
         *internal, "--set", "externalSecrets.rotation.enabled=true"
@@ -1044,7 +1044,7 @@ def read_session_cookie(settings, client: TestClient) -> dict:
 
 def test_review1_24_undo_restores_the_point_with_its_date_and_survives_a_replay(client: TestClient) -> None:
     workbook = roadmap(client)
-    meeting_id = meeting_by_title(client, "Nutrition roadmap review")["id"]
+    meeting_id = meeting_by_title(client, "Mobile roadmap review")["id"]
     point = client.post(
         "/points",
         json={"meeting_id": meeting_id, "text": "Write the rollout note", "due_text": "by 3 Oct"},
@@ -1083,7 +1083,7 @@ def test_review1_24_a_point_restored_over_a_row_that_came_back_is_undeleted(clie
     from app.routes.transfers import _restore_point
 
     workbook = roadmap(client)
-    meeting_id = meeting_by_title(client, "Nutrition roadmap review")["id"]
+    meeting_id = meeting_by_title(client, "Mobile roadmap review")["id"]
     point = client.post("/points", json={"meeting_id": meeting_id, "text": "Twice restored"}).json()
     state = tab(client, workbook["id"])
     client.post(
@@ -1120,7 +1120,7 @@ def test_review1_25_a_long_retry_after_is_capped_and_jittered() -> None:
     )
     slept: list[float] = []
     http = api.http(sleep=slept.append, jitter=lambda: 0.25)
-    assert http.get("a@simpleo.ai", "https://sheets.googleapis.com/v4/spreadsheets/abc") == {"ok": True}
+    assert http.get("a@example.com", "https://sheets.googleapis.com/v4/spreadsheets/abc") == {"ok": True}
     # Five minutes asked for; at most eight seconds held, plus jitter so a fleet does not sync up.
     assert slept == [8.25]
 
@@ -1136,7 +1136,7 @@ def test_review1_25_a_short_retry_after_is_still_honoured() -> None:
     )
     slept: list[float] = []
     http = api.http(sleep=slept.append, jitter=lambda: 0.5)
-    http.get("a@simpleo.ai", "https://sheets.googleapis.com/v4/spreadsheets/abc")
+    http.get("a@example.com", "https://sheets.googleapis.com/v4/spreadsheets/abc")
     assert slept == [3.5]
 
 

@@ -1,6 +1,5 @@
-// Review 1, finding 23, second half: "the overlay does not push history". Back has to close what
-// is on top rather than leave the app, and closing any other way must not leave a dead entry
-// behind for Back to land on.
+// An overlay pushes history: Back has to close what is on top rather than leave the app, and
+// closing any other way must not leave a dead entry behind for Back to land on.
 
 import { describe, expect, it, vi } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";

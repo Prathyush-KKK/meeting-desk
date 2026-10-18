@@ -1,7 +1,7 @@
 # Meeting Desk - one image: the API, the built SPA it serves, and the job worker.
 #
-# Why one image and not two: main.py already mounts `WEB_DIST` at "/" with an SPA fallback
-# (phase 3), so the API is the web server. A second nginx image would mean a second thing to
+# Why one image and not two: main.py already mounts `WEB_DIST` at "/" with an SPA fallback,
+# so the API is the web server. A second nginx image would mean a second thing to
 # version, a second ingress path and a CORS exception for the session cookie, and would buy
 # nothing - the SPA is 420 kB of static files. deploy/Dockerfile.web keeps the nginx route alive
 # for a split-origin deployment; it is not what the chart deploys.
@@ -30,7 +30,7 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY api/pyproject.toml ./pyproject.toml
 COPY api/app ./app
-# `.` rather than `.[llm]`: the Vertex and Bedrock SDKs are an extra, and both are imported
+# `.` rather than `.[llm]`: the Vertex, Bedrock and Anthropic SDKs are extras, all imported
 # lazily. Build with `--build-arg EXTRAS='[llm]'` for an image that can run FAKE_LLM=0.
 ARG EXTRAS=""
 RUN pip install --no-cache-dir ".${EXTRAS}"
@@ -43,7 +43,7 @@ ENV PYTHONUNBUFFERED=1 \
     PATH="/opt/venv/bin:$PATH" \
     WEB_DIST=/srv/web/dist \
     METRICS_PORT=9464 \
-    TZ=Asia/Kolkata
+    TZ=UTC
 
 # A fixed uid so the chart's runAsUser: 10001 matches the files this image owns.
 RUN groupadd --gid 10001 app \

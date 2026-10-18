@@ -1,6 +1,7 @@
 """Every outbound call, wrapped.
 
-One context manager - ``track_provider(provider, op)`` - does all four things the standard asks for:
+One context manager - ``track_provider(provider, op)`` - does all four things that
+docs/TELEMETRY.md asks for:
 
 * counts the call on ``external_provider_requests_total{provider, op, outcome}``;
 * sets ``external_provider_last_success_timestamp_seconds{provider}`` **only** on success;
@@ -39,6 +40,8 @@ GOOGLE_OAUTH = "google_oauth"
 GOOGLE_API = "google_api"  # the catch-all, so an unmapped URL can never invent a label
 VERTEX = "vertex"
 BEDROCK = "bedrock"
+OPENAI = "openai"  # any OpenAI-compatible endpoint: OpenAI, Ollama, OpenRouter, ...
+ANTHROPIC = "anthropic"
 POSTGRES = "postgres"
 
 #: Operations per provider. ``other`` is always allowed, so the table is total.
@@ -53,6 +56,8 @@ OPS: dict[str, tuple[str, ...]] = {
     GOOGLE_API: (),
     VERTEX: ("generate_content",),
     BEDROCK: ("converse", "chat_completions"),  # the Converse API; the OpenAI-compatible endpoint
+    OPENAI: ("chat_completions",),
+    ANTHROPIC: ("messages_create",),
     POSTGRES: ("query",),
 }
 OTHER_OP = "other"
@@ -283,6 +288,7 @@ def track_job(job_name: str) -> Iterator[None]:
 
 
 __all__ = [
+    "ANTHROPIC",
     "BEDROCK",
     "BREAKER_PROVIDERS",
     "GOOGLE_API",
@@ -293,6 +299,7 @@ __all__ = [
     "GOOGLE_OAUTH",
     "GOOGLE_PEOPLE",
     "GOOGLE_SHEETS",
+    "OPENAI",
     "OPS",
     "OTHER_OP",
     "OUTCOMES",

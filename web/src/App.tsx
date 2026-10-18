@@ -12,12 +12,13 @@ import { cn } from "@/lib/utils";
 import { useNarrow } from "@/lib/overlay";
 import { ApiError, apiUrl } from "@/api/client";
 import { useConnectionStatus, useMe, useMeetings } from "@/api/hooks";
+import { configureDisplay } from "@/lib/display";
 
 type Page = "capture" | "sheets" | "admin";
 
 /**
- * Screen review R2-01: bottom right is where every step keeps its primary button (Continue,
- * Transfer, Insert and write, Save to Sheet), and a toast with Undo sat on it for ten seconds. From
+ * Bottom right is where every step keeps its primary button (Continue, Transfer, Insert and
+ * write, Save to Sheet), and a toast with Undo would sit on it for ten seconds. From
  * 768 px the bottom centre only ever covers hint text; on a phone the bottom is all buttons, so the
  * toast goes to the top, over the page tabs for as long as it lasts.
  */
@@ -49,6 +50,8 @@ function readUrl() {
 
 export default function App() {
   const me = useMe();
+  // Before anything below renders a time or a workstream list: the workspace's zone and names.
+  if (me.data) configureDisplay(me.data);
   const narrow = useNarrow();
   const initial = readUrl();
   const [page, setPage] = useState<Page>(initial.page);
@@ -61,8 +64,8 @@ export default function App() {
   );
 
   const meetings = useMeetings();
-  // Review 1, finding 28 made `/admin/connections` admin-only, and with it the banner: a member saw
-  // none (screen review R1-23). The banner has its own route that anyone signed in may read; it is
+  // `/admin/connections` is admin-only, so the banner cannot come from it or a member would see
+  // none. The banner has its own route that anyone signed in may read; it is
   // asked for once `/auth/me` has answered.
   const status = useConnectionStatus(!!me.data);
   const items = meetings.data?.items ?? [];

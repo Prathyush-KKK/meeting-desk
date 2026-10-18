@@ -71,7 +71,7 @@ def list_connections(
     rows = list(db.scalars(select(Connection).order_by(Connection.connected_at)).all())
     return {
         "connections": [connection_out(c) for c in rows],
-        # "Only one" is wrong with none; the first-run notice covers that case (screen review R1-33).
+        # "Only one" is wrong with none; the first-run notice covers that case.
         "warning": ONE_CONNECTION_WARNING if len(rows) == 1 else "",
         "banner": _banner(rows),
         # First run: nothing is connected at all. The app shows this with a Connect button, and
@@ -88,10 +88,10 @@ def connection_status(
 ) -> dict[str, Any]:
     """The banner, for everyone signed in - not only admins.
 
-    Spec section 7: "Admin connection expires: a banner on every page names the connection and the
-    admin." ``GET /connections`` is admin-only (Review 1, finding 28), so a member saw no banner at
-    all (screen review R1-23). This answers only what the banner says: which connection needs
-    reconnecting, and whether nothing is connected yet - no scopes, no list.
+    When an admin connection expires, a banner on every page names the connection and the admin.
+    ``GET /connections`` is admin-only, so a member would see no banner at all. This answers only
+    what the banner says: which connection needs reconnecting, and whether nothing is connected yet
+    - no scopes, no list.
     """
     rows = list(db.scalars(select(Connection).order_by(Connection.connected_at)).all())
     admins = db.scalars(select(AllowListEntry.email).where(AllowListEntry.role == "admin")).all()

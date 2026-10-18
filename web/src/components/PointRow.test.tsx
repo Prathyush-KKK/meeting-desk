@@ -10,27 +10,27 @@ function point(over: Partial<Point> = {}): Point {
     meeting_id: "m-1",
     extraction_id: null,
     kind: "action",
-    text: "Mirror Open Food Facts before launch",
-    text_norm: "mirror open food facts before launch",
+    text: "Mirror OpenRates before launch",
+    text_norm: "mirror openrates before launch",
     evidence: "",
-    owner_text: "Prathyush Kodhanpur",
-    owner_email: "prathyush.kodhanpur@simpleo.ai",
+    owner_text: "Daniel Okafor",
+    owner_email: "daniel.okafor@example.com",
     owner_ambiguous: false,
     due_text: "3 Oct",
     due_date: null,
     status: "open",
-    workstream: "Nutrition",
+    workstream: "Mobile",
     lifecycle: "active",
     selected: false,
-    updated_by: "prathyush.kodhanpur@simpleo.ai",
+    updated_by: "daniel.okafor@example.com",
     updated_at: null,
     deleted_at: null,
     ...over,
   };
 }
 
-const OWNERS = ["Prathyush Kodhanpur", "Ansul S", "product"];
-const WORKSTREAMS = ["Nutrition", "Platform"];
+const OWNERS = ["Daniel Okafor", "Alex S", "product"];
+const WORKSTREAMS = ["Mobile", "Platform"];
 
 function renderRow(p: Point) {
   const props = {
@@ -82,8 +82,8 @@ describe("PointRow", () => {
   });
 });
 
-// Screen review round 1, R1-01 and R1-09. jsdom has no layout, so these read the structure the
-// layout is built from: which controls share a grid track, and which share a line on a phone.
+// jsdom has no layout, so these read the structure the layout is built from: which controls share a
+// grid track, and which share a line on a phone.
 describe("PointRow layout", () => {
   /** The md grid's items: children of an `md:contents` wrapper count as the wrapper's children. */
   function gridItems(row: HTMLElement): HTMLElement[] {
@@ -124,7 +124,7 @@ describe("PointRow layout", () => {
     for (const field of ["Kind", "Owner", "Due", "Status", "Workstream"]) {
       expect(second).toContainElement(screen.getByLabelText(field));
     }
-    // R4-03: a grid that wraps within the row, never a strip that scrolls sideways.
+    // A grid that wraps within the row, never a strip that scrolls sideways.
     expect(second.className).toMatch(/(^|\s)grid-cols-6(\s|$)/);
     expect(second.className).not.toMatch(/overflow-x-(auto|scroll)/);
     // Two lines of six columns: kind 2 + owner 4, then due 2 + status 2 + workstream 2.
@@ -146,8 +146,8 @@ describe("PointRow layout", () => {
   });
 });
 
-// Screen review round 4, R4-01: on a phone the point's text was a one-line field, cut at the edge
-// ("Send the Sprinto questionnaire by Frida"). Under 768 px it is a textarea that wraps and grows.
+// On a phone the point's text used to be a one-line field, cut at the edge ("Send the Northwind
+// questionnaire by Frida"). Under 768 px it is a textarea that wraps and grows.
 describe("PointRow on a phone", () => {
   const LINE = 20;
   let restore: PropertyDescriptor | undefined;
@@ -183,7 +183,7 @@ describe("PointRow on a phone", () => {
   });
 
   it("shows the whole point in a box that grows with it, with no scrollbar", () => {
-    const long = "Send the Sprinto questionnaire by Friday and chase the answers by the following Tuesday";
+    const long = "Send the Northwind questionnaire by Friday and chase the answers by the following Tuesday";
     renderRow(point({ text: long }));
     const text = screen.getByLabelText("Point");
     expect(text.tagName).toBe("TEXTAREA");
@@ -218,7 +218,7 @@ describe("PointRow on a phone", () => {
 });
 
 describe("a deferred point", () => {
-  it("wraps its text on a phone and truncates it only from 768 px (R4-04)", () => {
+  it("wraps its text on a phone and truncates it only from 768 px", () => {
     renderRow(point({ lifecycle: "deferred", text: "the upload flag has no rollback plan and nobody owns it yet" }));
     const text = screen.getByTestId("deferred-text");
     expect(text.className.split(/\s+/)).not.toContain("truncate");

@@ -21,7 +21,7 @@ spec:
     matchLabels:
       {{- include "meeting-desk.selectorLabels" . | nindent 6 }}
   endpoints:
-    - port: metrics          # by name, per the standard - never a port number
+    - port: metrics          # by name, per docs/TELEMETRY.md - never a port number
       path: /metrics
       scheme: http
       interval: {{ .Values.serviceMonitor.interval }}

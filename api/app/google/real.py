@@ -30,7 +30,7 @@ class RealGoogle:
         self,
         http: GoogleHttp,
         *,
-        display_tz: str = "Asia/Kolkata",
+        display_tz: str = "",
         calendar_cache_seconds: float = 60.0,
         sheets_max_rows: int = 5000,
         wall_clock: Any = None,

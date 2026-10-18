@@ -1,4 +1,4 @@
-// Review 1, finding 9 (the web half): the id is per user intent, not per attempt.
+// The id is per user intent, not per attempt.
 
 import { describe, expect, it } from "vitest";
 import { act, renderHook } from "@testing-library/react";

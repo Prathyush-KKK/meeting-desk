@@ -1,9 +1,9 @@
-// Screen review round 1, Step 4:
-//   R1-16  the prerequisites: with no workbook there is a Connect right here, and a reload (which
+// Step 4:
+//   prereq the prerequisites: with no workbook there is a Connect right here, and a reload (which
 //          loses the ids passed from Step 3) falls back to the points ticked there, or offers the
 //          way back to them - it used to be a one-line dead end either way.
-//   R1-14  an anchor in or above the header is blocked with one line and no plan beside it.
-//   R1-15  "Write 1 cell", not "Write 1 cells".
+//   anchor an anchor in or above the header is blocked with one line and no plan beside it.
+//   count  "Write 1 cell", not "Write 1 cells".
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
@@ -32,15 +32,15 @@ vi.mock("@/api/hooks", () => ({
   useConnectWorkbook: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
-const MEETING = { id: "m-1", title: "Vendor call with Madhu", date: "2026-09-22" } as unknown as MeetingItem;
+const MEETING = { id: "m-1", title: "Vendor call with Maya", date: "2026-09-22" } as unknown as MeetingItem;
 
 const BOOK: Workbook = {
   id: "wb-1",
   spreadsheet_id: "ss-1",
-  name: "Nutrition Sialet Product Roadmap",
+  name: "Mobile App Product Roadmap",
   url: "https://docs.google.com/spreadsheets/d/ss-1",
   connection_id: "c-1",
-  connected_by: "prathyush.kodhanpur@simpleo.ai",
+  connected_by: "daniel.okafor@example.com",
   connected_at: "2026-09-21T09:00:00+05:30",
   last_read_at: null,
   can_edit: true,
@@ -51,8 +51,8 @@ const BOOK: Workbook = {
 const VALUES = [
   ["P1 Resolve & Log", "", "", "", ""],
   ["ID", "Task", "Owner", "Due", "Status"],
-  ["T-101", "Photo logging path", "Anushka Mohanty", "5 Sep", "done"],
-  ["T-102", "Search logging path", "Anushka Mohanty", "5 Sep", "done"],
+  ["T-101", "Photo capture flow", "Anna Moreno", "5 Sep", "done"],
+  ["T-102", "Manual entry flow", "Anna Moreno", "5 Sep", "done"],
   ["", "", "", "", ""],
 ];
 
@@ -71,7 +71,7 @@ function point(id: string, selected: boolean): Point {
     meeting_id: "m-1",
     kind: "action",
     text: `Point ${id}`,
-    owner_text: "Ansul S",
+    owner_text: "Alex S",
     due_text: "by Friday",
     status: "open",
     lifecycle: "active",

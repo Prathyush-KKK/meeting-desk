@@ -12,15 +12,15 @@ def test_list_merges_calendar_and_saved_meetings(client: TestClient) -> None:
     titles = [i["title"] for i in body["items"]]
     # Calendar-only, and saved-from-the-seed, both show up.
     assert "Platform squad sync" in titles
-    assert "Nutrition roadmap review" in titles
-    assert "Sprinto call prep" in titles  # manual
+    assert "Mobile roadmap review" in titles
+    assert "Northwind call prep" in titles  # manual
     assert body["connections"]
     assert body["age_minutes"] == 0
 
 
 def test_the_same_event_on_two_calendars_appears_once(client: TestClient) -> None:
     items = client.get("/meetings/list").json()["items"]
-    # Platform squad sync is on both admin calendars (organizer Ansul, attendee Prathyush).
+    # Platform squad sync is on both admin calendars (organizer Alex, attendee Daniel).
     matching = [i for i in items if i["title"] == "Platform squad sync"]
     assert len(matching) == 1
     assert matching[0]["ical_uid"].endswith("@google.com")
@@ -65,12 +65,12 @@ def test_manual_meeting_create_patch_and_soft_delete(client: TestClient) -> None
     created = client.post(
         "/meetings/manual",
         json={
-            "title": "Sprinto follow-up",
+            "title": "Northwind follow-up",
             "date": "2026-09-22",
             "start": "18:00",
             "end": "18:30",
             "workstream": "Platform",
-            "attendees": [{"name": "Ansul S", "email": "ansul.s@simpleo.ai"}],
+            "attendees": [{"name": "Alex S", "email": "alex.s@example.com"}],
         },
     )
     assert created.status_code == 201
@@ -79,10 +79,10 @@ def test_manual_meeting_create_patch_and_soft_delete(client: TestClient) -> None
     assert meeting["editable"] is True
 
     patched = client.patch(
-        f"/meetings/{meeting['id']}", json={"title": "Sprinto follow-up v2", "start": "19:00"}
+        f"/meetings/{meeting['id']}", json={"title": "Northwind follow-up v2", "start": "19:00"}
     )
     assert patched.status_code == 200
-    assert patched.json()["title"] == "Sprinto follow-up v2"
+    assert patched.json()["title"] == "Northwind follow-up v2"
     assert patched.json()["start"] == "19:00"
 
     deleted = client.delete(f"/meetings/{meeting['id']}")
@@ -92,7 +92,7 @@ def test_manual_meeting_create_patch_and_soft_delete(client: TestClient) -> None
 
     restored = client.post(f"/meetings/{meeting['id']}/restore")
     assert restored.status_code == 200
-    assert restored.json()["title"] == "Sprinto follow-up v2"
+    assert restored.json()["title"] == "Northwind follow-up v2"
 
 
 def test_calendar_meetings_are_not_editable_or_deletable(client: TestClient) -> None:
@@ -108,7 +108,7 @@ def test_resync_updates_calendar_fields_and_keeps_notes(client: TestClient) -> N
     client.post("/notes/paste", json={"meeting_id": meeting_id, "text": "a note that must survive"})
 
     google = client.app.state.google
-    event = next(e for e, _ in google.events if e.id == "7jt039pupf1l0iu9b995v8pjj8")
+    event = next(e for e, _ in google.events if e.id == "platformsync0demo0event01")
     event.title = "Platform squad sync (moved)"
 
     response = client.post(f"/meetings/{meeting_id}/resync")
@@ -119,11 +119,11 @@ def test_resync_updates_calendar_fields_and_keeps_notes(client: TestClient) -> N
 
 
 def test_resync_of_a_manual_meeting_is_refused(client: TestClient) -> None:
-    meeting_id = meeting_by_title(client, "Sprinto call prep")["id"]
+    meeting_id = meeting_by_title(client, "Northwind call prep")["id"]
     assert client.post(f"/meetings/{meeting_id}/resync").status_code == 409
 
 
 def test_list_counts_notes_and_active_points(client: TestClient) -> None:
-    item = meeting_by_title(client, "Nutrition roadmap review")
+    item = meeting_by_title(client, "Mobile roadmap review")
     assert item["notes_count"] == 1
     assert item["points_count"] == 6

@@ -1,10 +1,10 @@
 """Idempotency for the three routes that write to Google.
 
-Spec section 5 asks for one ``batchUpdate`` per transfer and for the points to leave the tool only
-once the write landed. Between those two there is a network call, and a network call can be
-answered twice: the browser retries, a phone wakes up and re-sends, someone taps Save again while
-the first request is still in flight. Without a key on the request, the second attempt writes the
-same rows again and deletes points that are already gone.
+A transfer is one ``batchUpdate``, and the points leave the tool only once the write landed. Between
+those two there is a network call, and a network call can be answered twice: the browser retries, a
+phone wakes up and re-sends, someone taps Save again while the first request is still in flight.
+Without a key on the request, the second attempt writes the same rows again and deletes points that
+are already gone.
 
 So every write carries a client ``batch_id`` and goes through ``begin`` / ``settle``:
 

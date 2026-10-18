@@ -16,6 +16,12 @@ export interface Me {
   name: string;
   role: "admin" | "member";
   is_admin: boolean;
+  /** DISPLAY_TIMEZONE: every time in the UI is shown in this IANA zone. */
+  timezone?: string;
+  /** WORKSTREAMS: the ones offered on a meeting; anything already on a meeting is added. */
+  workstreams?: string[];
+  /** GOOGLE_HOSTED_DOMAIN: the Workspace sign-in is limited to; empty means any Google account. */
+  hosted_domain?: string;
 }
 
 export interface Attendee {

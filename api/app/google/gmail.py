@@ -18,6 +18,7 @@ from zoneinfo import ZoneInfo
 
 from app.google.http import GoogleHttp
 from app.google.interface import GmailMessage
+from app.tz import as_zone
 
 BASE = "https://gmail.googleapis.com/gmail/v1/users/me"
 MAX_RESULTS = 10
@@ -26,9 +27,9 @@ _BLANKS_RE = re.compile(r"\n{3,}")
 
 
 class RealGmailClient:
-    def __init__(self, http: GoogleHttp, display_tz: ZoneInfo | str = "Asia/Kolkata") -> None:
+    def __init__(self, http: GoogleHttp, display_tz: ZoneInfo | str | None = None) -> None:
         self.http = http
-        self.tz = ZoneInfo(display_tz) if isinstance(display_tz, str) else display_tz
+        self.tz = as_zone(display_tz)
 
     def search_messages(self, connection_email: str, query: str) -> list[GmailMessage]:
         listing = self.http.get(

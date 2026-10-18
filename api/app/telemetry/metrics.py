@@ -1,6 +1,6 @@
 """The six required metrics, plus ``app_build_info``.
 
-Names, types, labels and buckets are `docs/ALERT-EMISSION-STANDARD-SUMMARY.md` verbatim. They live
+Names, types, labels and buckets are `docs/TELEMETRY.md` verbatim. They live
 on their own ``CollectorRegistry`` rather than the process-global one so that
 
 * ``GET /metrics`` on the metrics port answers exactly these and nothing else (no ``python_gc_*``,
@@ -17,8 +17,8 @@ import os
 
 from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram, disable_created_metrics
 
-# The `_created` gauge prometheus_client adds next to every counter is noise the standard does not
-# ask for; switching it off keeps /metrics to the names below.
+# The `_created` gauge prometheus_client adds next to every counter is noise docs/TELEMETRY.md does
+# not ask for; switching it off keeps /metrics to the names below.
 disable_created_metrics()
 
 DURATION_BUCKETS = (0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0)

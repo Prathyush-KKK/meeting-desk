@@ -1,4 +1,4 @@
-"""The extraction contract - spec section 5, schema as v3.
+"""The extraction contract - schema v3.
 
 ``EXTRACTION_JSON_SCHEMA`` goes to Vertex as ``response_schema`` and to Bedrock as the forced tool's
 input schema; the Pydantic models validate whatever comes back, fake or real, before anything is

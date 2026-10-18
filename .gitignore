@@ -23,7 +23,6 @@ web/e2e/last-run.png
 
 # local launch output
 .launch.log
-
-# per-round screenshot sets stay local; docs/review/shots/final is committed
-docs/review/shots/round-*/
+# screenshot sets from web/e2e/screens.mjs stay local; the README's pictures are in docs/images
+docs/screenshots/
 .api.log

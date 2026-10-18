@@ -1,0 +1,123 @@
+# An example production overlay: real Google, real extraction, the worker, Prometheus, TLS, and
+# secrets from your secret manager through External Secrets. Copy it, change the host, the domain
+# and the secret store, then:
+#
+#   helm template meeting-desk deploy/helm/meeting-desk -f deploy/helm/meeting-desk/values-production.example.yaml
+#
+# Still no credentials: every secret is a path in the secret store, resolved by External Secrets.
+
+image:
+  repository: ghcr.io/prathyush-kkk/meeting-desk
+  tag: "0.1.0"
+
+build:
+  version: "0.1.0"
+  commit: "set-by-ci"
+
+api:
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+worker:
+  enabled: true
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+
+serviceAccount:
+  create: true
+  annotations:
+    # Only for the Bedrock fallback on EKS (IRSA). The role's trust policy names the cluster's OIDC
+    # provider and system:serviceaccount:meeting-desk:meeting-desk.
+    eks.amazonaws.com/role-arn: arn:aws:iam::000000000000:role/meeting-desk-bedrock
+
+ingress:
+  enabled: true
+  className: nginx-internal
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 8m
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+    external-dns.alpha.kubernetes.io/hostname: meeting-desk.example.com
+  host: meeting-desk.example.com
+  tls:
+    enabled: true
+    secretName: meeting-desk-tls
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  labels:
+    release: kube-prometheus-stack
+
+prometheusRule:
+  enabled: true
+  labels:
+    release: kube-prometheus-stack
+
+env:
+  ENVIRONMENT: production
+  FAKE_GOOGLE: "0"
+  FAKE_LLM: "0"
+  SEED_DEMO: "0"
+  AUTH_DEV_USER: ""
+  CORS_ORIGINS: "[]"
+  WEB_DIST: /srv/web/dist
+  WEB_BASE_URL: https://meeting-desk.example.com
+  GOOGLE_OIDC_REDIRECT_URI: https://meeting-desk.example.com/auth/callback
+  GOOGLE_CONNECT_REDIRECT_URI: https://meeting-desk.example.com/admin/connections/callback
+  GOOGLE_HOSTED_DOMAIN: example.com
+  MEETING_DESK_TOKEN_KEY_VERSION: "1"
+  DISPLAY_TIMEZONE: UTC
+  SHEETS_MAX_ROWS: "5000"
+  EXTRACTION_PROVIDER: vertex
+  VERTEX_PROJECT: my-gcp-project
+  VERTEX_LOCATION: us-central1
+  VERTEX_MODEL: gemini-2.5-flash
+  BEDROCK_REGION: us-east-1
+  BEDROCK_MODEL: anthropic.claude-3-5-sonnet-20240620-v1:0
+  EXTRACT_FALLBACK_TO_BEDROCK: "1"
+  JOBS_ENABLED: "1"
+  METRICS_ENABLED: "1"
+  LOG_LEVEL: INFO
+  TZ: UTC
+
+externalSecrets:
+  enabled: true
+  secretStore:
+    name: my-secret-store
+    kind: ClusterSecretStore
+  basePath: /meeting-desk
+  keys:
+    - SESSION_SECRET
+    - DATABASE_URL
+    - GOOGLE_CLIENT_ID
+    - GOOGLE_CLIENT_SECRET
+    - MEETING_DESK_TOKEN_KEY
+  # Turned on only for the length of a token-key rotation, then off again.
+  rotation:
+    enabled: false
+    key: MEETING_DESK_TOKEN_KEY_PREVIOUS
+  vertexServiceAccount:
+    enabled: true
+    key: VERTEX_SERVICE_ACCOUNT_KEY
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: meeting-desk
+        app.kubernetes.io/component: api

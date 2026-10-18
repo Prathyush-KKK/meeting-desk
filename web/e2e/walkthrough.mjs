@@ -11,20 +11,21 @@
 // asserted through the UI; the API is only asked where a row landed, so the script never hard-codes
 // a row number.
 
-import { chromium } from "/home/claude/.npm-global/lib/node_modules/playwright/index.mjs";
+import { chromium } from "playwright";
 
 const WEB = process.env.E2E_WEB ?? "http://localhost:5173";
 const API = process.env.E2E_API ?? "http://localhost:8000";
-const EXECUTABLE = process.env.E2E_CHROMIUM ?? "/opt/pw-browsers/chromium";
+// Playwright's own Chromium (`npx playwright install chromium`) unless E2E_CHROMIUM names another.
+const EXECUTABLE = process.env.E2E_CHROMIUM || undefined;
 const STAMP = new Date().toISOString().slice(11, 19).replace(/:/g, "");
 
 // Stamped so a re-run against a long-lived API is a fresh meeting with fresh points, rather than a
 // repeat transfer (which the API rightly stops until someone confirms).
-const NOTES = `Vendor call with Madhu ${STAMP}
+const NOTES = `Vendor call with Maya ${STAMP}
 
 The Next Steps
-Ansul S: Send the Sprinto questionnaire ${STAMP} by Friday
-Prathyush Kodhanpur: Mirror Open Food Facts ${STAMP} before 3 Oct
+Alex S: Send the Northwind questionnaire ${STAMP} by Friday
+Daniel Okafor: Mirror OpenRates ${STAMP} before 3 Oct
 Decided: the Owner column ${STAMP} holds a person, not a team
 Risk: the upload flag ${STAMP} has no rollback plan
 `;
@@ -91,7 +92,7 @@ async function main() {
       await page.getByRole("button", { name: "Save and continue" }).click();
       await page.getByRole("heading", { name: "Saved notes" }).waitFor({ timeout: 20_000 });
       const title = await page.getByTestId("current-meeting").innerText();
-      if (!title.startsWith("Vendor call with Madhu")) throw new Error(`titled "${title}"`);
+      if (!title.startsWith("Vendor call with Maya")) throw new Error(`titled "${title}"`);
       return title;
     });
 
@@ -191,7 +192,7 @@ async function main() {
       return `${await page.locator("section h2").first().innerText()} · ${toast.split("\n")[0]}`;
     });
 
-    const workbook = (await json("/workbooks")).find((w) => w.name === "Nutrition Sialet Product Roadmap");
+    const workbook = (await json("/workbooks")).find((w) => w.name === "Mobile App Product Roadmap");
     let tabState = await json(`/workbooks/${workbook.id}/tabs/t1`);
     let writtenRow = -1;
 
@@ -204,7 +205,7 @@ async function main() {
       const key = await page.locator(`[data-cell="${writtenRow},0"]`).innerText();
       const notes = await page.locator(`[data-cell="${writtenRow},7"]`).innerText();
       if (!key.startsWith("T-")) throw new Error(`key column shows "${key}"`);
-      if (!notes.startsWith("Vendor call with Madhu")) throw new Error(`notes column shows "${notes}"`);
+      if (!notes.startsWith("Vendor call with Maya")) throw new Error(`notes column shows "${notes}"`);
       return `row ${writtenRow + 1} ${key} · ${notes}`;
     });
 
@@ -227,7 +228,7 @@ async function main() {
       await page.getByTestId("add-row-toggle").click();
       await page.getByTestId("add-row-panel").waitFor({ timeout: 10_000 });
       const above = page.getByTestId("addrow-above");
-      // Review 1, finding 8: this used to come up pre-set to the first data row under the header.
+      // This used to come up pre-set to the first data row under the header.
       if (await above.isChecked()) throw new Error("'Above a row' was checked before a row was clicked");
       if (!(await above.isDisabled())) throw new Error("'Above a row' can be picked with no row");
       const lands = await page.getByTestId("add-row-lands").innerText();
@@ -254,7 +255,7 @@ async function main() {
       await page.locator(`th[data-row="${aboveRow}"]`).click();
       await page.getByText(`Above row ${aboveRow + 1}`).waitFor({ timeout: 10_000 });
       await page.fill("#addrow-1", newTask);
-      await page.locator("#addrow-2").fill("Nishchay S");
+      await page.locator("#addrow-2").fill("Noah S");
       await page.selectOption("#addrow-6", "open");
       await page.getByTestId("add-row-submit").click();
       await page.waitForFunction(
@@ -294,7 +295,7 @@ async function main() {
       const current = await json(`/workbooks/${workbook.id}/tabs/t1`);
       const row = current.values.findIndex((r) => r[1] === newTask);
       await page.locator(`[data-cell="${row},2"]`).click();
-      await page.locator(`[data-cell="${row},2"] input`).fill("Ansul S");
+      await page.locator(`[data-cell="${row},2"] input`).fill("Alex S");
       await page.keyboard.press("Enter");
       await page.getByText("1 unsaved").waitFor({ timeout: 10_000 });
 
@@ -305,7 +306,7 @@ async function main() {
         body: JSON.stringify({
           workbook_id: workbook.id,
           sheet_id: "t1",
-          edits: [{ cell: `C${row + 1}`, before: current.values[row][2], after: "Shambhavi Singh" }],
+          edits: [{ cell: `C${row + 1}`, before: current.values[row][2], after: "Sofia Silva" }],
         }),
       });
       if (!elsewhere.ok) throw new Error(`the other writer failed: ${elsewhere.status}`);
@@ -350,7 +351,7 @@ async function main() {
       return "390 px: sidebar becomes a select, the grid scrolls in its box";
     });
 
-    // Review 1, finding 6: the grid used to be sized `min(60vh, 100vh - 330px)` inside a slot that
+    // The grid used to be sized `min(60vh, 100vh - 330px)` inside a slot that
     // was shorter than that, so it painted over Save and Add row. The geometry is the assertion.
     const gridIsInsideItsSlot = async (label) => {
       await page.getByRole("button", { name: /sheets/i }).click();
@@ -393,8 +394,8 @@ async function main() {
       return await gridIsInsideItsSlot("768 px");
     });
 
-    // Review 1, finding 23: "Mobile: inline 24 px input instead of bottom editor with 44 px
-    // targets". The tap now opens a sheet at the bottom naming the column.
+    // A phone used to get an inline 24 px input instead of a bottom editor with 44 px targets. The
+    // tap now opens a sheet at the bottom naming the column.
     await step("tapping a cell on a phone opens the bottom editor, not an inline input", async () => {
       await page.setViewportSize({ width: 390, height: 780 });
       const current = await json(`/workbooks/${workbook.id}/tabs/t1`);
@@ -416,7 +417,7 @@ async function main() {
         if (h < 44) throw new Error(`${name} is ${h}px high, not 44`);
       }
 
-      const wanted = current.values[row][2] === "Nishchay S" ? "Ansul S" : "Nishchay S";
+      const wanted = current.values[row][2] === "Noah S" ? "Alex S" : "Noah S";
       await control.fill(wanted);
       await editor.getByRole("button", { name: "Save" }).click();
       await page.getByTestId("cell-editor").waitFor({ state: "detached", timeout: 10_000 });
@@ -440,8 +441,7 @@ async function main() {
       return "the editor closed, the page is still open";
     });
 
-    // Spec section 7, "Shared state and mobile": "The detail overlay traps the back button · the
-    // overlay pushes history; back closes it."
+    // The detail overlay traps the back button: it pushes history, and Back closes it.
     await step("Back closes the meeting detail overlay instead of leaving the app", async () => {
       await page.getByRole("button", { name: /capture/i }).click();
       await page.locator("[data-testid=meeting-row]").first().waitFor({ timeout: 20_000 });
@@ -480,7 +480,7 @@ async function main() {
         route.fulfill({
           status: 403,
           contentType: "application/json",
-          body: JSON.stringify({ detail: "This Google account is not on the Meeting Desk allow-list. Ask an admin to add it: prathyush.kodhanpur@simpleo.ai." }),
+          body: JSON.stringify({ detail: "This Google account is not on the Meeting Desk allow-list. Ask an admin to add it: daniel.okafor@example.com." }),
         }),
       );
       await second.reload({ waitUntil: "domcontentloaded" });

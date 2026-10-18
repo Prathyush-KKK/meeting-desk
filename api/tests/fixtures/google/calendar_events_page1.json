@@ -1,7 +1,7 @@
 {
   "kind": "calendar#events",
   "etag": "\"p32ofbnlk8fpb20o\"",
-  "summary": "prathyush.kodhanpur@simpleo.ai",
+  "summary": "daniel.okafor@example.com",
   "updated": "2026-09-22T10:41:12.317Z",
   "timeZone": "Asia/Kolkata",
   "accessRole": "owner",
@@ -14,14 +14,14 @@
       "status": "confirmed",
       "htmlLink": "https://www.google.com/calendar/event?eid=M2ljZmNidHFvZWl0NWdnYmpiNGI1dWthZHFfMjAyNjA5MTlUMTAzMDAwWiBwcmF0aHl1c2gua29kaGFucHVyQHNpbXBsZW8uYWk",
       "updated": "2026-09-18T06:12:44.101Z",
-      "summary": "Nutrition roadmap review",
+      "summary": "Mobile roadmap review",
       "description": "Weekly. Agenda in the doc.",
       "location": "Meet",
       "iCalUID": "3icfcbtqoeit5ggbjb4b5ukadq@google.com",
       "recurringEventId": "3icfcbtqoeit5ggbjb4b5ukadq",
       "organizer": {
-        "email": "prathyush.kodhanpur@simpleo.ai",
-        "displayName": "Prathyush Kodhanpur",
+        "email": "daniel.okafor@example.com",
+        "displayName": "Daniel Okafor",
         "self": true
       },
       "start": {
@@ -34,19 +34,19 @@
       },
       "attendees": [
         {
-          "email": "prathyush.kodhanpur@simpleo.ai",
-          "displayName": "Prathyush Kodhanpur",
+          "email": "daniel.okafor@example.com",
+          "displayName": "Daniel Okafor",
           "organizer": true,
           "self": true,
           "responseStatus": "accepted"
         },
         {
-          "email": "anushka.mohanty@simpleo.ai",
-          "displayName": "Anushka Mohanty",
+          "email": "anna.moreno@example.com",
+          "displayName": "Anna Moreno",
           "responseStatus": "accepted"
         },
         {
-          "email": "nishchay.s@simpleo.ai",
+          "email": "noah.s@example.com",
           "responseStatus": "tentative"
         }
       ],
@@ -73,11 +73,11 @@
       },
       "attachments": [
         {
-          "fileUrl": "https://docs.google.com/document/d/1qX9Lm3kNotesDocIdForNutrition/edit",
-          "title": "Nutrition roadmap review - 2026/09/19 16:00 IST - Notes by Gemini",
+          "fileUrl": "https://docs.google.com/document/d/1qX9Lm3kNotesDocIdForMobile/edit",
+          "title": "Mobile roadmap review - 2026/09/19 16:00 IST - Notes by Gemini",
           "mimeType": "application/vnd.google-apps.document",
           "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.document",
-          "fileId": "1qX9Lm3kNotesDocIdForNutrition"
+          "fileId": "1qX9Lm3kNotesDocIdForMobile"
         }
       ]
     },
@@ -88,11 +88,11 @@
       "status": "confirmed",
       "htmlLink": "https://www.google.com/calendar/event?eid=N2JxMXI1bThrMmR0bjBwM3ZmaHM2Y2VqNG8gcHJhdGh5dXNoLmtvZGhhbnB1ckBzaW1wbGVvLmFp",
       "updated": "2026-09-20T14:02:10.000Z",
-      "summary": "Sprinto vendor call",
+      "summary": "Northwind vendor call",
       "iCalUID": "7bq1r5m8k2dtn0p3vfhs6cej4o@google.com",
       "organizer": {
-        "email": "madhu.rao@sprinto.com",
-        "displayName": "Madhu Rao"
+        "email": "maya.rao@northwind.example",
+        "displayName": "Maya Rao"
       },
       "start": {
         "dateTime": "2026-09-21T09:30:00-04:00",
@@ -104,13 +104,13 @@
       },
       "attendees": [
         {
-          "email": "madhu.rao@sprinto.com",
-          "displayName": "Madhu Rao",
+          "email": "maya.rao@northwind.example",
+          "displayName": "Maya Rao",
           "organizer": true,
           "responseStatus": "accepted"
         },
         {
-          "email": "prathyush.kodhanpur@simpleo.ai",
+          "email": "daniel.okafor@example.com",
           "self": true,
           "responseStatus": "accepted"
         }

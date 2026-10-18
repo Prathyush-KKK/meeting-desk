@@ -46,8 +46,8 @@ EXPIRY_MARGIN_SECONDS = 60
 def _connection_ref(email: str) -> str:
     """A stable handle for one connection that is not the person's address.
 
-    Logs never carry a user identifier (the standard); an admin matches this against the Admin page
-    by running the same hash, or simply reads which connection the banner names.
+    Logs never carry a user identifier (docs/TELEMETRY.md); an admin matches this against the Admin
+    page by running the same hash, or simply reads which connection the banner names.
     """
     return hashlib.sha256(email.strip().lower().encode()).hexdigest()[:12]
 
@@ -188,7 +188,7 @@ class TokenBroker:
         """The OAuth token endpoint is an outbound dependency like any other.
 
         It gets its own provider (``google_oauth``) because "OAuth refresh failures" is one of the
-        alerts the spec asks for, and because an ``invalid_grant`` on one connection says nothing
+        alerts, and because an ``invalid_grant`` on one connection says nothing
         about Google's health - it is counted as an error but never moves the breaker.
         """
         try:

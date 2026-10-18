@@ -1,7 +1,7 @@
 """Re-check for a Notes by Gemini doc that appears minutes after the meeting.
 
-Spec section 7: "the source shows 'not generated yet' with Retry, and a job re-checks every 5
-minutes for an hour after the meeting ends". ``fetch_notes_doc`` is the one-shot lookup the Retry
+The source shows "not generated yet" with Retry, and a job re-checks every 5 minutes for an hour
+after the meeting ends. ``fetch_notes_doc`` is the one-shot lookup the Retry
 button and the job share; ``fetch_missing_docs`` is what the periodic task runs: every captured
 calendar meeting that ended inside the last hour and has no Gemini note yet gets one lookup, and a
 found doc is imported (Full notes tab preferred) and pinned on the meeting's attachments so the
@@ -12,7 +12,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -25,8 +24,7 @@ from app.models import Connection, Meeting
 from app.notes_store import has_note_from, save_note
 from app.routes.common import pick_for
 from app.telemetry.providers import track_job
-
-IST = ZoneInfo("Asia/Kolkata")
+from app.tz import display_zone
 
 SEARCH_WINDOW = timedelta(hours=2)
 RETRY_FOR = timedelta(hours=1)
@@ -53,7 +51,7 @@ def fetch_notes_doc(google: GoogleSuite, meeting: Meeting, connection_emails: li
             start_at = meeting.start_at
             if start_at is not None:
                 if start_at.tzinfo is None:
-                    start_at = start_at.replace(tzinfo=IST)
+                    start_at = start_at.replace(tzinfo=display_zone())
                 hits = google.drive.search(
                     email, meeting.title, start_at - SEARCH_WINDOW, start_at + SEARCH_WINDOW
                 )
@@ -88,7 +86,7 @@ def meetings_due_for_check(db: Session, now: datetime) -> list[Meeting]:
         if end_at is None:
             continue
         if end_at.tzinfo is None:
-            end_at = end_at.replace(tzinfo=IST)
+            end_at = end_at.replace(tzinfo=display_zone())
         if since <= end_at <= now and not has_note_from(db, meeting, "gemini_doc"):
             due.append(meeting)
     return due

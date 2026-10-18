@@ -1,6 +1,6 @@
-"""Rule-based extraction - a port of ``meeting-desk/src/lib/extract.ts``.
+"""Rule-based extraction: section headings, owner lines and keywords, no model.
 
-Same line rules as the prototype, reshaped into the v3 schema so the fake and Gemini are
+The output has the same v3 schema as the real providers, so the fake and Gemini are
 interchangeable. Owners stay verbatim here; resolution is ``postprocess.py``'s job, exactly as it
 is for the real provider.
 """
@@ -13,7 +13,7 @@ import time
 from app.extract.provider import ExtractionContext, ProviderResult
 from app.extract.schema import ActionItem, ExtractionOutput, Question, Statement
 
-# re.ASCII keeps \w to [A-Za-z0-9_], the way the JavaScript original behaves.
+# re.ASCII keeps \w to [A-Za-z0-9_], the way JavaScript's \w behaves.
 _BULLET_RE = re.compile(r"^[\s*\-•\d.)]+")
 _STEPS_RE = re.compile(r"^(the )?(next steps|action items|actions|next step)s?:?$", re.I)
 _DISCUSSION_RE = re.compile(r"^(the )?(discussion|summary|details|goal):?$", re.I)
@@ -41,7 +41,7 @@ def due_from(text: str) -> str:
 
 
 def looks_like_person(raw: str, people: list[str]) -> bool:
-    """The prototype's ``resolveOwner(...).known`` - only used to decide if a line is an owner line."""
+    """Whether ``raw`` names a known person - only used to decide if a line is an owner line."""
     r = re.sub(r"[:\-\u2013]+$", "", raw.strip()).strip()
     if not r:
         return False

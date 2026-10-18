@@ -1,9 +1,45 @@
-// Formatting and the few vocabularies the UI shows. Everything is rendered in Asia/Kolkata; the
-// API already returns IST-local strings, so nothing is converted twice here.
+// Formatting and the few vocabularies the UI shows. Everything is rendered in the workspace's
+// display zone (DISPLAY_TIMEZONE, sent with /auth/me); the API already returns local strings in that
+// zone, so nothing is converted twice here.
 
 import type { Kind, Status, Transfer } from "@/api/types";
 
-export const IST = "Asia/Kolkata";
+const DEFAULT_WORKSTREAMS = ["Product", "Engineering", "Design", "Growth", "Operations", "Hiring"];
+
+let displayZone = "UTC";
+let workstreamDefaults = DEFAULT_WORKSTREAMS;
+
+function validZone(zone: string): boolean {
+  try {
+    new Intl.DateTimeFormat("en-GB", { timeZone: zone });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Called with /auth/me's answer before anything is rendered with it. Idempotent. */
+export function configureDisplay(config: { timezone?: string | null; workstreams?: string[] | null }): void {
+  if (config.timezone && validZone(config.timezone)) displayZone = config.timezone;
+  if (config.workstreams && config.workstreams.length) workstreamDefaults = [...config.workstreams];
+}
+
+/** The IANA zone every time is shown in. */
+export function displayTimeZone(): string {
+  return displayZone;
+}
+
+/** The display zone's short name ("UTC", "BST", "IST"), or the IANA name where there is none. */
+export function zoneLabel(at: Date = new Date()): string {
+  try {
+    const part = new Intl.DateTimeFormat("en-GB", { timeZone: displayZone, timeZoneName: "short" })
+      .formatToParts(at)
+      .find((p) => p.type === "timeZoneName");
+    return part?.value || displayZone;
+  } catch {
+    return displayZone;
+  }
+}
 
 export const STATUS_LABEL: Record<Status, string> = {
   open: "open",
@@ -25,12 +61,10 @@ export const KIND_TITLE: Record<Kind, string> = {
   question: "Open questions",
 };
 
-/** The workstreams the workspace uses; anything already on a meeting is merged in at runtime. */
-export const WORKSTREAMS = ["Nutrition", "Platform", "Household & CDP", "SIApoints", "Prod ops", "Hiring"];
-
+/** The workstreams the workspace uses (WORKSTREAMS); anything already on a meeting is merged in. */
 export function mergeWorkstreams(extra: (string | null | undefined)[]): string[] {
-  const seen = new Set(WORKSTREAMS);
-  const out = [...WORKSTREAMS];
+  const seen = new Set(workstreamDefaults);
+  const out = [...workstreamDefaults];
   for (const value of extra) {
     const w = (value || "").trim();
     if (w && !seen.has(w)) {
@@ -53,23 +87,22 @@ export function fmtDate(iso: string | null | undefined): string {
 }
 
 /**
- * An ISO timestamp -> "16:58" in Asia/Kolkata, the way the header shows "read HH:MM". Spec section
- * 7: "Times shown in Asia/Kolkata everywhere" - it used the browser's zone, so a laptop set to
- * another zone read the same sheet at a different time (screen review R1-25).
+ * An ISO timestamp -> "16:58" in the display zone, the way the header shows "read HH:MM". Not the
+ * browser's zone: two laptops in different zones must read the same sheet at the same time.
  */
 export function fmtClock(iso: string | null | undefined): string {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: IST });
+  return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: displayZone });
 }
 
-/** An ISO timestamp -> "Tue 22 Sep 16:58", day and time both in Asia/Kolkata. */
+/** An ISO timestamp -> "Tue 22 Sep 16:58", day and time both in the display zone. */
 export function fmtStamp(iso: string | null | undefined): string {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  const day = d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: IST });
+  const day = d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: displayZone });
   return `${day} ${fmtClock(iso)}`;
 }
 
@@ -88,8 +121,8 @@ export function clip(text: string, max: number): string {
 }
 
 /**
- * Today as YYYY-MM-DD on this machine's calendar. Not toISOString: that is UTC, and before 05:30
- * IST it is still yesterday there.
+ * Today as YYYY-MM-DD on this machine's calendar. Not toISOString: that is UTC, and east of UTC
+ * it is still yesterday there for the first hours of the day.
  */
 export function localToday(now: Date = new Date()): string {
   const m = String(now.getMonth() + 1).padStart(2, "0");
@@ -112,7 +145,7 @@ export function ago(minutes: number): string {
 }
 
 /** A tab title if the transfer's snapshot carries one; today's snapshots do not, so the sheet id. */
-/** "Nutrition Roadmap / Backlog" from the names the transfer kept; older rows have only the sheet id. */
+/** "Mobile Roadmap / Backlog" from the names the transfer kept; older rows have only the sheet id. */
 export function transferSheet(t: Pick<Transfer, "sheet_id" | "snapshot">): string {
   const book = t.snapshot?.workbook_name;
   const tab = t.snapshot?.sheet_title;

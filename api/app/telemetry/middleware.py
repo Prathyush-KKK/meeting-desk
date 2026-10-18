@@ -3,9 +3,9 @@
 Pure ASGI rather than ``BaseHTTPMiddleware`` for two reasons: it can read the *matched* route out
 of the scope after the router has run, and it can work the route out **before** the app runs.
 
-Both halves matter. The standard wants ``route`` on every line of a request, not only the last one,
-so the route has to be in the context variable before the handler makes its first outbound call -
-which means matching the route table here, the way Starlette itself does (first full match in
+Both halves matter. docs/TELEMETRY.md wants ``route`` on every line of a request, not only the last
+one, so the route has to be in the context variable before the handler makes its first outbound call
+- which means matching the route table here, the way Starlette itself does (first full match in
 registration order, then a partial one, which is how a 405 happens). Afterwards
 ``scope["endpoint"]`` is authoritative and is what the metric label uses; the two agree, and the
 pre-match is what the log lines in between carried.

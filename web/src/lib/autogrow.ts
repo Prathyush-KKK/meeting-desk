@@ -1,6 +1,6 @@
-// Spec section 7, phone: "the paste textarea grows with content and Save and continue appears as
-// soon as there is text." Screen review round 1, R1-06: it was a fixed six rows, so a pasted
-// summary scrolled out of its own box and the first lines could not be seen.
+// On a phone the paste textarea grows with content, and Save and continue appears as soon as there
+// is text. It used to be a fixed six rows, so a pasted summary scrolled out of its own box and the
+// first lines could not be seen.
 
 import { useLayoutEffect, type RefObject } from "react";
 

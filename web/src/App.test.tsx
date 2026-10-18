@@ -1,8 +1,8 @@
-// The banner on every page. Spec section 7: "Admin connection expires: a banner on every page names
-// the connection and the admin; paste, points and manual meetings keep working without Google."
+// The banner on every page. When an admin connection expires, a banner on every page names the
+// connection and the admin; paste, points and manual meetings keep working without Google.
 //
-// Review 1, finding 28 made `/admin/connections` admin-only, and App used to read the banner from
-// it - so it stopped asking for members, and members saw no banner at all (screen review R1-23).
+// `/admin/connections` is admin-only, and App used to read the banner from it - so it stopped
+// asking for members, and members saw no banner at all.
 // The banner now comes from `/admin/connections/status`, which anyone signed in may read and which
 // carries nothing but what the banner says.
 
@@ -45,7 +45,7 @@ vi.mock("@/pages/PointsStep", () => ({ PointsStep: ({ meeting }: { meeting: Meet
 vi.mock("@/pages/TransferStep", () => ({ TransferStep: ({ meeting }: { meeting: MeetingItem }) => <div data-testid="page">transfer:{meeting.id}</div> }));
 
 const BANNER: ConnectionStatus = {
-  banner: "Google connection needs reconnecting: ansul.s@simpleo.ai. Paste, points and manual meetings keep working.",
+  banner: "Google connection needs reconnecting: alex.s@example.com. Paste, points and manual meetings keep working.",
   first_run: false,
   first_run_notice: "",
   can_connect: true,
@@ -61,7 +61,7 @@ const FIRST_RUN: ConnectionStatus = {
 function user(role: "admin" | "member"): Me {
   return {
     id: "u-1",
-    email: role === "admin" ? "prathyush.kodhanpur@simpleo.ai" : "nishchay.s@simpleo.ai",
+    email: role === "admin" ? "daniel.okafor@example.com" : "noah.s@example.com",
     name: "Somebody",
     role,
     is_admin: role === "admin",
@@ -80,13 +80,13 @@ beforeEach(() => {
 });
 
 describe("the expired-connection banner", () => {
-  it("reaches a member too (R1-23)", () => {
+  it("reaches a member too", () => {
     h.me = user("member");
     h.status.mockReturnValue({ data: { ...BANNER, can_connect: false }, isLoading: false, error: null });
     render(<App />);
     expect(h.status.mock.calls.every((call) => call[0] === true)).toBe(true);
-    expect(screen.getByTestId("connection-banner")).toHaveTextContent("ansul.s@simpleo.ai");
-    // The admin-only list is never asked for on a member's behalf (finding 28).
+    expect(screen.getByTestId("connection-banner")).toHaveTextContent("alex.s@example.com");
+    // The admin-only list is never asked for on a member's behalf.
     expect(h.connections.mock.calls.every((call) => call[0] !== true)).toBe(true);
   });
 
@@ -147,7 +147,7 @@ describe("the first-run notice", () => {
   });
 });
 
-// Screen review R2-01: a toast with Undo sat on the step's primary button for ten seconds.
+// A toast with Undo used to sit on the step's primary button for ten seconds.
 describe("toasts", () => {
   it("never sit bottom right, where every step keeps its primary button", async () => {
     const { toastPosition } = await import("@/App");
@@ -160,15 +160,15 @@ function meeting(over: Partial<MeetingItem>): MeetingItem {
   return {
     id: null, key: null, source: "calendar", title: "A meeting", description: "", location: "",
     date: "2026-09-01", start: "16:00", end: "16:48", start_at: null, end_at: null, timezone: "Asia/Kolkata",
-    organizer_email: "ansul.s@simpleo.ai", organizer_name: "Ansul S", attendees: [], conference: {}, attachments: [],
+    organizer_email: "alex.s@example.com", organizer_name: "Alex S", attendees: [], conference: {}, attachments: [],
     calendar_event_id: "evt-1", ical_uid: null, recurring_event_id: null, html_link: null, workstream: "Platform",
     step: "meeting", in_progress_by: null, editable: false, saved: false, notes_count: 0, points_count: 0,
     ...over,
   };
 }
 
-const SAVED = meeting({ id: "m-1", key: "M-101", saved: true, title: "Vendor call with Madhu", calendar_event_id: "evt-1", points_count: 2 });
-const OTHER = meeting({ id: "m-2", key: "M-102", saved: true, title: "Sprinto call prep", calendar_event_id: "evt-2" });
+const SAVED = meeting({ id: "m-1", key: "M-101", saved: true, title: "Vendor call with Maya", calendar_event_id: "evt-1", points_count: 2 });
+const OTHER = meeting({ id: "m-2", key: "M-102", saved: true, title: "Northwind call prep", calendar_event_id: "evt-2" });
 const CARD = meeting({ title: "Platform squad sync", calendar_event_id: "evt-3" });
 
 // "I should be able to access the meeting pages regardless of when it's coming up": a saved meeting
@@ -186,13 +186,13 @@ describe("the step bar", () => {
   it("opens Notes and Points for a saved meeting picked on Step 1, adopting it", async () => {
     render(<App />);
     expect(stepButton("Points")).toBeDisabled();
-    await userEvent.click(row("Vendor call with Madhu"));
+    await userEvent.click(row("Vendor call with Maya"));
     expect(stepButton("Notes")).toBeEnabled();
     expect(stepButton("Points")).toBeEnabled();
     expect(stepButton("Transfer")).toBeDisabled(); // no points were picked on any meeting
     await userEvent.click(stepButton("Points"));
     expect(screen.getByTestId("page")).toHaveTextContent("points:m-1");
-    expect(screen.getByTestId("current-meeting")).toHaveTextContent("Vendor call with Madhu");
+    expect(screen.getByTestId("current-meeting")).toHaveTextContent("Vendor call with Maya");
     expect(window.location.search).toContain("meeting=m-1");
     await userEvent.click(stepButton("Notes"));
     expect(screen.getByTestId("page")).toHaveTextContent("notes:m-1");
@@ -208,7 +208,7 @@ describe("the step bar", () => {
   it("follows the highlighted card, not the meeting from an earlier visit kept in the URL", async () => {
     window.history.replaceState(null, "", "/?page=capture&step=meeting&meeting=m-1");
     render(<App />);
-    await userEvent.click(row("Sprinto call prep"));
+    await userEvent.click(row("Northwind call prep"));
     // Transfer carries points picked on another meeting, so it waits for this one's Step 3.
     expect(stepButton("Transfer")).toBeDisabled();
     await userEvent.click(stepButton("Points"));
@@ -217,13 +217,13 @@ describe("the step bar", () => {
 
   it("opens a meeting's points from the count on its card", async () => {
     render(<App />);
-    await userEvent.click(within(row("Vendor call with Madhu")).getByTestId("open-points"));
+    await userEvent.click(within(row("Vendor call with Maya")).getByTestId("open-points"));
     expect(screen.getByTestId("page")).toHaveTextContent("points:m-1");
   });
 
   it("opens a meeting's notes from its detail panel", async () => {
     render(<App />);
-    await userEvent.click(within(row("Sprinto call prep")).getByLabelText("Show meeting details"));
+    await userEvent.click(within(row("Northwind call prep")).getByLabelText("Show meeting details"));
     await userEvent.click(within(screen.getByTestId("meeting-history")).getByRole("button", { name: "Open notes" }));
     expect(screen.getByTestId("page")).toHaveTextContent("notes:m-2");
   });

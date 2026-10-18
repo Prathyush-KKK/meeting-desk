@@ -5,7 +5,7 @@ import { apiUrl } from "@/api/client";
 export function SignIn() {
   return (
     <Shell title="Meeting Desk">
-      <p className="text-[13px] text-muted-foreground">Sign in with your simpleo.ai Google account to continue.</p>
+      <p className="text-[13px] text-muted-foreground">Sign in with your Google account to continue.</p>
       <Button className="mt-4 h-9" asChild>
         <a href={apiUrl("/auth/login")}>Sign in with Google</a>
       </Button>
