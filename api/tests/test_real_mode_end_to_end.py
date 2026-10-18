@@ -130,9 +130,7 @@ def test_sources_and_the_doc_import_go_through_the_first_connection_that_can_rea
     app = _real_app(tmp_path, api)
     with TestClient(app) as client:
         card = next(
-            i
-            for i in client.get("/meetings/list").json()["items"]
-            if i["title"] == "Mobile roadmap review"
+            i for i in client.get("/meetings/list").json()["items"] if i["title"] == "Mobile roadmap review"
         )
         meeting_id = client.post(
             "/meetings/from-calendar", json={"calendar_event_id": card["calendar_event_id"]}
@@ -267,7 +265,7 @@ def test_a_sheets_429_becomes_a_503_with_retry_after_and_is_counted(tmp_path: Pa
         google_client_id="cid",
         google_client_secret="secret",
         token_key=KEY,
-        google_max_retries=0,          # the retry loop itself is tested in test_google_http.py
+        google_max_retries=0,  # the retry loop itself is tested in test_google_http.py
         google_backoff_base_seconds=0,
     )
     app = create_app(settings, transport=api.transport())

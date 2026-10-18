@@ -70,8 +70,11 @@ def test_the_six_carry_samples_once_the_app_has_done_some_work(client: TestClien
 
 def test_the_registry_holds_nothing_but_those_metrics() -> None:
     """No python_gc_*, no process_*: the cardinality statement covers the whole endpoint."""
-    assert metrics().names() == {*REQUIRED_METRIC_NAMES, "background_job_last_success_timestamp_seconds",
-                                 BUILD_INFO_METRIC}
+    assert metrics().names() == {
+        *REQUIRED_METRIC_NAMES,
+        "background_job_last_success_timestamp_seconds",
+        BUILD_INFO_METRIC,
+    }
 
 
 def test_the_histogram_buckets_are_the_ones_the_standard_names() -> None:
@@ -181,7 +184,9 @@ def test_the_job_label_is_job_name_not_job() -> None:
 
 
 def test_a_log_line_is_one_json_object_with_the_required_fields() -> None:
-    record = logging.LogRecord("meeting_desk.test", logging.WARNING, __file__, 1, "external_call_failed", (), None)
+    record = logging.LogRecord(
+        "meeting_desk.test", logging.WARNING, __file__, 1, "external_call_failed", (), None
+    )
     record.request_id = "rid-1"
     record.route = "/meetings/{meeting_id}/extract"
     record.duration_ms = 12.5

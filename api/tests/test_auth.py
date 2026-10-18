@@ -87,9 +87,7 @@ def test_logout_clears_the_cookie(client: TestClient) -> None:
     assert client.post("/auth/logout").json() == {"ok": True}
 
 
-def test_a_lost_race_on_the_first_sign_in_recovers_instead_of_500(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_a_lost_race_on_the_first_sign_in_recovers_instead_of_500(tmp_path: Path, monkeypatch) -> None:
     """A first load fires four list requests at once; two can reach the INSERT together.
 
     One of them loses the unique index on ``users.google_sub``. That is not an error - the row the

@@ -49,6 +49,7 @@ def client(request: pytest.FixtureRequest, tmp_path: Path) -> Iterator[TestClien
     with TestClient(app) as c:
         yield c
 
+
 # A uuid, a Google file id, an A1 cell, an email: anything that identifies one record.
 LEAKS = re.compile(
     r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"  # uuid
@@ -137,7 +138,9 @@ def test_http_series_bound_is_derived_from_the_route_table(client: TestClient) -
     # Without templating there is no bound at all: one series per distinct URL ever requested.
     assert real < SERIES_CEILING, f"{real} series is over the {SERIES_CEILING} ceiling"
     # The duration histogram is (route, method) x (buckets + sum + count).
-    histogram = sum(len(ms) for ms in methods_used.values()) * (len(metrics().http_duration._upper_bounds) + 2)
+    histogram = sum(len(ms) for ms in methods_used.values()) * (
+        len(metrics().http_duration._upper_bounds) + 2
+    )
     print(f"http_request_duration_seconds: {histogram} real")
     assert histogram < SERIES_CEILING
 

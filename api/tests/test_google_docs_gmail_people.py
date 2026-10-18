@@ -41,10 +41,7 @@ def test_tab_text_keeps_headings_bullets_tables_and_people_as_lines() -> None:
     text = doc.tab("Full notes").text
     assert text.startswith("Mobile roadmap review\n\nSummary\n")
     assert "\n\nThe Next Steps\n- Anna Moreno: Review dataset for currency information by 3 Oct\n" in text
-    assert (
-        "- Weight data: the OpenRates mirror is missing portion weights for 40% of Indian items.\n"
-        in text
-    )
+    assert "- Weight data: the OpenRates mirror is missing portion weights for 40% of Indian items.\n" in text
     assert "  - Anna Moreno will review the dataset for currency information.\n" in text  # nested bullet
     assert "Item | Owner\nVendor questionnaire | Alex S\n" in text  # the table
     assert "- Daniel: Mirror OpenRates before launch\n" in text  # a smart-chip person
@@ -102,9 +99,7 @@ def test_gmail_search_lists_then_fetches_each_message_and_turns_html_into_text()
     assert message.from_email == "gemini-notes@google.com"
     assert message.received_at == datetime(2026, 9, 19, 16, 40, 1, tzinfo=IST)
     assert message.body.startswith("Recap: Mobile roadmap review\n\nHi Daniel,\nHere is the recap")
-    assert (
-        "\nNext steps\n\n- Anna Moreno: Review dataset for currency information by 3 Oct\n" in message.body
-    )
+    assert "\nNext steps\n\n- Anna Moreno: Review dataset for currency information by 3 Oct\n" in message.body
     assert "dataset gaps & agreed" in message.body  # entities decoded
     assert "track()" not in message.body and "color:red" not in message.body
 

@@ -192,7 +192,14 @@ def test_the_request_is_the_bedrock_credential_the_prompt_and_json_mode() -> Non
     assert body["response_format"] == {"type": "json_object"}
     assert [m["role"] for m in body["messages"]] == ["system", "user"]
     assert "Anna Moreno: Review dataset for currency information by 3 Oct" in body["messages"][1]["content"]
-    assert set(body) == {"model", "messages", "temperature", "max_completion_tokens", "reasoning_effort", "response_format"}
+    assert set(body) == {
+        "model",
+        "messages",
+        "temperature",
+        "max_completion_tokens",
+        "reasoning_effort",
+        "response_format",
+    }
 
 
 def test_the_answer_is_the_same_extraction_output_as_the_recorded_fixtures() -> None:

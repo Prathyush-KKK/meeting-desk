@@ -64,11 +64,7 @@ def test_every_token_a_rule_quotes_is_actually_emitted() -> None:
     """In ``events.py`` is not enough: the constant has to be used at a call site."""
     quoted = tokens_in(RULES.read_text())
     constants = _constant_names()
-    sources = {
-        path: path.read_text()
-        for path in APP.rglob("*.py")
-        if path.name != "events.py"
-    }
+    sources = {path: path.read_text() for path in APP.rglob("*.py") if path.name != "events.py"}
     for token in sorted(quoted):
         name = constants[token]
         emitted = any(re.search(rf"\b(events\.)?{name}\b", text) for text in sources.values())
@@ -104,11 +100,11 @@ def test_the_last_success_rules_use_max_over_time_absent_and_min_by_provider() -
 def test_the_five_rules_the_spec_names_are_present() -> None:
     names = {name for name, _ in rule_blocks(RULES.read_text())}
     for wanted in (
-        "MeetingDeskProviderLastSuccessStale",   # provider last-success stale
-        "MeetingDeskExtractionFailureRate",      # extraction failure rate
-        "MeetingDeskSheetsErrorRate",            # Sheets 4xx / 5xx
-        "MeetingDeskTransferConflictRate",       # transfer 409 rate
-        "MeetingDeskOAuthRefreshFailing",        # OAuth refresh failures
+        "MeetingDeskProviderLastSuccessStale",  # provider last-success stale
+        "MeetingDeskExtractionFailureRate",  # extraction failure rate
+        "MeetingDeskSheetsErrorRate",  # Sheets 4xx / 5xx
+        "MeetingDeskTransferConflictRate",  # transfer 409 rate
+        "MeetingDeskOAuthRefreshFailing",  # OAuth refresh failures
     ):
         assert wanted in names, f"{wanted} is missing from the PrometheusRule"
 

@@ -168,7 +168,8 @@ def _refusal(message: str, reason: str = FailureReason.CLIENT_ERROR) -> Anthropi
 def answer_text(response: Any) -> str:
     """The text block structured outputs put the JSON in."""
     parts = [
-        getattr(block, "text", "") for block in getattr(response, "content", None) or []
+        getattr(block, "text", "")
+        for block in getattr(response, "content", None) or []
         if getattr(block, "type", "") == "text"
     ]
     text = "".join(parts).strip()

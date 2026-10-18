@@ -55,7 +55,10 @@ def test_a_transfer_posts_who_sent_what_where(tmp_path: Path) -> None:
     assert str(request.url) == HOOK
     text = json.loads(request.content)["text"]
     lines = text.split("\n")
-    assert lines[0] == "Daniel Okafor sent 2 points from Mobile roadmap review to Mobile App Product Roadmap > P1 Resolve & Log"
+    assert (
+        lines[0]
+        == "Daniel Okafor sent 2 points from Mobile roadmap review to Mobile App Product Roadmap > P1 Resolve & Log"
+    )
     assert lines[1] == "• Review dataset for currency information - Anna Moreno, 26 Sep"
     assert lines[-1].startswith("https://docs.google.com/spreadsheets/d/")
 

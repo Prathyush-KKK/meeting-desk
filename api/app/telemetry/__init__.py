@@ -1,12 +1,12 @@
 """Telemetry per ``docs/TELEMETRY.md``.
 
-    metrics.py     the six required metrics plus app_build_info, on their own registry
-    providers.py   track_provider(): the wrapper every outbound call goes through
-    breaker.py     the circuit breakers behind that wrapper
-    middleware.py  request id, http_requests_total, http_request_duration_seconds
-    server.py      GET /metrics on its own port, never on the app router
-    logs.py        the JSON log line
-    events.py      the event tokens the runbook and the alert rules quote
+metrics.py     the six required metrics plus app_build_info, on their own registry
+providers.py   track_provider(): the wrapper every outbound call goes through
+breaker.py     the circuit breakers behind that wrapper
+middleware.py  request id, http_requests_total, http_request_duration_seconds
+server.py      GET /metrics on its own port, never on the app router
+logs.py        the JSON log line
+events.py      the event tokens the runbook and the alert rules quote
 """
 
 from __future__ import annotations

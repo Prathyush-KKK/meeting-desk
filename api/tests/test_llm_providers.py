@@ -55,9 +55,7 @@ def test_the_prompt_carries_the_rules_the_context_and_the_notes_verbatim() -> No
     assert "- workstream: Mobile" in prompt.user
     assert "  - Anna Moreno" in prompt.user
     fence = prompt.delimiter
-    assert prompt.user.endswith(
-        f"{fence}\nThe Next Steps\nNoah: finish the standard by Friday\n{fence}"
-    )
+    assert prompt.user.endswith(f"{fence}\nThe Next Steps\nNoah: finish the standard by Friday\n{fence}")
     assert prompt.text == f"{prompt.system}\n\n{prompt.user}"
 
 
