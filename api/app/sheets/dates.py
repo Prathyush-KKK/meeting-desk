@@ -1,8 +1,7 @@
 """Dates the way Sheets stores them: a serial number of days since 1899-12-30.
 
 A date column is written as a date when the value can be read as one (ISO first, then the same
-``dateparser`` rules the extractor uses for due hints) and as text otherwise - spec section 7,
-"Date columns".
+``dateparser`` rules the extractor uses for due hints) and as text otherwise.
 """
 
 from __future__ import annotations

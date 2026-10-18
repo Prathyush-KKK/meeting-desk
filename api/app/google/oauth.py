@@ -1,7 +1,7 @@
 """'Connect an account': the OAuth authorization-code flow for an admin connection.
 
 Distinct from sign-in (``app/auth/oidc.py``, which only identifies a person). This one asks for the
-spec's scope list with offline access so a refresh token comes back, ``prompt=consent`` so Google
+scope list below with offline access so a refresh token comes back, ``prompt=consent`` so Google
 issues that refresh token every time (a reconnect replaces a revoked one), and
 ``include_granted_scopes`` so a later, wider request keeps what was granted before (incremental
 consent). Built on authlib's ``OAuth2Client``; the token exchange goes through the same transport
@@ -27,8 +27,8 @@ AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 TOKEN_URL = "https://oauth2.googleapis.com/token"
 USERINFO_URL = "https://openidconnect.googleapis.com/v1/userinfo"
 
-# Spec section 1 and the handover: read Calendar, Drive, Docs and Gmail; write Sheets; search the
-# directory for owner resolution; identify the account.
+# Read Calendar, Drive, Docs and Gmail; write Sheets; search the directory for owner resolution;
+# identify the account.
 CONNECTION_SCOPES: list[str] = [
     "openid",
     "https://www.googleapis.com/auth/userinfo.email",

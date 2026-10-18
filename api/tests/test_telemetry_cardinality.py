@@ -1,6 +1,6 @@
 """Cardinality, derived from the code rather than asserted as a number somebody typed in.
 
-Two things the standard asks for:
+Two things docs/TELEMETRY.md asks for:
 
 * route labels are templated paths and carry no record ids - proved by driving real requests with
   real uuids through the app and reading the labels back off the registry;

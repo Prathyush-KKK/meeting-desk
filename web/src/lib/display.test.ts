@@ -1,5 +1,5 @@
-// Screen review round 1, R1-25. Spec section 7: "Times shown in Asia/Kolkata everywhere." These
-// hold whatever zone the machine running them is in: the instant is fixed, the answer must be IST.
+// Times are shown in the display zone (DISPLAY_TIMEZONE; the test setup pins Asia/Kolkata). These
+// tests hold whatever zone the machine running them is in: the instant is fixed, the answer must be IST.
 
 import { describe, expect, it } from "vitest";
 import { clip, dayGroup, fmtClock, fmtDate, fmtStamp, localToday, meetingLabel, plural, transferSheet } from "./display";

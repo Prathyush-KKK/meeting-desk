@@ -22,7 +22,7 @@ PEOPLE: list[dict[str, str]] = [
     {"name": "Aiden Murphy", "email": "aiden.murphy@example.com"},
 ]
 
-# Two people whose first names collide - the spec's ambiguity case.
+# Two people whose first names collide - the owner-ambiguity case.
 DIRECTORY: list[dict[str, str]] = [
     *PEOPLE,
     {"name": "Maya Rao", "email": "maya.rao@northwind.example"},

@@ -1,9 +1,12 @@
-// Builds api/tests/fixtures/sheets/*.json from the prototype's lib/sheet.ts so the Python port is
-// checked against the TypeScript reference rather than against itself.
+// Builds api/tests/fixtures/sheets/*.json from web/src/lib/sheet.ts - the planner the browser runs -
+// so the Python port is checked against the TypeScript reference rather than against itself.
+//
+//   node --experimental-strip-types api/tests/fixtures/sheets/_generate_from_reference.mjs
 import { writeFileSync, mkdirSync } from "node:fs";
-import * as S from "/home/claude/meeting-desk/src/lib/sheet.ts";
+import path from "node:path";
+import * as S from "../../../../web/src/lib/sheet.ts";
 
-const OUT = "/home/claude/meeting-desk-app/api/tests/fixtures/sheets";
+const OUT = path.resolve(import.meta.dirname);
 mkdirSync(OUT, { recursive: true });
 
 const pad = (rows, min = 8) => {
@@ -23,7 +26,7 @@ const POINTS = [
 
 // --- grids -------------------------------------------------------------------------------------
 
-// 1. headers on row 1 (store.tsx "Decisions")
+// 1. headers on row 1 (the demo "Decisions" tab)
 const headersRow1 = pad([
   ["ID", "Decision", "Workstream", "Meeting", "Date", "Status", "Notes"],
   ["D-039", "Owner column holds a person, not a team", "Mobile", "Sheet review", "21 Sep", "decided", ""],
@@ -33,7 +36,7 @@ const headersRow1 = pad([
   [],
 ]);
 
-// 2. headers on row 9, banner rows above, a stray note below the table (store.tsx "P1 Resolve & Log")
+// 2. headers on row 9, banner rows above, a stray note below the table (the demo "P1 Resolve & Log" tab)
 const headersRow9 = pad([
   ["P1 Resolve & Log"],
   ["", "Phase goal: all five capture flows ship; receipt scan is ours alone"],
@@ -99,7 +102,7 @@ const dateColFormats = [
   ["TEXT", "TEXT", "TEXT", "TEXT", "TEXT", "TEXT"],
 ];
 
-// 7. keyed on Task, no ID column (store.tsx "Earn Points")
+// 7. keyed on Task, no ID column (the demo "Earn Points" tab)
 const taskKeyed = pad([
   ["Task", "Points", "Cap", "Status", "Notes"],
   ["Upload an ID", "100", "one time", "live", ""],
@@ -240,7 +243,7 @@ for (const f of FIXTURES) {
     points: POINTS.map((p) => ({ id: p.id, kind: p.kind, text: p.text, owner: p.owner, due: p.due, status: p.status, meeting_label: p.meetingLabel })),
     fill: f.fill,
     with_hooks: f.with_hooks ?? null,
-    // Everything below is produced by meeting-desk/src/lib/sheet.ts - the reference implementation.
+    // Everything below is produced by web/src/lib/sheet.ts - the reference implementation.
     expect: {
       layout: {
         header_row: layout.headerRow,

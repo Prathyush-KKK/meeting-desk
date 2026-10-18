@@ -1,7 +1,7 @@
 {{- if .Values.ingress.enabled }}
 {{/*
 Internal only. The class and the annotations are values because the internal ingress controller is
-named differently per cluster; the default is the internal NLB the spec asks for.
+named differently per cluster; the default is an internal NLB.
 
 Note what is NOT here: the metrics port. /metrics is served by a different ASGI app on a different
 container port and is only ever reached in-cluster by the Prometheus scrape. There is no rule

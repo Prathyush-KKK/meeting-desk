@@ -43,7 +43,7 @@ const CONNECT_OPTION = "__connect__";
 
 /**
  * One staged cell edit. `before` is what the cell held **when the person changed it**, not what the
- * 60 s poll last brought in - Review 1, finding 4. The API compares `before` against a fresh read
+ * 60 s poll last brought in. The API compares `before` against a fresh read
  * of that cell and refuses the save when they differ, which is the whole pre-save guard; recomputing
  * it from the latest poll would quietly adopt someone else's value as the baseline and the guard
  * would never fire. A second edit of the same cell keeps the first `before`: the baseline is the
@@ -72,7 +72,7 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
   const [pending, setPending] = useState<Map<string, PendingEdit>>(new Map());
   const [clashes, setClashes] = useState<SaveClash[]>([]);
   const [addOpen, setAddOpen] = useState(false);
-  /** On a phone the Connect field sits behind the select's last option (R2-06). */
+  /** On a phone the Connect field sits behind the select's last option. */
   const [connectOpen, setConnectOpen] = useState(false);
   const [aboveRow, setAboveRow] = useState<number | null>(null);
   const saveBatch = useBatchId();
@@ -129,7 +129,7 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
     return cols;
   }, [layout, server, wb]);
 
-  /** Spec section 7: key and formula cells "say why they are not editable on tap" (R1-19). */
+  /** Key and formula cells say why they are not editable on tap. */
   const explainLocked = (_r: number, c: number) => {
     const header = (layout.headerRow >= 0 ? values[layout.headerRow]?.[c] : "")?.trim();
     const name = `${colLetter(c)}${header ? ` (${header})` : ""}`;
@@ -200,7 +200,7 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
 
   /**
    * Disconnecting is one click and the workbook is shared by everyone, so it offers Undo, which
-   * connects the same URL again (the API revives the row). R1-24.
+   * connects the same URL again (the API revives the row).
    */
   const doDisconnect = async (w: Workbook) => {
     try {
@@ -223,7 +223,7 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
     });
   };
 
-  /** Undo from the log itself, while the server says the ten-minute window is open (R1-20). */
+  /** Undo from the log itself, while the server says the ten-minute window is open. */
   const doUndo = async (t: Transfer) => {
     try {
       await undoTransfer.mutateAsync(t.batch_id);
@@ -248,13 +248,13 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
   };
 
   return (
-    // Review 1, finding 6. Under 768 px there is no `h-full`: `main` scrolls, the grid keeps a
+    // Under 768 px there is no `h-full`: `main` scrolls, the grid keeps a
     // fixed slice of the viewport and everything below it - Add row, the clash list, Save - is
     // reached by scrolling the page. From 768 px up the page does not scroll and the grid takes
     // whatever is left, which is why every slot below is `shrink-0` and the grid's is `min-h-0`.
     <div className="flex min-h-0 flex-col gap-4 md:h-full md:flex-row md:gap-8">
       <aside className="flex w-full shrink-0 flex-col gap-3 md:w-[260px]">
-        {/* R2-06: on a phone the select says all this; the heading, the Connect field and five
+        {/* On a phone the select says all this; the heading, the Connect field and five
             filter buttons used to push the grid below the first screen. */}
         <div className="hidden items-baseline gap-2 md:flex">
           <h2 className="text-[15px] font-semibold">Sheets</h2>
@@ -269,7 +269,7 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
           {books.map((w) => w.tabs.map((t) => <option key={`${w.id}|${t.sheet_id}`} value={`${w.id}|${t.sheet_id}`}>{w.name} › {t.title}</option>))}
           <option value={CONNECT_OPTION}>Connect another workbook…</option>
         </select>
-        {/* R3-02: with nothing connected the tree was an empty box between two rules. */}
+        {/* With nothing connected the tree would be an empty box between two rules. */}
         <div className={cn("hidden min-h-0 flex-1 overflow-y-auto border-y", books.length > 0 && "md:block")} data-testid="workbook-tree">
           {books.map((w) => (
             <div key={w.id} className="border-b py-1.5 last:border-b-0">
@@ -315,7 +315,7 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
 
       <section className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
         {!wb || !tabMeta ? (
-          // R1-17: the empty state used to say "Connect a workbook to start." with the field at the
+          // The empty state used to say "Connect a workbook to start." with the field at the
           // far bottom of the sidebar. The field is here now.
           <div className="mx-auto w-full max-w-[480px] border-y py-6" data-testid="sheets-empty">
             <p className="mb-3 text-[13px]">No workbook is connected yet. Paste a Google Sheets URL to connect one; everyone on the allow-list will see it.</p>
@@ -330,7 +330,7 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
               </span>
               <button className="text-xs text-muted-foreground underline-offset-2 hover:underline" onClick={() => void tab.refetch()}>Refresh</button>
               <a className="text-xs text-muted-foreground underline-offset-2 hover:underline" href={wb.url} target="_blank" rel="noreferrer">Open in Google Sheets</a>
-              {/* The sidebar, and its disconnect, is a select on a phone (R1-24). */}
+              {/* The sidebar, and its disconnect, is a select on a phone. */}
               <button className="text-xs text-muted-foreground underline-offset-2 hover:underline md:hidden" onClick={() => void doDisconnect(wb)}>
                 Disconnect
               </button>
@@ -416,7 +416,7 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
               <span className="text-muted-foreground">
                 {narrow ? "Tap" : "Click"} a cell to edit it. The key column{(server?.formula_cols.length ?? 0) > 0 ? " and formula columns are" : " is"} fixed.
               </span>
-              {/* R3-04: one group, kept to the right when the hint pushes it onto its own line. */}
+              {/* One group, kept to the right when the hint pushes it onto its own line. */}
               <div className="ml-auto flex items-center gap-3" data-testid="save-actions">
                 <span className={pending.size ? "text-foreground" : "text-muted-foreground"}>{pending.size} unsaved</span>
                 <Button size="sm" variant="outline" className="h-8" disabled={!pending.size} onClick={() => { setPending(new Map()); setClashes([]); }}>Discard</Button>

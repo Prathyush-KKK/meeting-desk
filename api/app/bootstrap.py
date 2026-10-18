@@ -1,4 +1,4 @@
-"""Writes the prototype's world into the database.
+"""Writes the demo world into the database.
 
 Runs at startup when ``SEED_DEMO`` is on (the default in fake mode) and from the tests. It is
 idempotent: an already-populated database is left alone.

@@ -1,9 +1,9 @@
-"""SQLAlchemy 2 models - the tables of spec section 4.
+"""SQLAlchemy 2 models - the app's tables.
 
 Two deliberate storage choices so the same code runs on Postgres 16 and on the SQLite the tests use:
 
 * ``jsonb`` columns are ``JSON`` with a ``JSONB`` variant on Postgres.
-* the spec's ``text[]`` / ``uuid[]`` columns (``connections.scopes``, ``extractions.note_ids``,
+* the ``text[]`` / ``uuid[]`` columns (``connections.scopes``, ``extractions.note_ids``,
   ``transfers.cells``, ``sheet_layouts.formula_cols`` / ``date_cols``) are stored as JSON arrays
   rather than native Postgres arrays. Nothing queries inside them; they are read whole.
 """

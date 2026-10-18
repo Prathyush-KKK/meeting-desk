@@ -2,14 +2,14 @@
 {{- $sel := include "meeting-desk.metricSelector" . -}}
 {{- $svc := include "meeting-desk.fullname" . -}}
 {{/*
-The consumer the standard asks for: at least one rule that reads the six metrics.
+The consumer docs/TELEMETRY.md asks for: at least one rule that reads the six metrics.
 
 Every rule carries `service` and `severity` labels and a `remediation` annotation written in the
 event tokens app/telemetry/events.py emits - tests/test_telemetry_alerts.py asserts every token
 named below exists in the code, so a rename cannot leave a runbook pointing at nothing.
 
 `service` and `namespace` on the metrics come from the Prometheus Operator's target labels, not
-from the app: the six metrics carry only the labels the standard names.
+from the app: the six metrics carry only the labels docs/TELEMETRY.md names.
 */}}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule

@@ -1,6 +1,6 @@
 // One idempotency key per user intent, for the three routes that write to Google Sheets.
 //
-// Review 1, finding 9: the API takes a client `batch_id` on `transfers/execute`, `sheets/save` and
+// The API takes a client `batch_id` on `transfers/execute`, `sheets/save` and
 // `sheets/add-row`, writes the intent row before it calls Google, and answers a repeat of a
 // finished id with the stored result. That only helps if the browser sends the *same* id when it
 // tries again - a fresh uuid per attempt is a second write. So the id is minted once per press and

@@ -1,4 +1,4 @@
-"""The schema is spec section 4, and the migration matches the models."""
+"""The schema has the expected tables, and the migration matches the models."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ SPEC_TABLES = {
     "activity",
 }
 
-# Not in the spec's table list: the idempotency record every Google write goes through
+# Not a product table: the idempotency record every Google write goes through
 # (app/write_batch.py). It holds no product data - one row per attempted write, its status and the
 # answer it gave - so it is named here rather than smuggled into SPEC_TABLES.
 SUPPORT_TABLES = {"write_batches"}

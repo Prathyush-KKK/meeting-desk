@@ -462,7 +462,7 @@ def test_the_meeting_step_becomes_done_when_the_last_point_leaves(client: TestCl
 
 
 def test_the_log_says_which_lines_can_still_be_undone(client: TestClient) -> None:
-    """Screen review R1-20: the Sheets page offers Undo on the recent-transfer lines, which needs the
+    """The Sheets page offers Undo on the recent-transfer lines, which needs the
     server's word on the ten-minute window - the toast that carried Undo is gone after ten seconds."""
     workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     tab = _tab(client, workbook["id"], "t1")
@@ -506,7 +506,7 @@ def test_an_undone_transfer_cannot_be_undone_again_from_the_log(client: TestClie
 
 
 def test_the_preview_counts_in_words_not_with_brackets(client: TestClient) -> None:
-    """Screen review R3-01: "11 cell(s) already have content" and "1 point(s)" on screen."""
+    """No "11 cell(s) already have content" or "1 point(s)" on screen."""
     workbook = workbook_by_name(client, "Mobile App Product Roadmap")
     one = _points(client, 1)
     fill = client.post(

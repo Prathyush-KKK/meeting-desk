@@ -47,8 +47,7 @@ def inherits_from_above(plan: Plan) -> bool:
     """False when the row above the insert is the header (or nothing): inherit from below instead.
 
     A row inserted directly under the header would otherwise arrive wearing the header's bold,
-    borders and fill - spec section 7, "Anchor in or above the header", and the same mistake one
-    row lower.
+    borders and fill - the same reason an anchor in or above the header is refused, one row lower.
     """
     at = plan.insert_at or 0
     if at <= 0:

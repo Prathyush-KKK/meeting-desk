@@ -1,7 +1,7 @@
 """Planner parity with the TypeScript reference, plus the server-only additions.
 
-``expect`` in each fixture is what ``meeting-desk/src/lib/sheet.ts`` produced for the same grid,
-points and anchor; ``with_hooks`` is hand-written for the formula/date behaviour the prototype does
+``expect`` in each fixture is what ``web/src/lib/sheet.ts`` produced for the same grid, points and
+anchor; ``with_hooks`` is hand-written for the formula/date behaviour the TypeScript planner does
 not have.
 """
 

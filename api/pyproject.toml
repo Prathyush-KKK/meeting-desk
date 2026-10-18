@@ -56,7 +56,7 @@ ignore = ["B008", "RUF012"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["E501"]
-# Verbatim demo content lifted from the prototype's store.tsx; reflowing it would change the data.
+# Verbatim demo content; reflowing it would change the data.
 "app/seed_data.py" = ["E501"]
 
 [tool.pytest.ini_options]

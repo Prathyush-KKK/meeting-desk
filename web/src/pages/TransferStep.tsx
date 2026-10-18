@@ -65,15 +65,15 @@ export function TransferStep({ meeting, pointIds, onBack, onDone }: Props) {
   const batch = useBatchId();
 
   // A reload lands here with no ids in hand (they are not in the URL): the points ticked on Step 3
-  // are the ones meant, so they stand in rather than a dead end (R1-16).
+  // are the ones meant, so they stand in rather than a dead end.
   const ids = pointIds.length ? pointIds : (active.data ?? []).filter((p) => p.selected).map((p) => p.id);
   const wanted = new Set(ids);
   const points: Point[] = [...(active.data ?? []), ...(deferred.data ?? [])].filter((p) => wanted.has(p.id));
 
   const values = tab.data?.values ?? [];
   const headerRow = useMemo(() => detectLayout(values).headerRow, [values]);
-  // Spec section 7: "Anchor in or above the header is blocked with a one-line message." The API
-  // refuses it too; blocking here keeps the side panel from offering a plan for it (R1-14).
+  // An anchor in or above the header is blocked with a one-line message. The API refuses it too;
+  // blocking here keeps the side panel from offering a plan for it.
   const anchorBlocked = mode === "fill" && !!anchor && headerRow >= 0 && anchor.r <= headerRow;
 
   const previewInput: PreviewIn | null =
@@ -152,7 +152,7 @@ export function TransferStep({ meeting, pointIds, onBack, onDone }: Props) {
         ...(previewInput as PreviewIn),
         region_hash: preview.data.region_hash,
         allow_repeat: allowRepeat,
-        // Review 1, finding 9: one id per press, sent again on a retry, so a write whose answer
+        // One id per press, sent again on a retry, so a write whose answer
         // never arrived replays rather than landing twice.
         batch_id: batch.take(),
       });
@@ -193,7 +193,7 @@ export function TransferStep({ meeting, pointIds, onBack, onDone }: Props) {
   };
 
   if (workbooks.isLoading || active.isLoading) return <div className="py-6 text-sm text-muted-foreground">Loading…</div>;
-  // Spec section 7: "Transfer prerequisites screen with Connect when there is no workbook" (R1-16).
+  // The prerequisites screen, with Connect right here when there is no workbook.
   // It used to be one line pointing at another page, or "Select points on the previous step" with
   // no way there.
   if (!wb || !tabMeta || !ids.length) {
@@ -227,7 +227,7 @@ export function TransferStep({ meeting, pointIds, onBack, onDone }: Props) {
   const columnLabel = (c: number, field: string) => `${colLetter(c)} ${header(c) || field}`;
   const anchorHeader = anchor ? header(anchor.c) : "";
   const serverCells = preview.data?.plan.cells ?? [];
-  // The first cell the plan writes: the grid scrolls it into view (R1-13).
+  // The first cell the plan writes: the grid scrolls it into view.
   const firstWrite = plan && plan.writes.length ? plan.writes.reduce((a, w) => (w.r < a.r || (w.r === a.r && w.c < a.c) ? w : a)) : null;
   const cellCount = plan && plan.mode === "fill" ? serverCells.length || planCells(plan).length : 0;
   const moved = plan && plan.mode === "append" ? plan.moved : [];
@@ -273,12 +273,12 @@ export function TransferStep({ meeting, pointIds, onBack, onDone }: Props) {
       {preview.isError && <div className="border px-2 py-1.5 text-xs font-medium">{preview.error.message}</div>}
 
       <div className="flex min-h-0 flex-1 flex-col gap-4 md:flex-row">
-        {/* R1-13: the grid takes the height the step has (a fixed 55vh on a phone, where the page
+        {/* The grid takes the height the step has (a fixed 55vh on a phone, where the page
             scrolls) instead of a 55vh cap with empty space under it. */}
         <div className="flex min-w-0 flex-1 flex-col md:min-h-0">
-          {/* Review 1, finding 29: no swatches. Each label wears the variant it names, so the
-              legend is the rule the grid follows rather than a second copy of it. Above the grid
-              (R2-03): under it, it floated at the bottom of the slot when the tab was short. */}
+          {/* No swatches. Each label wears the variant it names, so the legend is the rule the
+              grid follows rather than a second copy of it. Above the grid: under it, it floated at
+              the bottom of the slot when the tab was short. */}
           <div className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground" data-testid="transfer-legend">
             <Legend kind="new" text={mode === "append" ? "inserted rows" : "cells to write"} />
             <Legend kind="key" text="key column" />
@@ -299,7 +299,7 @@ export function TransferStep({ meeting, pointIds, onBack, onDone }: Props) {
         </div>
 
         <aside className="flex w-full shrink-0 flex-col gap-2.5 text-[13px] md:w-[300px] md:border-l md:pl-4">
-          {/* R1-30: labels, not the planner's working ("most known header words"), and the sheet's
+          {/* Labels, not the planner's working ("most known header words"), and the sheet's
               own column names rather than the internal field names. */}
           {mode === "append" && plan && plan.mode === "append" ? (
             <>

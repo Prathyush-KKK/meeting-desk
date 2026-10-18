@@ -195,10 +195,9 @@ externalSecrets:
     - GOOGLE_CLIENT_ID
     - GOOGLE_CLIENT_SECRET
     - MEETING_DESK_TOKEN_KEY
-  # The previous token key exists only while a rotation is in flight (dual-read, spec section 7,
-  # "Token encryption key rotation"). Off by default: a required-but-absent
-  # MEETING_DESK_TOKEN_KEY_PREVIOUS blocks the whole secret. Turn it on for the rotation, run
-  # POST /admin/connections/rotate-keys, turn it off again.
+  # The previous token key exists only while a rotation is in flight (dual-read). Off by default:
+  # a required-but-absent MEETING_DESK_TOKEN_KEY_PREVIOUS blocks the whole secret. Turn it on for
+  # the rotation, run POST /admin/connections/rotate-keys, turn it off again.
   rotation:
     enabled: false
     key: MEETING_DESK_TOKEN_KEY_PREVIOUS

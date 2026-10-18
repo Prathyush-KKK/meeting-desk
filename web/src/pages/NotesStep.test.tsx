@@ -1,6 +1,6 @@
-// Screen review round 1, Step 2:
-//   R1-22  a saved note can be moved to another meeting (spec section 7; POST /notes/{id}/move).
-//   R1-11  no fixed model name on the page, except the wait hint while a run is pending.
+// Step 2:
+//   move   a saved note can be moved to another meeting (POST /notes/{id}/move).
+//   model  no fixed model name on the page, except the wait hint while a run is pending.
 //   wait   an extraction takes one to two minutes, so the button counts the seconds.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

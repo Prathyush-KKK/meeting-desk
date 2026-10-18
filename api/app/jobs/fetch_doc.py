@@ -1,7 +1,7 @@
 """Re-check for a Notes by Gemini doc that appears minutes after the meeting.
 
-Spec section 7: "the source shows 'not generated yet' with Retry, and a job re-checks every 5
-minutes for an hour after the meeting ends". ``fetch_notes_doc`` is the one-shot lookup the Retry
+The source shows "not generated yet" with Retry, and a job re-checks every 5 minutes for an hour
+after the meeting ends. ``fetch_notes_doc`` is the one-shot lookup the Retry
 button and the job share; ``fetch_missing_docs`` is what the periodic task runs: every captured
 calendar meeting that ended inside the last hour and has no Gemini note yet gets one lookup, and a
 found doc is imported (Full notes tab preferred) and pinned on the meeting's attachments so the

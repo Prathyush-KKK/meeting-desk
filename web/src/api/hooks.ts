@@ -1,5 +1,5 @@
-// TanStack Query hooks, one group per route group. This is what replaced the prototype's
-// `store.tsx`: the server is the store, lists poll every 15 s, the live sheet tab every 60 s, and a
+// TanStack Query hooks, one group per route group. There is no client-side store: the server is the
+// store, lists poll every 15 s, the live sheet tab every 60 s, and a
 // point edit is applied optimistically and rolled back if the API refuses it.
 
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
@@ -221,7 +221,11 @@ export function useImportNote(meetingId: string) {
 
 export function usePasteNote(meetingId: string) {
   const client = useQueryClient();
-  return useMutation<{ note: Note; created: boolean; truncated: boolean }, ApiError, { text: string; title?: string }>({
+  return useMutation<
+    { note: Note; created: boolean; truncated: boolean },
+    ApiError,
+    { text: string; title?: string; source?: "paste" | "upload" }
+  >({
     mutationFn: (body) => api.post("/notes/paste", { meeting_id: meetingId, ...body }),
     onSuccess: () => notesInvalidation(client, meetingId),
   });
@@ -250,7 +254,7 @@ export function usePatchNote(meetingId: string) {
   });
 }
 
-/** Pasted onto the wrong meeting: move the note rather than retype it (spec section 7, R1-22). */
+/** Pasted onto the wrong meeting: move the note rather than retype it. */
 export function useMoveNote(meetingId: string) {
   const client = useQueryClient();
   return useMutation<Note, ApiError, { id: string; meeting_id: string }>({
@@ -565,8 +569,8 @@ export function useExtract(meetingId: string) {
         });
         result = { ...result, points: landed.points, queued: false };
       }
-      // The prototype arrived on Step 3 with the action items already ticked; the API stores
-      // `selected` per point, so one bulk call puts that back.
+      // Step 3 opens with the action items already ticked; the API stores `selected` per point, so
+      // one bulk call sets it.
       const actions = result.points.filter((p) => p.kind === "action" && !p.selected).map((p) => p.id);
       if (actions.length) await api.post("/points/bulk", { ids: actions, patch: { selected: true } });
       setPhase("done");
@@ -590,7 +594,7 @@ export function useExtract(meetingId: string) {
   };
 }
 
-/** Who extracted this meeting's points, newest first: the label on Step 3 reads it (R1-11). */
+/** Who extracted this meeting's points, newest first: the label on Step 3 reads it. */
 export function useExtractions(meetingId: string | null) {
   return useQuery<ExtractionRecord[], ApiError>({
     queryKey: qk.extractions(meetingId ?? ""),
@@ -627,7 +631,7 @@ export function useDisconnectWorkbook() {
   });
 }
 
-/** The live tab. Auto-refresh every 60 s while the page is visible, per the spec. */
+/** The live tab. Auto-refresh every 60 s while the page is visible. */
 export function useTab(workbookId: string | null, sheetId: string | null) {
   return useQuery<TabState, ApiError>({
     queryKey: qk.tab(workbookId ?? "", sheetId ?? ""),
@@ -680,7 +684,7 @@ export function useTransferPreview(input: PreviewIn | null) {
 }
 
 /**
- * `batch_id` is the client's idempotency key (Review 1, finding 9). It is minted per user intent in
+ * `batch_id` is the client's idempotency key. It is minted per user intent in
  * the page - see `lib/batch.ts` - not here, because a key made per call would be a fresh one on
  * every retry and would not stop anything.
  */
@@ -745,7 +749,7 @@ export function useAddRow() {
 
 // --- admin ----------------------------------------------------------------------------------------
 
-// The four readers below are admin-only (Review 1, finding 28), so every one of them takes the
+// The four readers below are admin-only, so every one of them takes the
 // caller's role: a member skips the query rather than polling a 403 every 15 seconds.
 
 export function useConnections(enabled = true) {
@@ -756,8 +760,8 @@ export function useConnections(enabled = true) {
 }
 
 /**
- * The banner on every page (spec section 7). Its own route, readable by members, because the
- * connection list above is admin-only and a member used to see no banner at all (R1-23).
+ * The banner on every page. Its own route, readable by members, because the connection list
+ * above is admin-only and a member would otherwise see no banner at all.
  */
 export function useConnectionStatus(enabled = true) {
   return useQuery<ConnectionStatus, ApiError>({

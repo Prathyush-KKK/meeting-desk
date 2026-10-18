@@ -1,6 +1,6 @@
 """In-memory Google, built from ``app/seed_data.py`` and ``tests/fixtures/sheets/*.json``.
 
-It is the only Google implementation phase 1 has. It keeps state across requests within one app, so
+It backs fake mode and the tests. It keeps state across requests within one app, so
 a transfer written in one request is visible to the read in the next - which is what makes the
 re-read guard, undo and the Sheets page testable without a network.
 """

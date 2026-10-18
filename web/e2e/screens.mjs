@@ -1,9 +1,9 @@
-// Every screen of the app, photographed at the widths the spec names, for the screen review loop
-// (docs/review/SCREENS-REVIEW.md).
+// Every screen of the app, photographed at desktop, phone and tablet widths - for reviewing a UI
+// change screen by screen, and for the pictures in the README (docs/images/).
 //
-//   cd api && FAKE_GOOGLE=1 FAKE_LLM=1 AUTH_DEV_USER=... uvicorn app.main:app --port 8000   (fresh DB)
-//   cd web && pnpm dev
-//   cd web && node e2e/screens.mjs <round>        -> docs/review/shots/round-<round>/*.png
+//   make run          (fresh DB: rm api/meeting-desk.db first)
+//   make web-dev
+//   cd web && node e2e/screens.mjs <name>        -> docs/screenshots/<name>/*.png (git-ignored)
 //
 // 1280x900 and 390x844 for everything, 768x1024 for the Sheets grid, and a dark pass over Step 3
 // and Sheets. Beside the PNGs it writes metrics.json: per screen, how far the page scrolls sideways
@@ -13,22 +13,24 @@
 // walkthrough's pattern. States the fake cannot reach (an empty calendar, a first-run or an expired
 // connection, no workbook, 401, 403) are produced by answering that one route in the browser.
 
-import { chromium } from "/home/claude/.npm-global/lib/node_modules/playwright/index.mjs";
+import { chromium } from "playwright";
 import { mkdirSync, writeFileSync, rmSync } from "node:fs";
 import path from "node:path";
 
 const WEB = process.env.E2E_WEB ?? "http://127.0.0.1:5173";
 const API = process.env.E2E_API ?? "http://localhost:8000";
-const EXECUTABLE = process.env.E2E_CHROMIUM ?? "/opt/pw-browsers/chromium";
+// Playwright's own Chromium (`npx playwright install chromium`) unless E2E_CHROMIUM names another.
+const EXECUTABLE = process.env.E2E_CHROMIUM || undefined;
 const ROUND = process.argv[2] ?? process.env.ROUND ?? "1";
-// `node e2e/screens.mjs final` writes the set kept for viewing, docs/review/shots/final.
-const OUT = path.resolve(import.meta.dirname, "..", "..", "docs", "review", "shots", ROUND === "final" ? "final" : `round-${ROUND}`);
-const STAMP = new Date().toISOString().slice(11, 19).replace(/:/g, "");
+const OUT = path.resolve(import.meta.dirname, "..", "..", "docs", "screenshots", ROUND);
+// A long-lived API already holds earlier runs' meetings; the stamp keeps this run's apart. Against
+// a fresh database (E2E_STAMP=0, for the README pictures) the titles stay clean.
+const STAMP = process.env.E2E_STAMP === "0" ? "" : ` ${new Date().toISOString().slice(11, 19).replace(/:/g, "")}`;
 
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 
-const NOTES = `Vendor call with Maya ${STAMP}
+const NOTES = `Vendor call with Maya${STAMP}
 
 The Next Steps
 Alex S: Send the Northwind questionnaire by Friday
@@ -84,7 +86,7 @@ async function measure(page) {
       small.push(`${name} (${Math.round(box.width)}x${Math.round(box.height)})`);
     }
     // Every scroll container, not only the page: nothing on a phone may scroll sideways but a grid
-    // inside its own box (round 4). A text field scrolling its own text is how a field works, so
+    // inside its own box. A text field scrolling its own text is how a field works, so
     // inputs and selects are left out; textareas are in.
     const sideways = [];
     for (const el of document.querySelectorAll("body *")) {
@@ -257,7 +259,7 @@ async function main() {
       await page.getByRole("button", { name: "Save and continue" }).click();
       await page.getByRole("heading", { name: "Saved notes" }).waitFor({ timeout: 20_000 });
       const meetings = await api("GET", "/meetings/list");
-      pasted = meetings.items.find((m) => m.title.startsWith(`Vendor call with Maya ${STAMP}`));
+      pasted = meetings.items.find((m) => m.title.startsWith(`Vendor call with Maya${STAMP}`));
       await page.fill("#paste", "Follow-up from Slack\nAlex S: share the Northwind login with Noah by Monday");
       await shot(page, "step2-notes-paste", { full: true });
     });
@@ -403,7 +405,7 @@ async function main() {
       await page.getByRole("button", { name: "Hide deferred" }).click();
     });
     await screen("390 point text: caret, growth, autosave", async () => {
-      // Round 4, R4-01: the phone's point text is a growing textarea. Typed text stays where it was
+      // The phone's point text is a growing textarea. Typed text stays where it was
       // typed, focus stays, the box grows instead of scrolling, and the debounced save lands.
       const box = page.locator("[data-testid=point-row][data-lifecycle=active]").first().locator("textarea[aria-label=Point]");
       const before = await box.inputValue();
@@ -438,6 +440,9 @@ async function main() {
       };
       checks.push(result);
       console.log(`  check ${JSON.stringify(result)}`);
+      // Put the text back so the later Sheets screens show the point as it was transferred.
+      await box.fill(before);
+      await page.waitForTimeout(1200);
       if (!result.textIntact || !result.caretKept || !result.focused || result.innerScroll || !saved) {
         throw new Error(`phone point text: ${JSON.stringify(result)}`);
       }

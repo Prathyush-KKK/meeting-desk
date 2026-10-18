@@ -114,7 +114,7 @@ def test_similar_spellings_do_not_collide() -> None:
 
 
 def test_a_bare_daniel_with_both_spellings_in_the_room_is_ambiguous() -> None:
-    """The spec's case: Daniel Okafor and Daniela Mehta are both attendees."""
+    """Daniel Okafor and Daniela Mehta are both attendees."""
     room = [
         Person("Daniel Okafor", "daniel.okafor@example.com"),
         Person("Daniela Mehta", "daniela.mehta@example.com"),

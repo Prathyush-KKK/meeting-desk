@@ -1,7 +1,7 @@
 """Sheet layout detection.
 
-A faithful port of ``meeting-desk/src/lib/sheet.ts`` (``detectLayout``, ``nextKeys``, the A1 helpers)
-plus the two things the server needs that the prototype does not have: a hash of the table region so
+A faithful port of ``web/src/lib/sheet.ts`` (``detectLayout``, ``nextKeys``, the A1 helpers) plus
+the two things the server needs that the browser does not: a hash of the table region so
 a write can tell whether the sheet moved under it, and hooks for the formula and date columns that
 the reader discovers from the Sheets API (``valueRenderOption=FORMULA`` and the number formats).
 
@@ -161,7 +161,7 @@ def detect_layout(
     """Header row by synonym score, then columns, key column, and the table extent.
 
     Ties between two candidate header rows go to the *upper* row, exactly as ``lib/sheet.ts`` does
-    (the comparison is a strict ``>``). The spec's "a second matching row directly below wins" case
+    (the comparison is a strict ``>``). The "a second matching row directly below wins" case
     is the common one where a merged/banner row above scores lower than the real header row; that
     resolves to the lower row here too.
     """

@@ -1,6 +1,7 @@
 """Every outbound call, wrapped.
 
-One context manager - ``track_provider(provider, op)`` - does all four things the standard asks for:
+One context manager - ``track_provider(provider, op)`` - does all four things that
+docs/TELEMETRY.md asks for:
 
 * counts the call on ``external_provider_requests_total{provider, op, outcome}``;
 * sets ``external_provider_last_success_timestamp_seconds{provider}`` **only** on success;

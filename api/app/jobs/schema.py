@@ -1,8 +1,8 @@
 """Install procrastinate's own tables (``make jobs-schema``).
 
 The queue keeps its jobs in the same Postgres as the app, in tables procrastinate owns and
-migrates itself; they are deliberately outside Alembic so ``alembic check`` stays about spec
-section 4. Run once per database before the first worker starts.
+migrates itself; they are deliberately outside Alembic so ``alembic check`` stays about the
+app's own tables. Run once per database before the first worker starts.
 """
 
 from __future__ import annotations

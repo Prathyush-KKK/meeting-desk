@@ -9,7 +9,7 @@ Two halves so the route and the queue share one implementation:
 
 ``run_extraction`` is the inline composite the tests and a queue-less deployment use. Job status
 lives in ``extractions.usage["job"]`` (queued, running) until the provider's usage replaces it,
-so spec section 4 stays exact and the polling route reads one row.
+so the table schema stays as it is and the polling route reads one row.
 """
 
 from __future__ import annotations

@@ -141,7 +141,7 @@ def _preview_payload(state: TabState, plan: Plan, points: list[Point]) -> dict[s
 
 
 def _count(n: int, one: str, many: str) -> str:
-    """ "1 cell", "3 cells" - the preview is read by people (screen review R3-01: "1 cell(s)")."""
+    """ "1 cell", "3 cells" - the preview is read by people, so no "1 cell(s)"."""
     return f"{n} {one if n == 1 else many}"
 
 

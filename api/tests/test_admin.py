@@ -128,7 +128,7 @@ def test_the_service_health_endpoint_needs_no_sign_in(tmp_path: Path) -> None:
 
 
 def test_the_banner_reaches_members_too(client: TestClient, member_client: TestClient) -> None:
-    """Screen review R1-23. Spec section 7: an expired admin connection puts a banner on every page.
+    """An expired admin connection puts a banner on every page.
     The banner came from the admin-only connections list, so members never saw it."""
     from app.models import Connection
 

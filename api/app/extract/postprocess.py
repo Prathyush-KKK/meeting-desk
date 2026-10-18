@@ -1,6 +1,6 @@
 """Post-processing: owners and due dates.
 
-Spec section 5. Owners resolve deterministically - attendees by full name, then first name if it is
+Owners resolve deterministically - attendees by full name, then first name if it is
 unique among them, then the directory, then the alias table. Two candidates set
 ``owner_ambiguous`` and leave the verbatim text alone; nothing is ever guessed. Due dates are
 parsed by code, never by the model, with the meeting start in the display timezone as the base.

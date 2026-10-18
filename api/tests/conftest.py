@@ -2,7 +2,7 @@
 
 Nothing here touches the network, and the socket guard below makes sure of it: any test that
 opens an internet socket fails. Each test gets a fresh database seeded from ``app/seed_data.py``
-(the prototype's store), the in-memory Google, and the rule-based extraction provider. The real
+(the demo world), the in-memory Google, and the rule-based extraction provider. The real
 Google clients are tested against ``httpx.MockTransport`` with the fixtures under
 ``tests/fixtures/google/``.
 """

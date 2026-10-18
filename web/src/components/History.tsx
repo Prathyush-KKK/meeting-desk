@@ -15,7 +15,7 @@ export function ExtractionLines({ runs, loading, className }: { runs: Extraction
       {runs.map((e) => (
         <li key={e.id} data-testid="extraction-line" data-status={e.status} className="text-xs text-muted-foreground">
           {e.at && <span className="mono">{fmtStamp(e.at)} · </span>}
-          {/* R2-02: the fake has no model worth naming. */}
+          {/* The fake has no model worth naming. */}
           {e.provider === "fake" ? "rule-based fake" : <span className="mono text-foreground">{e.model}</span>}
           {` · ${e.status}`}
           {e.status === "done" && ` · ${e.created_points ?? 0} new`}

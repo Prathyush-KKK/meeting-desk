@@ -1,9 +1,9 @@
-// Screen review round 1, Step 4:
-//   R1-16  the prerequisites: with no workbook there is a Connect right here, and a reload (which
+// Step 4:
+//   prereq the prerequisites: with no workbook there is a Connect right here, and a reload (which
 //          loses the ids passed from Step 3) falls back to the points ticked there, or offers the
 //          way back to them - it used to be a one-line dead end either way.
-//   R1-14  an anchor in or above the header is blocked with one line and no plan beside it.
-//   R1-15  "Write 1 cell", not "Write 1 cells".
+//   anchor an anchor in or above the header is blocked with one line and no plan beside it.
+//   count  "Write 1 cell", not "Write 1 cells".
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";

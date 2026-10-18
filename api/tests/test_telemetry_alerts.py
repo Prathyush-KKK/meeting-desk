@@ -1,6 +1,6 @@
 """The alert rules are a consumer of these metrics, and their runbooks point at real event tokens.
 
-The standard's last two checklist items:
+The last two items of the PR checklist in docs/TELEMETRY.md:
 
 * "A consumer exists: at least one alert rule reads these metrics" - asserted per rule;
 * "Any runbook string that quotes log content uses event tokens, and a test asserts those tokens
@@ -25,7 +25,7 @@ CHART = REPO / "deploy" / "helm" / "meeting-desk"
 RULES = CHART / "templates" / "prometheusrule.yaml"
 APP = Path(__file__).resolve().parents[1] / "app"
 
-# The shape the standard prescribes: grep '"event":"(a|b)"'
+# The shape docs/TELEMETRY.md prescribes: grep '"event":"(a|b)"'
 EVENT_GREP = re.compile(r'"event":"\(?([a-z_|]+)\)?"')
 
 

@@ -1,9 +1,9 @@
-// Screen review round 1: the Step 1 fixes that are behaviour rather than layout.
+// Step 1: the parts that are behaviour rather than layout.
 //
-//   R1-03  "updated N min ago" and Refresh are shown at every width, under the list.
-//   R1-04  a click on another card while the detail is open moves the detail to that card, and the
+//   age    "updated N min ago" and Refresh are shown at every width, under the list.
+//   pick   a click on another card while the detail is open moves the detail to that card, and the
 //          list's own Continue steps aside for the panel's.
-//   R1-21  deleting a manual meeting offers Undo for ten seconds (spec section 7).
+//   undo   deleting a manual meeting offers Undo for ten seconds.
 //   empty  the empty list says what to do.
 //   history a saved meeting's detail shows its extraction runs and transfers, and opens its pages.
 

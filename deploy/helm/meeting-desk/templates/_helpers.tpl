@@ -111,7 +111,7 @@ it when it is enabled.
 {{/*
 The label selector every alert rule uses. `service` and `namespace` are added by the Prometheus
 Operator from the ServiceMonitor's target, not by the app: the six metrics carry only the labels
-the standard names.
+docs/TELEMETRY.md names.
 */}}
 {{- define "meeting-desk.metricSelector" -}}
 {{- printf "service=~\"%s(-worker)?\", namespace=\"%s\"" (include "meeting-desk.fullname" .) .Release.Namespace -}}

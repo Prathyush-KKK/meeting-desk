@@ -9,7 +9,7 @@ import type { ConnectedWorkbook } from "@/api/types";
 /**
  * A Google Sheets URL and Connect. The Sheets sidebar, the Sheets page's empty state and the
  * Transfer step's prerequisites all use this one, so connecting reads the same wherever it is
- * offered (screen review R1-16, R1-17: the empty states used to point somewhere else instead).
+ * offered (the empty states used to point somewhere else instead).
  */
 export function ConnectWorkbook({
   className,

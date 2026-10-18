@@ -1,6 +1,6 @@
 """Google OIDC sign-in.
 
-Scaffolded here and exercised end to end in phase 3; phase 1 and the tests use ``AUTH_DEV_USER``.
+Local runs and the tests use ``AUTH_DEV_USER`` instead.
 The flow is deliberately thin: Google identifies the person, the allow-list decides access, and the
 allow-list entry binds to the Google ``sub`` on first sign-in.
 """

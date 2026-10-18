@@ -1,9 +1,9 @@
 """The deliberate failure, exercised end to end.
 
-The standard's last verification item: break a dependency, watch the counter move, the last-success
-gauge stall, the breaker move, and the error log appear. This is that, against the real Sheets
-client and ``httpx.MockTransport`` - the same harness the phase 2 contract tests use, so nothing is
-mocked out except Google itself.
+The failure exercise in docs/TELEMETRY.md: break a dependency, watch the counter move, the
+last-success gauge stall, the breaker move, and the error log appear. This is that, against the real
+Sheets client and ``httpx.MockTransport`` - the same harness the Google client contract tests use,
+so nothing is mocked out except Google itself.
 """
 
 from __future__ import annotations

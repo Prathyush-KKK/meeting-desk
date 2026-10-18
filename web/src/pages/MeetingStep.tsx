@@ -10,7 +10,8 @@ import { ExtractionLines, TransferLines } from "@/components/History";
 import { cn } from "@/lib/utils";
 import { useCloseOnBack } from "@/lib/overlay";
 import { useAutoGrow } from "@/lib/autogrow";
-import { ago, fmtDate, mergeWorkstreams, plural } from "@/lib/display";
+import { ago, displayTimeZone, fmtDate, mergeWorkstreams, plural, zoneLabel } from "@/lib/display";
+import { parseAttendees } from "@/lib/attendees";
 import {
   useCaptureCalendarEvent,
   useCreateManualMeeting,
@@ -103,7 +104,7 @@ export function MeetingStep({ selectedKey, onSelectKey, onContinue, onOpenStep }
   const closePanel = useCallback(() => { setOpenKey(null); setEditing(false); }, []);
 
   /**
-   * A click on another card while the detail is open moves the detail to that card (R1-04). It used
+   * A click on another card while the detail is open moves the detail to that card. It used
    * to stay on the first one, so the panel's Continue and the list's Continue meant two meetings.
    */
   const select = (m: MeetingItem) => {
@@ -115,8 +116,8 @@ export function MeetingStep({ selectedKey, onSelectKey, onContinue, onOpenStep }
     }
   };
 
-  // Spec section 7: the detail is a full-screen overlay under 768 px, so Back has to close it
-  // rather than leave the app (Review 1, finding 23). Above the breakpoint the same entry makes
+  // The detail is a full-screen overlay under 768 px, so Back has to close it rather than leave
+  // the app. Above the breakpoint the same entry makes
   // Back close the side panel, which is also where a person expects to land.
   useCloseOnBack(!!open, closePanel);
 
@@ -169,8 +170,8 @@ export function MeetingStep({ selectedKey, onSelectKey, onContinue, onOpenStep }
             />
           )}
         </div>
-        {/* Spec section 7: "Calendar cache: 'updated N min ago' and an explicit Refresh" - at every
-            width (R1-03: it was hidden under 640 px and wrapped in the narrow column). */}
+        {/* The calendar cache: "updated N min ago" and an explicit Refresh, at every width (it was
+            hidden under 640 px and wrapped in the narrow column). */}
         <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
           {meetings.data && <span data-testid="calendar-age">updated {ago(meetings.data.age_minutes)}</span>}
           <button
@@ -216,7 +217,7 @@ export function MeetingStep({ selectedKey, onSelectKey, onContinue, onOpenStep }
           ) : (
             <div className="flex-1">
               <dl className="grid content-start grid-cols-[96px_minmax(0,1fr)] gap-x-4 gap-y-2.5 text-[13px] lg:grid-cols-[120px_minmax(0,1fr)]">
-                <dt className="text-muted-foreground">When</dt><dd>{fmtDate(open.date)} · {open.start}-{open.end} IST</dd>
+                <dt className="text-muted-foreground">When</dt><dd>{fmtDate(open.date)} · {open.start}-{open.end} {zoneLabel()}</dd>
                 <dt className="text-muted-foreground">Organizer</dt><dd className="break-all">{open.organizer_email}</dd>
                 <dt className="text-muted-foreground">Attendees</dt>
                 <dd>{open.attendees.length ? open.attendees.map((a) => `${a.name || a.email} (${a.response})`).join(", ") : "none"}</dd>
@@ -226,7 +227,7 @@ export function MeetingStep({ selectedKey, onSelectKey, onContinue, onOpenStep }
                 <dt className="text-muted-foreground">Description</dt><dd className="whitespace-pre-wrap">{open.description || "none"}</dd>
                 <dt className="text-muted-foreground">Attachments</dt><dd>{open.attachments.length ? open.attachments.map((a) => a.title).join(", ") : "none"}</dd>
                 <dt className="text-muted-foreground">Workstream</dt><dd>{open.workstream || "not set"}</dd>
-                <dt className="text-muted-foreground">Shown in</dt><dd>Asia/Kolkata{open.timezone && open.timezone !== "Asia/Kolkata" ? ` (organizer: ${open.timezone})` : ""}</dd>
+                <dt className="text-muted-foreground">Shown in</dt><dd>{displayTimeZone()}{open.timezone && open.timezone !== displayTimeZone() ? ` (organizer: ${open.timezone})` : ""}</dd>
                 {open.calendar_event_id && <><dt className="text-muted-foreground">Event id</dt><dd className="mono break-all">{open.calendar_event_id}</dd></>}
               </dl>
               {open.id ? (
@@ -302,11 +303,7 @@ function ManualForm({
   });
 
   const save = async () => {
-    const attendees = f.attendeesText
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .map((name) => ({ name, email: `${name.toLowerCase().replace(/\s+/g, ".")}@example.com`, response: "accepted" }));
+    const attendees = parseAttendees(f.attendeesText, meeting.attendees);
     try {
       await patch.mutateAsync({
         id: meeting.id!,
@@ -321,7 +318,7 @@ function ManualForm({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {/* content-start: the fields sit together at the top instead of spreading over the panel's
-          height (R1-05). */}
+          height. */}
       <div className="grid flex-1 grid-cols-1 content-start gap-3 sm:grid-cols-2">
         <Field id="mt" label="Title" full><Input id="mt" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Meeting title" /></Field>
         <Field id="md" label="Date"><Input id="md" type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></Field>
@@ -346,7 +343,7 @@ function ManualForm({
           onClick={async () => {
             const id = meeting.id!;
             await remove.mutateAsync(id);
-            // Spec section 7: "Accidental delete: soft delete with a 10-second undo toast" (R1-21).
+            // Accidental delete: a soft delete with a 10-second undo toast.
             toast.message(`Deleted ${meeting.title || "the meeting"}`, {
               description: "10 seconds to undo; recoverable for 30 days.",
               duration: 10_000,

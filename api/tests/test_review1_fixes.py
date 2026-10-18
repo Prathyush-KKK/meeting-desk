@@ -1,8 +1,8 @@
-"""One test per finding in docs/REVIEW-1.md - the scenario the review described, first.
+"""Regression tests for a pre-release review: one or more per issue found, the scenario first.
 
-Each test is named after its finding number so a reader can go from the review, to the fix log in
-docs/REVIEW-1-FIXES.md, to the thing that proves it. The web-only findings (4, 6, 23, 29 and the
-Add row default in 8) are not here; their API side is.
+Each test carries its issue number in its name, so the tests for one issue sit together. Issues
+that were only in the web app (4, 6, 23, 29 and the Add row default in 8) are covered by the web
+tests; their API side is here.
 """
 
 from __future__ import annotations

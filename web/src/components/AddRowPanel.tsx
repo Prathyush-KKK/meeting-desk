@@ -32,8 +32,8 @@ const CONTROL = "h-11 rounded border bg-background px-2 text-sm md:h-9";
  * Add row: one field per mapped header, or a point picked from the active and deferred lists.
  * The key column is generated server-side after the re-read; formula columns are copied down.
  *
- * The insert lands after the table unless a row number is clicked in the grid (Review 1, finding 8:
- * "Above a row" used to default to `header_row + 1`, so the first press put a row directly under
+ * The insert lands after the table unless a row number is clicked in the grid ("Above a row" used
+ * to default to `header_row + 1`, so the first press put a row directly under
  * the header and took the header's formatting). There is no default row: the radio turns on when
  * one is picked, and the API refuses an insert in or above the header, whose message is shown here.
  */
@@ -214,7 +214,7 @@ export function AddRowPanel({ tab, aboveRow, onPickRow, onDone }: Props) {
         </div>
       )}
 
-      {/* R1-36: on a phone the two buttons share a line under the sentence; Add row used to wrap
+      {/* On a phone the two buttons share a line under the sentence; Add row used to wrap
           alone to the left. */}
       <div className="mt-3 grid grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center">
         <span className="col-span-2 text-xs text-muted-foreground" data-testid="add-row-lands">

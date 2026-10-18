@@ -1,10 +1,10 @@
-// Review 1, finding 4: `before` was recomputed from the latest poll at save time, so a value
+// `before` used to be recomputed from the latest poll at save time, so a value
 // somebody else had written in the meantime became the baseline and the API's pre-save guard - the
 // one thing standing between two people editing the same cell - could never fire.
 //
 // The tab is polled every 60 s and a save can be pressed any time, so the poll landing between the
 // two is the ordinary case, not a rare one. These tests drive exactly that ordering, and the
-// second pair covers the idempotency key the same button sends (finding 9).
+// second pair covers the idempotency key the same button sends.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";

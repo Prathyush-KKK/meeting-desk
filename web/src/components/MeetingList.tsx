@@ -75,7 +75,7 @@ export function MeetingList({ items, selectedKey, onSelect, onOpen, onContinue, 
         data-source={m.source}
         onClick={() => onSelect(m)}
         onDoubleClick={() => onContinue(m)}
-        // R1-45: a card could only be picked with a mouse. Tab reaches it, Space picks it, Enter
+        // A card used to be pickable only with a mouse. Tab reaches it, Space picks it, Enter
         // continues with it - the keyboard's click and double-click.
         tabIndex={0}
         aria-current={isSel ? "true" : undefined}
@@ -90,7 +90,7 @@ export function MeetingList({ items, selectedKey, onSelect, onOpen, onContinue, 
           }
         }}
         // No negative margins: inside the list's scroll box they made the row wider than the box,
-        // so on a phone the box scrolled sideways and clipped the titles (R1-02).
+        // so on a phone the box scrolled sideways and clipped the titles.
         className={cn("group relative cursor-pointer py-2.5 pl-2 pr-24 focus-visible:-outline-offset-2 md:pr-20", isSel ? "bg-secondary" : "hover:bg-secondary/60")}
       >
         <div className="flex items-baseline gap-2">

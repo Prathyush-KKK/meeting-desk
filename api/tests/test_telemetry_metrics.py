@@ -96,7 +96,7 @@ def test_the_metrics_app_answers_nothing_else() -> None:
 
 
 def test_metrics_is_not_a_route_on_the_api(client: TestClient) -> None:
-    """The standard: a separate container port, never mounted on the app router."""
+    """docs/TELEMETRY.md: a separate container port, never mounted on the app router."""
     paths = {getattr(route, "path", "") for route in client.app.routes}
     assert "/metrics" not in paths
     answer = client.get("/metrics")
@@ -295,7 +295,7 @@ def test_healthz_and_livez_are_what_the_probes_call(client: TestClient) -> None:
 
 
 def test_every_line_of_a_request_carries_its_route_not_only_the_last(client: TestClient) -> None:
-    """The standard wants ``route`` on every line of the request.
+    """docs/TELEMETRY.md wants ``route`` on every line of the request.
 
     The middleware works the route out from the route table *before* the handler runs, so a line
     the handler itself writes - here the extraction job's - already has the templated path.

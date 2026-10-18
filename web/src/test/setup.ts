@@ -2,7 +2,13 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach } from "vitest";
 
+import { configureDisplay } from "@/lib/display";
+
 afterEach(() => cleanup());
+
+// The demo world the suites were written against: a zone 5:30 off UTC (so a test that confuses
+// local time with UTC fails) and the demo team's workstreams.
+configureDisplay({ timezone: "Asia/Kolkata", workstreams: ["Mobile", "Platform", "Billing", "Rewards", "Prod ops", "Hiring"] });
 
 // jsdom has no layout: every element is 0x0 and there is no ResizeObserver. TanStack Virtual
 // measures its scroll box through both, so without these the virtualised grid renders an empty

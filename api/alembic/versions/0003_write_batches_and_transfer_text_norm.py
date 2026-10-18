@@ -1,6 +1,6 @@
 """write_batches, and transfers.text_norm as a column
 
-Two things the review asked for:
+Two additions:
 
 * ``write_batches`` - the idempotency record every Google write goes through. The row is written
   ``pending`` and committed before the call, settled ``done`` with the stored answer after it, and

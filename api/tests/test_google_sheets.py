@@ -261,7 +261,7 @@ def test_values_are_strings_dates_are_serials_and_blank_clears() -> None:
     assert cell_data("", as_date=True) == {}
     assert cell_data("2026-10-03", as_date=True) == {"userEnteredValue": {"numberValue": 46298}}
     assert cell_data("by 3 Oct", as_date=True, base=NOW) == {"userEnteredValue": {"numberValue": 46298}}
-    # A date column with a value that is not a date is written as text, per the spec.
+    # A date column with a value that is not a date is written as text.
     assert cell_data("when the accountant is free", as_date=True, base=NOW) == {
         "userEnteredValue": {"stringValue": "when the accountant is free"}
     }

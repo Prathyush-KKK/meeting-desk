@@ -1,9 +1,9 @@
-// Review 1, finding 8 (the web half): "Above a row" defaulted to `header_row + 1`, so the first
-// press put the new row directly under the header - the one place the planner used to copy the
-// header's formulas and formatting from. There is no default row now: the insert goes after the
+// "Above a row" used to default to `header_row + 1`, so the first press put the new row directly
+// under the header - the one place the planner used to copy the header's formulas and formatting
+// from. There is no default row now: the insert goes after the
 // table until a row number is clicked, and the API's refusal for a header row is shown here.
 //
-// Finding 9's key rides on the same button.
+// The idempotency key (`lib/batch.ts`) rides on the same button.
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";

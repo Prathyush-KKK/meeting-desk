@@ -1,4 +1,4 @@
-"""The activity log: every change records who did it. Kept 90 days (spec section 5)."""
+"""The activity log: every change records who did it. Kept 90 days."""
 
 from __future__ import annotations
 

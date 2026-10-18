@@ -8,7 +8,7 @@ import { useCloseOnBack, useNarrow } from "@/lib/overlay";
 export type CellMark = "new" | "key" | "conflict" | "moved" | "edited";
 
 /**
- * Spec section 3: "TanStack Virtual (grids over 300 rows)". Under that the table renders every row
+ * TanStack Virtual for grids over 300 rows. Under that the table renders every row
  * - it is cheaper than the measuring, and the sticky header, the column letters and the cell
  * editor all behave without a second code path to keep in step. Over it, only the rows in view are
  * in the DOM and two spacer rows hold the scrollbar at the right length, so the markup, the sticky
@@ -21,7 +21,7 @@ const ROW_HEIGHT = 28;
 const INITIAL_RECT = { width: 1200, height: 640 };
 
 /**
- * The five marks, in the one selection hue (Review 1, finding 29). Three variants carry all of
+ * The five marks, in the one selection hue. Three variants carry all of
  * them: a tint for what is being written, an outline for what needs a decision, a strike for what
  * only moves. The Transfer legend wears the same three on its own labels, so the legend is the
  * rule rather than a copy of it.
@@ -47,8 +47,8 @@ interface Props {
     fromRow: number;
     /**
      * A table cell that cannot be edited here was tapped - the key column, a formula column, a
-     * read-only workbook. Spec section 7: such cells "say why they are not editable on tap"
-     * (screen review R1-19); before, the tap did nothing at all.
+     * read-only workbook. Such cells say why they are not editable on tap; before, the tap did
+     * nothing at all.
      */
     onLocked?: (r: number, c: number) => void;
   };
@@ -60,7 +60,7 @@ interface Props {
   activeRow?: number | null;
   /**
    * Brought into the box's view whenever it changes - the first cell a transfer plan writes, so the
-   * rows being added are on screen rather than below the fold (screen review R1-13). It moves the
+   * rows being added are on screen rather than below the fold. It moves the
    * box only when the cell changes, never on a poll, so it does not fight the person's scrolling.
    */
   revealCell?: { r: number; c: number } | null;
@@ -80,8 +80,8 @@ export function Grid({ rows, layout, marks, anchor, onCellClick, editable, maxHe
   const display = Math.max(rows.length, 22);
   const order = rowIndexes ?? Array.from({ length: display }, (_, i) => i);
 
-  // Spec section 7, "Sheets page": "Editing on a phone · tap opens a bottom editor with the column
-  // name, not an inline input." Under 768 px the inline input is not rendered at all, so it cannot
+  // Editing on a phone: a tap opens a bottom editor with the column name, not an inline input.
+  // Under 768 px the inline input is not rendered at all, so it cannot
   // take the focus or raise the keyboard behind the sheet.
   const narrow = useNarrow();
   const closeEditor = () => setEditing(null);
@@ -184,7 +184,7 @@ export function Grid({ rows, layout, marks, anchor, onCellClick, editable, maxHe
                     className={cn(
                       "sticky left-0 z-10 h-7 border-b border-r bg-grid-header text-center font-medium text-muted-foreground mono",
                       onRowClick && "cursor-pointer hover:text-foreground",
-                      // R1-18: `sel-tint` lost to bg-grid-header, so the picked row showed as nothing
+                      // `sel-tint` lost to bg-grid-header, so the picked row showed as nothing
                       // but a darker number. The number now wears the tint over its opaque ground
                       // (the column is sticky, so a see-through tint would show the cells under it)
                       // and every cell of the row a line across its top.

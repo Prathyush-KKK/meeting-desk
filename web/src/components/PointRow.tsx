@@ -14,7 +14,7 @@ export const SELECT_CLASS = "h-8 rounded border bg-background px-2 text-xs";
 
 /**
  * Eight tracks, one control each: tick, kind, point, owner, due, status, workstream, and the row's
- * own actions (Defer, Remove). Screen review round 1, R1-01: the actions used to share the
+ * own actions (Defer, Remove). The actions used to share the
  * workstream's 130 px track, so at 1280 px they sat past the right edge and the list scrolled
  * sideways to reach them. The tracks narrow between 768 and 1024 px so the row still fits there.
  */
@@ -36,12 +36,12 @@ interface Props {
 }
 
 /**
- * One point. Deferred points are shown read-only with Restore and Transfer, per spec section 2.
+ * One point. Deferred points are shown read-only with Restore and Transfer.
  *
- * Under 768 px the row wraps (spec section 2): the tick, the point's text (wrapping and growing,
- * R4-01), Defer and Remove; then the fields in a six-column grid, two lines, nothing scrolling
- * sideways (R4-03). From 768 px both parts dissolve (`md:contents`) into the eight grid tracks, and
- * `md:order-*` puts Kind in front of the text and the actions last.
+ * Under 768 px the row wraps: the tick, the point's text (wrapping and growing), Defer and Remove;
+ * then the fields in a six-column grid, two lines, nothing scrolling sideways. From 768 px both
+ * parts dissolve (`md:contents`) into the eight grid tracks, and `md:order-*` puts Kind in front of
+ * the text and the actions last.
  */
 export function PointRow({ point, owners, workstreams, onPatch, onDefer, onRestore, onRemove, onTransfer }: Props) {
   const deferred = point.lifecycle === "deferred";
@@ -51,7 +51,7 @@ export function PointRow({ point, owners, workstreams, onPatch, onDefer, onResto
     return (
       <div data-testid="point-row" data-lifecycle="deferred" className="flex flex-wrap items-center gap-2 border-b px-2 py-2 text-[13px]">
         <span className="hidden w-20 shrink-0 text-xs text-muted-foreground sm:inline">{point.kind}</span>
-        {/* R4-04: read in full on a phone too, like an active point's text (R4-01). */}
+        {/* Read in full on a phone too, like an active point's text. */}
         <span className="min-w-0 flex-1 break-words md:truncate" data-testid="deferred-text">{point.text || "Untitled point"}</span>
         <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">
           {point.owner_text || "unassigned"}{point.due_text ? ` · ${point.due_text}` : ""}
@@ -90,7 +90,7 @@ export function PointRow({ point, owners, workstreams, onPatch, onDefer, onResto
           </Button>
         </div>
       </div>
-      {/* R4-03: on a phone the fields are a six-column grid, two lines - kind and owner; due,
+      {/* On a phone the fields are a six-column grid, two lines - kind and owner; due,
           status and workstream. They used to be a strip that scrolled sideways inside the row. */}
       <div className="mt-1.5 grid grid-cols-6 gap-1.5 md:contents" data-line="2">
         <select className={cn(SELECT_CLASS, FIELD, "max-md:col-span-2 md:order-2")} value={point.kind} onChange={(e) => onPatch({ kind: e.target.value })} aria-label="Kind">
@@ -128,7 +128,7 @@ export function PointRow({ point, owners, workstreams, onPatch, onDefer, onResto
 }
 
 /**
- * The point's text on a phone (screen review R4-01): it wraps and the box grows with it, so the
+ * The point's text on a phone: it wraps and the box grows with it, so the
  * whole point reads without scrolling inside a one-line field ("Send the Northwind questionnaire by
  * Frida"). A point is one line in the sheet, so Enter does not add a line break; the wrapping is
  * only how it is shown. Same value, same onChange as the desktop input, so autosave and the caret

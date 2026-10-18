@@ -19,9 +19,9 @@ from app.telemetry.providers import POSTGRES, provider_telemetry
 def instrument(engine: Engine) -> Engine:
     """Count every statement on ``external_provider_requests_total{provider="postgres"}``.
 
-    The standard asks for Postgres to be covered like any other outbound dependency, so the counter
-    and the last-success gauge are driven from the engine's own events - one op, ``query``, so the
-    series count does not follow the number of statements the app happens to run.
+    docs/TELEMETRY.md asks for Postgres to be covered like any other outbound dependency, so the
+    counter and the last-success gauge are driven from the engine's own events - one op, ``query``,
+    so the series count does not follow the number of statements the app happens to run.
 
     The provider label stays ``postgres`` even on the SQLite file a local run uses: it names the
     deployed dependency, not the driver, so a dashboard reads the same in both.

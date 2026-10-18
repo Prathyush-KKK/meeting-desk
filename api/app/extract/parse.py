@@ -3,7 +3,7 @@
 Both providers are schema-constrained, so an answer is normally clean JSON. When it is not (a
 fenced block, a stray preamble, a truncated document), ``parse_output`` recovers what it safely
 can and otherwise raises ``InvalidModelOutput``; the provider retries once and then gives up with
-the notes untouched (spec section 7, "Model output is not valid JSON").
+the notes untouched.
 """
 
 from __future__ import annotations

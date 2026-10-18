@@ -1,8 +1,8 @@
-// The banner on every page. Spec section 7: "Admin connection expires: a banner on every page names
-// the connection and the admin; paste, points and manual meetings keep working without Google."
+// The banner on every page. When an admin connection expires, a banner on every page names the
+// connection and the admin; paste, points and manual meetings keep working without Google.
 //
-// Review 1, finding 28 made `/admin/connections` admin-only, and App used to read the banner from
-// it - so it stopped asking for members, and members saw no banner at all (screen review R1-23).
+// `/admin/connections` is admin-only, and App used to read the banner from it - so it stopped
+// asking for members, and members saw no banner at all.
 // The banner now comes from `/admin/connections/status`, which anyone signed in may read and which
 // carries nothing but what the banner says.
 
@@ -80,13 +80,13 @@ beforeEach(() => {
 });
 
 describe("the expired-connection banner", () => {
-  it("reaches a member too (R1-23)", () => {
+  it("reaches a member too", () => {
     h.me = user("member");
     h.status.mockReturnValue({ data: { ...BANNER, can_connect: false }, isLoading: false, error: null });
     render(<App />);
     expect(h.status.mock.calls.every((call) => call[0] === true)).toBe(true);
     expect(screen.getByTestId("connection-banner")).toHaveTextContent("alex.s@example.com");
-    // The admin-only list is never asked for on a member's behalf (finding 28).
+    // The admin-only list is never asked for on a member's behalf.
     expect(h.connections.mock.calls.every((call) => call[0] !== true)).toBe(true);
   });
 
@@ -147,7 +147,7 @@ describe("the first-run notice", () => {
   });
 });
 
-// Screen review R2-01: a toast with Undo sat on the step's primary button for ten seconds.
+// A toast with Undo used to sit on the step's primary button for ten seconds.
 describe("toasts", () => {
   it("never sit bottom right, where every step keeps its primary button", async () => {
     const { toastPosition } = await import("@/App");

@@ -1,7 +1,7 @@
-// Screen review round 1, Step 3:
-//   R1-11  the "Extracted with" label names whoever answered, read from the meeting's extractions;
+// Step 3:
+//   model  the "Extracted with" label names whoever answered, read from the meeting's extractions;
 //          it was a fixed "gemini-2.5-flash · Vertex AI asia-south1".
-//   R1-10  the footer ends on Transfer, so on a phone's 2 x 2 block it is bottom right.
+//   footer the footer ends on Transfer, so on a phone's 2 x 2 block it is bottom right.
 //   history "See transferred" lists what left this meeting; a failed last extraction says so.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -101,7 +101,7 @@ describe("PointsStep", () => {
     expect(footer.className).toMatch(/grid-cols-2/);
   });
 
-  it("lays the bulk controls out as two rows of three on a phone, never scrolling sideways (R4-02)", () => {
+  it("lays the bulk controls out as two rows of three on a phone, never scrolling sideways", () => {
     renderStep();
     const bar = screen.getByTestId("bulk-bar");
     expect(bar.children).toHaveLength(6);
