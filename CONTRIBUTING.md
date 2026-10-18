@@ -33,9 +33,10 @@ complete demo world (`api/app/seed_data.py`).
 make check          # ruff + pytest + tsc + vitest + vite build
 ```
 
-`make ci` runs everything CI runs, including `helm lint` and a Docker build. If you changed the UI,
-`make e2e` drives the main flow through a real browser (both servers must be running), and
-`node web/e2e/screens.mjs <name>` photographs every screen into `docs/screenshots/<name>/`.
+There is no hosted CI, so please run this before you push and say in the pull request that it
+passed. `make ci` adds `helm lint` and a Docker build, and is run before a merge. If you changed the
+UI, `make e2e` drives the main flow through a real browser (both servers must be running), and `node
+web/e2e/screens.mjs <name>` photographs every screen into `docs/screenshots/<name>/`.
 
 ## Where things live
 
