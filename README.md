@@ -50,7 +50,8 @@ too, so your notes never leave your machine.
 - **Edit the sheet in place.** Browse and filter any connected tab, edit cells with the sheet's own
   dropdown values, and add rows above any row.
 - **Export anywhere else.** Copy as text, or download as **Markdown** or **CSV** for a doc, an
-  issue tracker or another spreadsheet.
+  issue tracker or another spreadsheet. **GitHub Issues-ready Markdown** gives each action item
+  its own title, owner, due date and meeting context, ready to paste into a new issue.
 - **Tell the team.** Each transfer can post a summary to **Slack**, **Google Chat**, Mattermost or
   Discord through an incoming webhook (`NOTIFY_WEBHOOK_URL`).
 - **Works with a personal Google account.** `GOOGLE_USE_GMAIL=0` and `GOOGLE_USE_DIRECTORY=0` leave
@@ -180,7 +181,7 @@ Prometheus metrics.
 
 These are ideas, and contributions are welcome:
 
-- More export targets: GitHub Issues, Linear, Jira, Notion.
+- More export targets: Linear, Jira, Notion. The GitHub Issues Markdown export is local; it does not create issues or connect to GitHub.
 - More note sources: Zoom and Microsoft Teams cloud transcripts, Otter, Fireflies.
 - Per-user calendars and personal workspaces.
 - Notes and extraction in languages other than English.

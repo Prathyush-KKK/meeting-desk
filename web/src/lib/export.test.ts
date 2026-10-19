@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Point } from "@/api/types";
-import { exportName, pointsToCsv, pointsToMarkdown } from "@/lib/export";
+import { exportName, pointsToCsv, pointsToGithubMarkdown, pointsToMarkdown } from "@/lib/export";
 
 function point(overrides: Partial<Point>): Point {
   return {
@@ -61,5 +61,44 @@ describe("exportName", () => {
   it("is the date and a slug of the title", () => {
     expect(exportName(MEETING)).toBe("2026-09-19-mobile-roadmap-review");
     expect(exportName({ title: "!!", date: null })).toBe("meeting");
+  });
+});
+
+
+describe("pointsToGithubMarkdown", () => {
+  it("exports one issue block per action, in input order, with meeting context", () => {
+    const md = pointsToGithubMarkdown(POINTS, MEETING);
+    expect(md).toContain('## Mirror the "rates" feed, then report');
+    expect(md).toContain("**Owner:** Daniel Okafor");
+    expect(md).toContain("**Due date:** 2026-10-03");
+    expect(md).toContain("**Meeting:** Mobile roadmap review (2026-09-19)");
+    expect(md).not.toContain("The Owner column holds a person");
+    expect(md.match(/^## /gm)).toHaveLength(2);
+    expect(md.indexOf('## Mirror')).toBeLessThan(md.indexOf('## =HYPERLINK'));
+  });
+
+  it("keeps multiline action text in the body and uses its first nonempty line as the title", () => {
+    const md = pointsToGithubMarkdown([point({ text: "\nSend the notes\nInclude the timeline\n\nKeep the appendix" })], MEETING);
+    expect(md).toContain("## Send the notes\n");
+    expect(md).toContain("### Description\n\nSend the notes\nInclude the timeline\n\nKeep the appendix");
+  });
+
+  it("handles missing metadata and falls back to the owner's email and natural-language due date", () => {
+    const md = pointsToGithubMarkdown([
+      point({ text: "Follow up", owner_email: "alex@example.com", due_text: "next Friday" }),
+      point({ text: "" }),
+    ], { title: "Planning", date: null });
+    expect(md).toContain("**Owner:** alex@example.com");
+    expect(md).toContain("**Due date:** next Friday");
+    expect(md).toContain("**Owner:** Unassigned");
+    expect(md).toContain("**Due date:** Not set");
+    expect(md).toContain("## Untitled action item");
+    expect(md).toContain("**Meeting:** Planning\n");
+    expect(md).not.toContain("null");
+  });
+
+  it("returns no issue blocks for an empty list or non-action points", () => {
+    expect(pointsToGithubMarkdown([], MEETING)).toBe("");
+    expect(pointsToGithubMarkdown([point({ kind: "decision", text: "Choose a plan" })], MEETING)).toBe("");
   });
 });

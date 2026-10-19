@@ -58,6 +58,26 @@ export function pointsToMarkdown(points: Point[], meeting: ExportMeeting): strin
   return lines.join("\n");
 }
 
+/** One copyable issue title and body per action item. No GitHub connection is needed. */
+export function pointsToGithubMarkdown(points: Point[], meeting: ExportMeeting): string {
+  const inline = (value: string) => value.replace(/\s+/g, " ").trim();
+  const context = `${inline(meeting.title)}${meeting.date ? ` (${meeting.date})` : ""}`;
+  return points.filter((p) => p.kind === "action").map((p) => {
+    const text = p.text.replace(/\r\n?/g, "\n").trim();
+    const title = text.split("\n").find((line) => line.trim())?.trim() || "Untitled action item";
+    const owner = inline(p.owner_text) || p.owner_email || "Unassigned";
+    const due = p.due_date ? p.due_date.slice(0, 10) : inline(p.due_text) || "Not set";
+    return [
+      `## ${title}`, "",
+      `**Owner:** ${owner}`,
+      `**Due date:** ${due}`,
+      `**Meeting:** ${context}`, "",
+      "### Description", "",
+      text || "Untitled action item", "",
+    ].join("\n");
+  }).join("\n---\n\n");
+}
+
 /** "Mobile roadmap review" on 2026-09-19 -> "2026-09-19-mobile-roadmap-review". */
 export function exportName(meeting: ExportMeeting): string {
   const slug = meeting.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "meeting";
