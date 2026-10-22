@@ -1,16 +1,40 @@
 version: 2
+# There is no hosted CI: every update is checked by hand with `make ci` before it is merged, so
+# minor and patch updates come grouped, one pull request per ecosystem a month. Majors still come
+# one at a time, since they are the ones that need reading.
 updates:
   - package-ecosystem: pip
     directory: /api
     schedule:
       interval: monthly
     open-pull-requests-limit: 5
+    groups:
+      python-minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # 0.137 nests routers in _IncludedRouter, which breaks the route labels in
+      # app/telemetry/middleware.py. Lift this once the middleware handles it.
+      - dependency-name: fastapi
+        versions: [">=0.137"]
   - package-ecosystem: npm
     directory: /web
     schedule:
       interval: monthly
     open-pull-requests-limit: 5
+    groups:
+      # react and react-dom must always be the same version.
+      react:
+        patterns: [react, react-dom, "@types/react", "@types/react-dom"]
+      web-minor-and-patch:
+        update-types: [minor, patch]
   - package-ecosystem: docker
     directory: /deploy
     schedule:
       interval: monthly
+    ignore:
+      # The image follows the versions the docs ask for (Python 3.12, Node 22 LTS). Moving them is
+      # a deliberate change to the docs and pyproject.toml, not a monthly bump.
+      - dependency-name: python
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: node
+        update-types: [version-update:semver-major]

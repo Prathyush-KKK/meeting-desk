@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Dependencies updated: SQLAlchemy 2.1, React 19.3.1 (with react-dom), google-cloud-aiplatform 2.5,
+  boto3 1.43, Ruff 0.17, and the nginx image behind `deploy/Dockerfile.web` to 1.29.
+
 ## [0.1.0] - 2026-10-18
 
 The first public release.

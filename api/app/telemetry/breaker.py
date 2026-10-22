@@ -40,7 +40,7 @@ class BreakerOpen(RuntimeError):
 
     def __init__(self, provider: str, retry_after_seconds: float = 0.0) -> None:
         super().__init__(
-            f"the circuit breaker for {provider} is open; retrying in " f"{int(retry_after_seconds) + 1} s"
+            f"the circuit breaker for {provider} is open; retrying in {int(retry_after_seconds) + 1} s"
         )
         self.provider = provider
         self.retry_after_seconds = retry_after_seconds

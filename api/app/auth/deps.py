@@ -19,9 +19,7 @@ from app.models import AllowListEntry, User
 
 LAST_SEEN_INTERVAL_SECONDS = 60
 
-NOT_ALLOWED = (
-    "This Google account is not on the Meeting Desk allow-list. Ask an admin to add it: " "{admins}."
-)
+NOT_ALLOWED = "This Google account is not on the Meeting Desk allow-list. Ask an admin to add it: {admins}."
 
 
 def get_config(request: Request) -> Settings:
