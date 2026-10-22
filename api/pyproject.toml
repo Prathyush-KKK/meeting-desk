@@ -43,7 +43,7 @@ anthropic = ["anthropic==1.15.0"]
 llm = ["google-cloud-aiplatform==2.5.0", "boto3==1.43.114", "anthropic==1.15.0"]
 dev = [
   "pytest==8.3.4",
-  "pytest-cov==6.0.0",
+  "pytest-cov==7.1.0",
   "ruff==0.17.1",
 ]
 
