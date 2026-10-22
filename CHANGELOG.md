@@ -13,8 +13,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
-- Dependencies updated: SQLAlchemy 2.1, React 19.3.1 (with react-dom), google-cloud-aiplatform 2.5,
-  boto3 1.43, Ruff 0.17, and the nginx image behind `deploy/Dockerfile.web` to 1.29.
+- Dependencies updated: SQLAlchemy 2.1.5, React 19.3.1 (with react-dom), google-cloud-aiplatform 2.5,
+  boto3 1.43, Ruff 0.17, pytest 9, pytest-cov 7, and the nginx image behind `deploy/Dockerfile.web`
+  to 1.31.
 - procrastinate 3.10. A database whose procrastinate schema came from 2.x needs procrastinate's 3.x
   SQL migrations; see docs/DEPLOY.md.
 

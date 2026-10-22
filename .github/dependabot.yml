@@ -16,6 +16,10 @@ updates:
       # app/telemetry/middleware.py. Lift this once the middleware handles it.
       - dependency-name: fastapi
         versions: [">=0.137"]
+      # 1.8+ switches to httpx2 when it is installed (the anthropic SDK installs it), and the httpx
+      # transports the OAuth tests inject cannot drive it: 6 tests fail on 1.9.1.
+      - dependency-name: authlib
+        versions: [">=1.8"]
   - package-ecosystem: npm
     directory: /web
     schedule:
