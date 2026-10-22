@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Export as GitHub Issues-ready Markdown: one block per action item with its title, owner, due
+  date and meeting, to paste into a new issue. Thanks to @hafizahmedzia (#24).
+
 ### Changed
 
 - Dependencies updated: SQLAlchemy 2.1, React 19.3.1 (with react-dom), google-cloud-aiplatform 2.5,
