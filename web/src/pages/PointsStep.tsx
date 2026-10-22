@@ -6,7 +6,7 @@ import { PointRow, SELECT_CLASS, ROW_GRID } from "@/components/PointRow";
 import { TransferLines } from "@/components/History";
 import { cn } from "@/lib/utils";
 import { useElapsedSeconds } from "@/lib/elapsed";
-import { download, exportName, pointsToCsv, pointsToMarkdown } from "@/lib/export";
+import { download, exportName, pointsToCsv, pointsToGithubMarkdown, pointsToMarkdown } from "@/lib/export";
 import { KIND_ORDER, KIND_TITLE, STATUSES, STATUS_LABEL, clip, fmtClock, mergeWorkstreams } from "@/lib/display";
 import {
   useAddPoint,
@@ -111,6 +111,7 @@ export function PointsStep({ meeting, onBack, onTransfer, onKeep }: Props) {
 
   const exportAs = (format: string) => {
     if (!points.length) return;
+    if (format === "github" && points.some((p) => p.kind === "action")) download(pointsToGithubMarkdown(points, meeting), `${exportName(meeting)}.github.md`, "text/markdown;charset=utf-8");
     if (format === "md") download(pointsToMarkdown(points, meeting), `${exportName(meeting)}.md`, "text/markdown;charset=utf-8");
     if (format === "csv") download(pointsToCsv(points, meeting), `${exportName(meeting)}.csv`, "text/csv;charset=utf-8");
   };
@@ -282,6 +283,7 @@ export function PointsStep({ meeting, onBack, onTransfer, onKeep }: Props) {
           <option value="">Export…</option>
           <option value="md">Markdown (.md)</option>
           <option value="csv">CSV (.csv)</option>
+          <option value="github" disabled={!points.some((p) => p.kind === "action")}>GitHub Issues (.md)</option>
         </select>
         <span className="hidden text-xs text-muted-foreground md:inline">After transfer, points leave this tool.</span>
         <Button variant="outline" className="h-9 md:ml-auto" onClick={onKeep}>Keep here</Button>

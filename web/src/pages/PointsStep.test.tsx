@@ -7,8 +7,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { download, pointsToGithubMarkdown } from "@/lib/export";
 import { PointsStep } from "@/pages/PointsStep";
 import type { ExtractionRecord, MeetingItem, Point, Transfer } from "@/api/types";
+
+vi.mock("@/lib/export", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/lib/export")>(),
+  download: vi.fn(),
+}));
 
 const h = vi.hoisted(() => ({
   extractions: [] as unknown[],
@@ -70,9 +76,28 @@ beforeEach(() => {
   h.transfers = [];
   h.transfersFor = [];
   h.extracting = false;
+  vi.mocked(download).mockClear();
 });
 
 describe("PointsStep", () => {
+  it("downloads the active action items as GitHub-ready Markdown and resets the menu", async () => {
+    h.points = [POINT, { ...POINT, id: "p-2", kind: "decision", text: "Choose the plan" }];
+    renderStep();
+    const menu = screen.getByRole("combobox", { name: "Export points" });
+    await userEvent.selectOptions(menu, "github");
+    expect(download).toHaveBeenCalledWith(pointsToGithubMarkdown(h.points as Point[], MEETING), "2026-09-22-vendor-call-with-maya.github.md", "text/markdown;charset=utf-8");
+    expect(menu).toHaveValue("");
+    await userEvent.selectOptions(menu, "github");
+    expect(download).toHaveBeenCalledTimes(2);
+  });
+
+  it("disables GitHub export when the active list has no action items", () => {
+    h.points = [{ ...POINT, kind: "decision" }];
+    renderStep();
+    expect(screen.getByRole("option", { name: "GitHub Issues (.md)" })).toBeDisabled();
+    expect(screen.getByRole("combobox", { name: "Export points" })).toBeEnabled();
+  });
+
   it("names the model and provider that actually answered", () => {
     h.extractions = [record({ provider: "fake", model: "rule-based", region: "local" })];
     renderStep();

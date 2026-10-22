@@ -114,6 +114,60 @@ async function main() {
       return `${rows} points`;
     });
 
+    await step("GitHub Markdown downloads only actions, with title, owner, due date and meeting context", async () => {
+      const menu = page.getByRole("combobox", { name: "Export points" });
+      await menu.focus();
+      await menu.press("Space");
+      await menu.press("Escape");
+      if (await menu.inputValue()) throw new Error("closing the menu changed its value");
+      const exported = page.waitForEvent("download");
+      await menu.selectOption("github");
+      const download = await exported;
+      if (!download.suggestedFilename().endsWith(".github.md")) throw new Error("unexpected export filename");
+      const stream = await download.createReadStream();
+      let markdown = "";
+      for await (const chunk of stream) markdown += chunk.toString();
+      const count = (markdown.match(/^## /gm) || []).length;
+      if (count !== 2) throw new Error(`exported ${count} issue blocks, expected 2 actions`);
+      for (const wanted of ["## Send the Northwind questionnaire", "## Mirror OpenRates", "**Owner:** Alex S", "**Due date:**", "**Meeting:** Vendor call with Maya"]) {
+        if (!markdown.includes(wanted)) throw new Error(`missing ${wanted}`);
+      }
+      if (markdown.includes("Owner column") || markdown.includes("no rollback plan")) throw new Error("exported a non-action point");
+      if (await page.getByRole("combobox", { name: "Export points" }).inputValue()) throw new Error("export menu did not reset");
+      await page.getByRole("button", { name: "Back", exact: true }).click();
+      await page.getByRole("button", { name: "Extract points", exact: true }).waitFor();
+      await page.getByRole("button", { name: /3.*Points/ }).click();
+      await menu.waitFor();
+      const repeated = page.waitForEvent("download");
+      await menu.selectOption("github");
+      if ((await repeated).suggestedFilename() !== download.suggestedFilename()) throw new Error("re-entering changed the export filename");
+      if (await menu.inputValue()) throw new Error("repeated export did not reset");
+      return `${count} action issues, repeated after Back and re-entry`;
+    });
+
+    await step("GitHub export is disabled for a list containing only non-action points", async () => {
+      const pattern = "**/api/points?**";
+      await page.route(pattern, async (route) => {
+        const response = await route.fetch();
+        const points = await response.json();
+        await route.fulfill({ response, json: points.filter((p) => p.kind !== "action") });
+      });
+      try {
+        await page.reload({ waitUntil: "networkidle" });
+        await unblockToasts();
+        const menu = page.getByRole("combobox", { name: "Export points" });
+        await menu.waitFor();
+        if (await menu.isDisabled()) throw new Error("regular exports should remain available");
+        if (!(await menu.locator('option[value="github"]').isDisabled())) throw new Error("GitHub export remained enabled without actions");
+      } finally {
+        await page.unroute(pattern);
+        await page.reload({ waitUntil: "networkidle" });
+        await unblockToasts();
+        await page.locator("[data-testid=point-row]").first().waitFor();
+      }
+      return "disabled without hiding Markdown or CSV";
+    });
+
     await step("actions arrive ticked, so Transfer is armed", async () => {
       const label = await page.locator("button", { hasText: /^Transfer \d+$/ }).first().innerText();
       return label;
