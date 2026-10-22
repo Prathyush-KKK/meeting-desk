@@ -10,11 +10,9 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
-from typing import Any, TypeVar
+from typing import Any
 
 from app.google.interface import AuthExpired, GoogleError, NotFoundError, PermissionDenied, RateLimited
-
-T = TypeVar("T")
 
 SKIPPABLE: tuple[type[GoogleError], ...] = (PermissionDenied, NotFoundError, RateLimited, AuthExpired)
 
@@ -53,7 +51,7 @@ class Pick:
         return max(limits, key=lambda exc: exc.retry_after_seconds)
 
 
-def first_able(
+def first_able[T](
     emails: Iterable[str],
     attempt: Callable[[str], T],
     accept: Callable[[T], bool] | None = None,
