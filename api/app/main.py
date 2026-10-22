@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-from fastapi import FastAPI, Request
+from fastapi import APIRouter, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
@@ -33,10 +33,21 @@ from app.config import (
     get_settings,
 )
 from app.google.interface import AuthExpired, GoogleError, NotFoundError, PermissionDenied, RateLimited
-from app.routes import ROUTERS
+from app.routes import admin, extract, meetings, notes, points, sheets, transfers, workbooks
 from app.runtime import Runtime
 from app.telemetry import TelemetryMiddleware, configure_logging, metrics, provider_telemetry
 from app.telemetry.server import MetricsServer
+
+ROUTERS: list[APIRouter] = [
+    meetings.router,
+    notes.router,
+    extract.router,
+    points.router,
+    workbooks.router,
+    transfers.router,
+    sheets.router,
+    admin.router,
+]
 
 
 @asynccontextmanager

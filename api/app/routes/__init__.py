@@ -1,20 +1,6 @@
-"""Every router the app mounts."""
+"""The API's route groups, one module each. ``app/main.py`` mounts them.
 
-from __future__ import annotations
-
-from fastapi import APIRouter
-
-from app.routes import admin, extract, meetings, notes, points, sheets, transfers, workbooks
-
-ROUTERS: list[APIRouter] = [
-    meetings.router,
-    notes.router,
-    extract.router,
-    points.router,
-    workbooks.router,
-    transfers.router,
-    sheets.router,
-    admin.router,
-]
-
-__all__ = ["ROUTERS"]
+Deliberately empty: the job modules import helpers from ``app.routes.common``, and the admin
+routes import the jobs, so a package ``__init__`` that imported every router would make
+``python -m app.jobs.queue`` (the worker) fail on a circular import.
+"""

@@ -123,6 +123,11 @@ procrastinate's own tables are **not** in Alembic; install them once per databas
 kubectl -n meeting-desk exec deploy/meeting-desk-api -- python -m app.jobs.schema
 ```
 
+`apply_schema` is for an empty database. When a release moves procrastinate to a version with new
+SQL migrations (they ship in the package, under `procrastinate/sql/migrations/`), apply the ones
+newer than your current version in name order: the `_pre_` files before the new pods start, the
+`_post_` files after.
+
 Then, in the app: sign in, add the allow-list entries on **Admin**, and **Connect an account**
 twice (the Admin page warns until there are two - reads fall back across connections).
 

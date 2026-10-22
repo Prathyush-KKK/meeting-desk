@@ -15,6 +15,15 @@ All notable changes to this project are documented here. The format follows
 
 - Dependencies updated: SQLAlchemy 2.1, React 19.3.1 (with react-dom), google-cloud-aiplatform 2.5,
   boto3 1.43, Ruff 0.17, and the nginx image behind `deploy/Dockerfile.web` to 1.29.
+- procrastinate 3.10. A database whose procrastinate schema came from 2.x needs procrastinate's 3.x
+  SQL migrations; see docs/DEPLOY.md.
+
+### Fixed
+
+- The background worker (`python -m app.jobs.queue`, the chart's worker) and `python -m
+  app.jobs.schema` crashed on start with a circular import, and procrastinate 2.15 could not open
+  its listener connection with psycopg-pool 3.3. With `JOBS_ENABLED=1`, extractions now run on the
+  worker as documented.
 
 ## [0.1.0] - 2026-10-18
 

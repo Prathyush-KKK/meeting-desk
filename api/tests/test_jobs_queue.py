@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import os
+import subprocess
+import sys
 import uuid
 from datetime import timedelta
 from pathlib import Path
@@ -234,3 +237,32 @@ def test_health_reports_the_queue(tmp_path: Path) -> None:
     app, _ = _queued_app(tmp_path)
     with TestClient(app) as client:
         assert client.get("/health").json()["jobs"] is True
+
+
+# --- the entry points -------------------------------------------------------------------------------------
+
+API_DIR = Path(__file__).resolve().parents[1]
+
+
+def _fresh_python(*args: str) -> subprocess.CompletedProcess[str]:
+    """A new interpreter: the tests import app.main first, which hides an import cycle that only
+    shows when a job module is the first thing loaded, as it is in the worker."""
+    env = {k: v for k, v in os.environ.items() if k not in ("DATABASE_URL", "JOBS_ENABLED")}
+    return subprocess.run(
+        [sys.executable, *args], cwd=API_DIR, env=env, capture_output=True, text=True, timeout=60
+    )
+
+
+@pytest.mark.parametrize(
+    "module", ["app.jobs.queue", "app.jobs.schema", "app.jobs", "app.notes_store", "app.main"]
+)
+def test_every_entry_module_imports_on_its_own(module: str) -> None:
+    result = _fresh_python("-c", f"import {module}")
+    assert result.returncode == 0, result.stderr
+
+
+def test_the_worker_starts_and_stops_on_its_own_config_check() -> None:
+    """``python -m app.jobs.queue`` is what the chart's worker runs. With jobs off it must reach
+    the settings check, not die on an import."""
+    result = _fresh_python("-m", "app.jobs.queue")
+    assert "JOBS_ENABLED is off" in result.stderr, result.stderr
