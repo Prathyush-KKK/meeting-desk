@@ -29,7 +29,7 @@ dependencies = [
   "python-dateutil==2.9.0.post0",
   "psycopg[binary]==3.3.6",
   "psycopg-pool>=3.2",
-  "procrastinate==2.15.1",
+  "procrastinate==3.10.0",
   # Telemetry per docs/TELEMETRY.md; /metrics on its own port.
   "prometheus-client==0.26.0",
 ]
