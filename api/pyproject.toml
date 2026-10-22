@@ -14,7 +14,7 @@ dependencies = [
   # Floor for the Range-header DoS fix in FileResponse (the SPA is served through StaticFiles).
   "starlette>=0.49.1",
   "uvicorn[standard]==0.54.0",
-  "sqlalchemy==2.1.4",
+  "sqlalchemy==2.1.5",
   "alembic==1.20.0",
   "pydantic==2.14.1",
   "pydantic-settings==2.16.0",
@@ -22,7 +22,7 @@ dependencies = [
   # authlib runs the OAuth flows (1.7.x: 1.8 switches to httpx2 when it is installed, which the
   # httpx transports the tests inject cannot drive); cryptography (Fernet) keeps refresh tokens at rest.
   "httpx==0.28.1",
-  "authlib==1.7.2",
+  "authlib==1.9.1",
   "cryptography>=46.0.0",
   "itsdangerous==2.2.0",
   "dateparser==1.4.3",
