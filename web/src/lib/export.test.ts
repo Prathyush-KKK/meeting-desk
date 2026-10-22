@@ -64,7 +64,6 @@ describe("exportName", () => {
   });
 });
 
-
 describe("pointsToGithubMarkdown", () => {
   it("exports one issue block per action, in input order, with meeting context", () => {
     const md = pointsToGithubMarkdown(POINTS, MEETING);
@@ -95,6 +94,15 @@ describe("pointsToGithubMarkdown", () => {
     expect(md).toContain("## Untitled action item");
     expect(md).toContain("**Meeting:** Planning\n");
     expect(md).not.toContain("null");
+  });
+
+  it("shortens a long title and keeps the whole text in the description", () => {
+    const long = `Draft the migration plan ${"for every regional team ".repeat(8)}`.trim();
+    const md = pointsToGithubMarkdown([point({ text: long })], MEETING);
+    const title = md.split("\n")[0].slice(3);
+    expect(title).toHaveLength(100);
+    expect(title.endsWith("…")).toBe(true);
+    expect(md).toContain(`### Description\n\n${long}\n`);
   });
 
   it("returns no issue blocks for an empty list or non-action points", () => {

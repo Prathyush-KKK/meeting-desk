@@ -146,7 +146,7 @@ async function main() {
     });
 
     await step("GitHub export is disabled for a list containing only non-action points", async () => {
-      const pattern = "**/api/points?**";
+      const pattern = "**/points?**";
       await page.route(pattern, async (route) => {
         const response = await route.fetch();
         const points = await response.json();

@@ -181,7 +181,8 @@ Prometheus metrics.
 
 These are ideas, and contributions are welcome:
 
-- More export targets: Linear, Jira, Notion. The GitHub Issues Markdown export is local; it does not create issues or connect to GitHub.
+- More export targets: Linear, Jira, Notion, and creating GitHub issues directly (the GitHub Issues
+  export today is a Markdown file to paste from).
 - More note sources: Zoom and Microsoft Teams cloud transcripts, Otter, Fireflies.
 - Per-user calendars and personal workspaces.
 - Notes and extraction in languages other than English.

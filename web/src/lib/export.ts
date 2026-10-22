@@ -3,7 +3,7 @@
 // already shows; nothing leaves the tool except the file the person saves.
 
 import type { Point } from "@/api/types";
-import { KIND_ORDER, KIND_TITLE, STATUS_LABEL } from "@/lib/display";
+import { KIND_ORDER, KIND_TITLE, STATUS_LABEL, clip } from "@/lib/display";
 
 export interface ExportMeeting {
   title: string;
@@ -58,13 +58,16 @@ export function pointsToMarkdown(points: Point[], meeting: ExportMeeting): strin
   return lines.join("\n");
 }
 
+/** A GitHub issue title over this reads badly in lists; the full text stays in the description. */
+const ISSUE_TITLE_MAX = 100;
+
 /** One copyable issue title and body per action item. No GitHub connection is needed. */
 export function pointsToGithubMarkdown(points: Point[], meeting: ExportMeeting): string {
   const inline = (value: string) => value.replace(/\s+/g, " ").trim();
   const context = `${inline(meeting.title)}${meeting.date ? ` (${meeting.date})` : ""}`;
   return points.filter((p) => p.kind === "action").map((p) => {
     const text = p.text.replace(/\r\n?/g, "\n").trim();
-    const title = text.split("\n").find((line) => line.trim())?.trim() || "Untitled action item";
+    const title = clip(text.split("\n").find((line) => line.trim())?.trim() || "Untitled action item", ISSUE_TITLE_MAX);
     const owner = inline(p.owner_text) || p.owner_email || "Unassigned";
     const due = p.due_date ? p.due_date.slice(0, 10) : inline(p.due_text) || "Not set";
     return [
