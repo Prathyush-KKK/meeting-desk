@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
+import { CompressionStream, DecompressionStream } from "node:stream/web";
 import { afterEach } from "vitest";
 
 import { configureDisplay } from "@/lib/display";
@@ -54,4 +55,31 @@ for (const [property, value] of [
       return this.dataset.rows === undefined ? 0 : value;
     },
   });
+}
+
+// jsdom has no compression streams. Node's are the same Web API the browser has, so .docx uploads
+// (lib/transcript.ts) inflate through the same code here as in a browser.
+if (!("DecompressionStream" in globalThis)) {
+  Object.assign(globalThis, { CompressionStream, DecompressionStream });
+}
+
+// Nor Blob.text() / Blob.arrayBuffer(), which every current browser has; the upload reads files
+// through them. FileReader, which jsdom does have, stands in.
+for (const [method, read] of [
+  ["text", "readAsText"],
+  ["arrayBuffer", "readAsArrayBuffer"],
+] as const) {
+  if (typeof Blob.prototype[method] !== "function") {
+    Object.defineProperty(Blob.prototype, method, {
+      configurable: true,
+      value(this: Blob) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(reader.error);
+          reader[read](this);
+        });
+      },
+    });
+  }
 }

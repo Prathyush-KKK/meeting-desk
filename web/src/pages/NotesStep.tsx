@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { shortName } from "@/lib/display";
 import { useElapsedSeconds } from "@/lib/elapsed";
-import { UPLOAD_ACCEPT, UPLOAD_MAX_BYTES, uploadText } from "@/lib/transcript";
+import { UPLOAD_ACCEPT, UPLOAD_MAX_BYTES, readUpload } from "@/lib/transcript";
 import {
   ExtractionCancelled,
   useDeleteNote,
@@ -92,7 +92,7 @@ export function NotesStep({ meeting, onBack, onExtracted }: Props) {
     if (!file) return;
     try {
       if (file.size > UPLOAD_MAX_BYTES) throw new Error(`${file.name} is over 2 MB. Paste the part that matters instead.`);
-      const text = uploadText(file.name, await file.text());
+      const text = await readUpload(file);
       const result = await pasteNote.mutateAsync({ text, title: file.name, source: "upload" });
       if (result.truncated) toast.message("Long file: only the first 200k characters go to the model.");
       toast.success(result.created ? `Saved ${file.name}` : "That text was already saved");
@@ -226,7 +226,7 @@ export function NotesStep({ meeting, onBack, onExtracted }: Props) {
               className="ml-auto h-8"
               disabled={pasteNote.isPending}
               onClick={() => fileInput.current?.click()}
-              title="A transcript or notes file: .txt, .md, .vtt (Meet, Zoom, Teams) or .srt"
+              title="A transcript or notes file: .txt, .md, .vtt, .srt or .docx (Meet, Zoom, Teams)"
             >
               Upload file
             </Button>
@@ -245,7 +245,7 @@ export function NotesStep({ meeting, onBack, onExtracted }: Props) {
               e.preventDefault();
               void uploadFile(file);
             }}
-            placeholder="Paste notes, a transcript or a summary - or drop a .txt, .md, .vtt or .srt file here"
+            placeholder="Paste notes, a transcript or a summary - or drop a .txt, .md, .vtt, .srt or .docx file here"
             className="min-h-[180px] flex-1 resize-none text-[13px] leading-relaxed md:min-h-[220px]"
           />
         </div>

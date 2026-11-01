@@ -32,8 +32,10 @@ too, so your notes never leave your machine.
 - **Meetings from Google Calendar.** Recent and upcoming events from every connected account, merged
   and de-duplicated, or add a meeting by hand.
 - **Notes from wherever they are.** It finds the meeting's *Notes by Gemini* doc (including the
-  transcript tab) and the Gemini recap email. You can also paste text, or upload a **.txt, .md,
-  .vtt or .srt** transcript from Google Meet, Zoom or Microsoft Teams.
+  transcript tab) and the Gemini recap email. You can also paste text, or upload a transcript
+  from Google Meet, Zoom or Microsoft Teams: **.vtt, .srt, .txt** (Zoom's and Teams' saved
+  transcripts become "Speaker: words" lines), **.docx** (Teams' download, read in the browser) or
+  **.md**.
 - **AI extraction you can trust.** Action items, decisions, risks and questions come back in one
   strict JSON schema. Owners are matched to attendees and your directory, and "by Friday" becomes a
   date, both by code rather than by the model. When two people in the room have near-identical
