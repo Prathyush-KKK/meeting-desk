@@ -38,8 +38,8 @@ dependencies = [
 # (OpenAI, Ollama, OpenRouter, ...) needs none of them: it is plain httpx.
 vertex = ["google-cloud-aiplatform==2.5.0"]
 bedrock = ["boto3==1.43.114"]
-anthropic = ["anthropic==1.15.0"]
-llm = ["google-cloud-aiplatform==2.5.0", "boto3==1.43.114", "anthropic==1.15.0"]
+anthropic = ["anthropic==2.3.0"]
+llm = ["google-cloud-aiplatform==2.5.0", "boto3==1.43.114", "anthropic==2.3.0"]
 dev = [
   "pytest==9.1.1",
   "pytest-cov==7.1.0",
