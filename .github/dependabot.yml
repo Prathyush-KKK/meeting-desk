@@ -11,6 +11,11 @@ updates:
     groups:
       python-minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # botocore (Bedrock) and google-cloud-bigquery (Vertex) require python-dateutil < 3, so the
+      # [llm] install would not resolve. Lift this once they allow 3.
+      - dependency-name: python-dateutil
+        versions: [">=3"]
   - package-ecosystem: npm
     directory: /web
     schedule:

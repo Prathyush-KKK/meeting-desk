@@ -149,7 +149,7 @@ function PointText({ value, onChange }: { value: string; onChange: (text: string
       placeholder="Describe the point"
       aria-label="Point"
       data-testid="point-text-phone"
-      className="min-h-11 min-w-0 flex-1 resize-none overflow-hidden rounded-md border border-transparent bg-transparent px-1 py-[11px] text-[13px] leading-5 placeholder:text-muted-foreground hover:border-input focus:border-input focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      className="min-h-11 min-w-0 flex-1 resize-none overflow-hidden rounded-md border border-transparent bg-transparent px-1 py-[11px] text-[13px] leading-5 placeholder:text-muted-foreground hover:border-input focus:border-input focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
     />
   );
 }
