@@ -15,7 +15,7 @@ from fastapi.testclient import TestClient
 from app.telemetry import events
 from app.telemetry.logs import JsonFormatter, configure_logging, log_event, set_request_id
 from app.telemetry.metrics import BUILD_INFO_METRIC, DURATION_BUCKETS, REQUIRED_METRIC_NAMES, metrics
-from app.telemetry.middleware import REQUEST_ID_HEADER
+from app.telemetry.middleware import REQUEST_ID_HEADER, flattened_routes
 from app.telemetry.providers import provider_telemetry
 from app.telemetry.server import make_metrics_app
 from tests.conftest import make_settings
@@ -100,7 +100,7 @@ def test_the_metrics_app_answers_nothing_else() -> None:
 
 def test_metrics_is_not_a_route_on_the_api(client: TestClient) -> None:
     """docs/TELEMETRY.md: a separate container port, never mounted on the app router."""
-    paths = {getattr(route, "path", "") for route in client.app.routes}
+    paths = {getattr(route, "path", "") for route in flattened_routes(client.app.routes)}
     assert "/metrics" not in paths
     answer = client.get("/metrics")
     assert answer.status_code == 404

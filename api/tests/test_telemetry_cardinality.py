@@ -20,7 +20,7 @@ from fastapi.testclient import TestClient
 
 from app.main import create_app
 from app.telemetry.metrics import STATUS_CLASSES, metrics
-from app.telemetry.middleware import UNMATCHED, route_index
+from app.telemetry.middleware import UNMATCHED, flattened_routes, route_index
 from app.telemetry.providers import OUTCOMES, PROVIDERS, ops_for
 from tests.conftest import connect_fixture_workbook, make_settings, saved_meeting_id
 
@@ -90,7 +90,7 @@ def test_no_path_parameter_value_reaches_a_route_label(client: TestClient) -> No
 
     labels = route_labels()
     assert labels, "no requests were recorded"
-    declared = {route.path for route in client.app.routes if isinstance(route, APIRoute)}
+    declared = {route.path for route in flattened_routes(client.app.routes) if isinstance(route, APIRoute)}
     # Whatever answers an unknown path: the one unmatched bucket, or - with the SPA mounted - the
     # mount's single templated label. Either way it is one label, not one per URL ever requested.
     catch_all = {UNMATCHED} | {
@@ -108,8 +108,8 @@ def test_no_path_parameter_value_reaches_a_route_label(client: TestClient) -> No
 
 
 def test_http_series_bound_is_derived_from_the_route_table(client: TestClient) -> None:
-    routes = list(client.app.routes)
-    index = route_index(routes)
+    index = route_index(list(client.app.routes))
+    routes = flattened_routes(client.app.routes)
     paths = set(index.values()) | {UNMATCHED}
 
     methods_used: dict[str, set[str]] = {}

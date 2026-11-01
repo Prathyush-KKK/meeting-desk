@@ -46,10 +46,38 @@ REQUEST_ID_HEADER = "x-request-id"
 UNMATCHED = "__unmatched__"
 
 
+def _included(route: object) -> list | None:
+    """The routes under an included router, or None for a plain route.
+
+    From FastAPI 0.137 ``app.routes`` holds one ``_IncludedRouter`` per ``include_router`` call
+    instead of its routes; it has no path or endpoint of its own and its ``matches`` says nothing
+    about which route matched. ``effective_route_contexts()`` lists the routes underneath with
+    their full paths, which is what FastAPI itself matches against. Older FastAPI lists the routes
+    themselves.
+    """
+    contexts = getattr(route, "effective_route_contexts", None)
+    return list(contexts()) if callable(contexts) else None
+
+
+def flattened_routes(routes: list) -> list:
+    """The route table in matching order, each included router replaced by its routes."""
+    out: list = []
+    for route in routes:
+        contexts = _included(route)
+        out.extend([c.original_route for c in contexts] if contexts is not None else [route])
+    return out
+
+
 def route_index(routes: list) -> dict[int, str]:
     """endpoint -> the route's declared path. Built once, after the routers are registered."""
     index: dict[int, str] = {}
     for route in routes:
+        contexts = _included(route)
+        if contexts is not None:
+            for context in contexts:
+                if context.endpoint is not None and context.path:
+                    index.setdefault(id(context.endpoint), context.path)
+            continue
         path = getattr(route, "path", "")
         if isinstance(route, Mount):
             # The SPA mount at "/" answers every unknown path; one label for all of it.
@@ -75,9 +103,9 @@ class TelemetryMiddleware:
 
     def _routes(self, scope: Scope) -> list:
         if self._index is None:
-            app = scope.get("app")
-            self._routes_holder = list(getattr(app, "routes", []) or [])
-            self._index = route_index(self._routes_holder)
+            routes = list(getattr(scope.get("app"), "routes", []) or [])
+            self._routes_holder = flattened_routes(routes)
+            self._index = route_index(routes)
         return self._routes_holder
 
     def _predict_route(self, scope: Scope) -> str:
