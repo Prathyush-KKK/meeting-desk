@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Grid, MARK_CLASS, type CellMark } from "@/components/Grid";
+import { Grid } from "@/components/Grid";
+import { MARK_CLASS, type CellMark } from "@/components/marks";
 import { ConnectWorkbook } from "@/components/ConnectWorkbook";
 import {
   a1,

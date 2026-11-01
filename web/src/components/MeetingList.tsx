@@ -1,6 +1,7 @@
 import type { MouseEvent } from "react";
 import { Eye, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { itemKey } from "@/lib/meetings";
 import { cn } from "@/lib/utils";
 import { dayGroup, displayToday, fmtDate, plural, type DayGroup } from "@/lib/display";
 import type { MeetingItem } from "@/api/types";
@@ -17,11 +18,6 @@ const GROUPS: { key: DayGroup; label: string }[] = [
   { key: "today", label: "Today" },
   { key: "earlier", label: "Earlier" },
 ];
-
-/** A calendar card has no row yet, so it is keyed on the event id until it is captured. */
-export function itemKey(item: MeetingItem): string {
-  return item.id ?? `event:${item.calendar_event_id ?? item.ical_uid ?? item.title}`;
-}
 
 interface Props {
   items: MeetingItem[];

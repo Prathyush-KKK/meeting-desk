@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -82,12 +82,17 @@ export function SheetsPage({ selection, onSelect, me }: Props) {
   const server = tab.data?.layout;
   const me_handle = shortName(me.email).split(".")[0];
 
-  useEffect(() => {
+  // Another workbook or tab starts clean: no staged edits, clashes, picked row or filter. Reset
+  // while rendering, the moment the key changes, rather than in an effect a render later.
+  const tabKey = `${wb?.id ?? ""}/${tabMeta?.sheet_id ?? ""}`;
+  const [shownTab, setShownTab] = useState(tabKey);
+  if (shownTab !== tabKey) {
+    setShownTab(tabKey);
     setPending(new Map());
     setClashes([]);
     setAboveRow(null);
     setFilter("all");
-  }, [wb?.id, tabMeta?.sheet_id]);
+  }
 
   const rowIndexes = useMemo(() => {
     if (!values.length) return [];

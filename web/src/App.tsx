@@ -12,19 +12,10 @@ import { cn } from "@/lib/utils";
 import { useNarrow } from "@/lib/overlay";
 import { ApiError, apiUrl } from "@/api/client";
 import { useConnectionStatus, useMe, useMeetings } from "@/api/hooks";
-import { configureDisplay } from "@/lib/display";
+import { configureDisplay, toastPosition } from "@/lib/display";
 
 type Page = "capture" | "sheets" | "admin";
 
-/**
- * Bottom right is where every step keeps its primary button (Continue, Transfer, Insert and
- * write, Save to Sheet), and a toast with Undo would sit on it for ten seconds. From
- * 768 px the bottom centre only ever covers hint text; on a phone the bottom is all buttons, so the
- * toast goes to the top, over the page tabs for as long as it lasts.
- */
-export function toastPosition(narrow: boolean): "top-center" | "bottom-center" {
-  return narrow ? "top-center" : "bottom-center";
-}
 type WizardStep = "meeting" | "notes" | "points" | "transfer";
 
 const STEPS: { key: WizardStep; label: string }[] = [

@@ -1,7 +1,8 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { MeetingList, itemKey } from "./MeetingList";
+import { itemKey } from "@/lib/meetings";
+import { MeetingList } from "./MeetingList";
 import type { MeetingItem } from "@/api/types";
 
 function meeting(over: Partial<MeetingItem>): MeetingItem {

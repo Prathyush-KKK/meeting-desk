@@ -308,7 +308,7 @@ const PROVIDER: Record<string, string> = {
 };
 
 /** "Vertex AI asia-south1", or "Amazon Bedrock ap-south-1, after Vertex AI failed". */
-export function providerLabel(e: { provider: string; region: string | null; fallback_from: string | null }): string {
+function providerLabel(e: { provider: string; region: string | null; fallback_from: string | null }): string {
   const name = PROVIDER[e.provider] ?? e.provider;
   const region = e.region && e.region !== "local" ? ` ${e.region}` : "";
   const fallback = e.fallback_from ? `, after ${PROVIDER[e.fallback_from] ?? e.fallback_from} failed` : "";

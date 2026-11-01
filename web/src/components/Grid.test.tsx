@@ -4,7 +4,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Grid, MARK_CLASS, VIRTUALIZE_OVER, type CellMark } from "@/components/Grid";
+import { Grid, VIRTUALIZE_OVER } from "@/components/Grid";
+import { MARK_CLASS, type CellMark } from "@/components/marks";
 import { detectLayout } from "@/lib/sheet";
 
 function sheet(dataRows: number): string[][] {
