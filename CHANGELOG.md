@@ -10,6 +10,9 @@ All notable changes to this project are documented here. The format follows
 
 - Export as GitHub Issues-ready Markdown: one block per action item with its title, owner, due
   date and meeting, to paste into a new issue. Thanks to @hafizahmedzia (#24).
+- Zoom and Teams transcripts: their saved `.txt` transcripts ("[Name] 10:02:15" or "Name   0:03"
+  before each turn) and Teams' `.docx` download become "Speaker: words" lines, like `.vtt` files.
+  The `.docx` is unpacked in the browser; nothing new is installed or uploaded.
 
 ### Changed
 
