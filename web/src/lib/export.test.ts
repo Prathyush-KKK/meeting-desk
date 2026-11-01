@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Point } from "@/api/types";
-import { exportName, pointsToCsv, pointsToGithubMarkdown, pointsToMarkdown } from "@/lib/export";
+import { exportName, pointsToCsv, pointsToGithubMarkdown, pointsToJiraCsv, pointsToMarkdown, pointsToNotionCsv } from "@/lib/export";
 
 function point(overrides: Partial<Point>): Point {
   return {
@@ -108,5 +108,100 @@ describe("pointsToGithubMarkdown", () => {
   it("returns no issue blocks for an empty list or non-action points", () => {
     expect(pointsToGithubMarkdown([], MEETING)).toBe("");
     expect(pointsToGithubMarkdown([point({ kind: "decision", text: "Choose a plan" })], MEETING)).toBe("");
+  });
+});
+
+/** A CSV parsed back into rows, quotes and all: what an importer would read. */
+function parseCsv(csv: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = "";
+  let quoted = false;
+  for (let i = 0; i < csv.length; i++) {
+    const ch = csv[i];
+    if (quoted && ch === '"' && csv[i + 1] === '"') {
+      cell += '"';
+      i++;
+    } else if (ch === '"') {
+      quoted = !quoted;
+    } else if (quoted || (ch !== "," && ch !== "\n" && ch !== "\r")) {
+      cell += ch;
+    } else if (ch === ",") {
+      row.push(cell);
+      cell = "";
+    } else if (ch === "\n") {
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = "";
+    }
+  }
+  return rows;
+}
+
+describe("pointsToJiraCsv", () => {
+  it("is one Task per action with Jira's field names, the owner's email and an ISO due date", () => {
+    const [header, ...rows] = parseCsv(pointsToJiraCsv(POINTS, MEETING));
+    expect(header).toEqual(["Summary", "Description", "Issue Type", "Assignee", "Due date", "Labels"]);
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toEqual([
+      'Mirror the "rates" feed, then report',
+      'Mirror the "rates" feed, then report\n\nFrom the meeting "Mobile roadmap review" on 2026-09-19.',
+      "Task",
+      "daniel.okafor@example.com",
+      "2026-10-03",
+      "meeting-desk Mobile",
+    ]);
+    expect(rows[1][0]).toBe("'=HYPERLINK(1)");
+  });
+
+  it("keeps an owner or due date it could not resolve in the description, and makes labels Jira-safe", () => {
+    const [, row] = parseCsv(
+      pointsToJiraCsv([point({ text: "Line one\nLine two", owner_text: "Sam", due_text: "after the offsite", workstream: "Prod ops" })], {
+        title: "Ops sync",
+        date: null,
+      }),
+    );
+    expect(row[0]).toBe("Line one");
+    expect(row[1]).toBe('Line one\nLine two\n\nFrom the meeting "Ops sync".\nOwner named in the notes: Sam.\nDue: after the offsite.');
+    expect(row[3]).toBe("");
+    expect(row[4]).toBe("");
+    expect(row[5]).toBe("meeting-desk Prod-ops");
+  });
+
+  it("cuts a summary at Jira's 255 characters", () => {
+    const [, row] = parseCsv(pointsToJiraCsv([point({ text: "x".repeat(400) })], MEETING));
+    expect(row[0]).toHaveLength(255);
+  });
+
+  it("has only the header without action items", () => {
+    expect(parseCsv(pointsToJiraCsv([POINTS[0]], MEETING))).toHaveLength(1);
+  });
+});
+
+describe("pointsToNotionCsv", () => {
+  it("puts the point first, as Notion's title column, and keeps every kind", () => {
+    const [header, ...rows] = parseCsv(pointsToNotionCsv(POINTS, MEETING));
+    expect(header[0]).toBe("Name");
+    expect(header).toContain("Due date");
+    expect(rows.map((r) => r[1])).toEqual(["action", "action", "decision"]);
+    expect(rows[0]).toEqual([
+      'Mirror the "rates" feed, then report',
+      "action",
+      "Daniel Okafor",
+      "daniel.okafor@example.com",
+      "2026-10-03",
+      "",
+      "open",
+      "Mobile",
+      "Mobile roadmap review",
+      "2026-09-19",
+    ]);
+  });
+
+  it("keeps a due phrase it could not turn into a date", () => {
+    const [, row] = parseCsv(pointsToNotionCsv([point({ text: "Plan", due_text: "after the offsite" })], MEETING));
+    expect(row[4]).toBe("");
+    expect(row[5]).toBe("after the offsite");
   });
 });

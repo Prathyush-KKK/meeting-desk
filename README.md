@@ -51,9 +51,13 @@ too, so your notes never leave your machine.
   - **Undo** works for 10 minutes after a write.
 - **Edit the sheet in place.** Browse and filter any connected tab, edit cells with the sheet's own
   dropdown values, and add rows above any row.
-- **Export anywhere else.** Copy as text, or download as **Markdown** or **CSV** for a doc, an
-  issue tracker or another spreadsheet. **GitHub Issues-ready Markdown** gives each action item
-  its own title, owner, due date and meeting context, ready to paste into a new issue.
+- **Export anywhere else.** Copy as text, or download as **Markdown** or **CSV** for a doc or
+  another spreadsheet. For trackers there are ready-made files:
+  - **Jira** (`.csv` for "Import issues from CSV"): one Task per action item, assignee by email,
+    due date as `yyyy-MM-dd`.
+  - **Notion** (`.csv` to import as a database): every point, with the point as the page title.
+  - **GitHub Issues** (`.md`): a title, owner, due date and meeting for each action item, to paste
+    into a new issue.
 - **Tell the team.** Each transfer can post a summary to **Slack**, **Google Chat**, Mattermost or
   Discord through an incoming webhook (`NOTIFY_WEBHOOK_URL`).
 - **Works with a personal Google account.** `GOOGLE_USE_GMAIL=0` and `GOOGLE_USE_DIRECTORY=0` leave
@@ -183,8 +187,8 @@ Prometheus metrics.
 
 These are ideas, and contributions are welcome:
 
-- More export targets: Linear, Jira, Notion, and creating GitHub issues directly (the GitHub Issues
-  export today is a Markdown file to paste from).
+- More export targets: Linear, and creating issues in Jira, Linear or GitHub directly through their
+  APIs (today's Jira, Notion and GitHub exports are files to import or paste).
 - More note sources: Zoom and Microsoft Teams cloud transcripts, Otter, Fireflies.
 - Per-user calendars and personal workspaces.
 - More languages for due-date shorthand (German, French, Spanish, Portuguese, Italian and Dutch are
