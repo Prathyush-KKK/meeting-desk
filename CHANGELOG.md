@@ -27,6 +27,8 @@ All notable changes to this project are documented here. The format follows
   to 1.31.
 - procrastinate 3.10. A database whose procrastinate schema came from 2.x needs procrastinate's 3.x
   SQL migrations; see docs/DEPLOY.md.
+- Web toolchain: Tailwind CSS 4 (still reading `tailwind.config.js` through `@config`), TypeScript
+  7, Vitest 5, Playwright 1.64. The anthropic SDK is on 2.x.
 - FastAPI 0.143 and Authlib 1.9, no longer held back. The metrics middleware reads FastAPI's
   nested router table, and "Connect an account" makes its token and userinfo requests through
   httpx itself (Authlib's client moved to httpx2).
