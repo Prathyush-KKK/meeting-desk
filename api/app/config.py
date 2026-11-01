@@ -106,6 +106,9 @@ class Settings(BaseSettings):
     # --- behaviour --------------------------------------------------------------------------
     # The IANA zone every time is shown in (meeting list, manual meetings, due dates, "read HH:MM").
     display_timezone: str = "UTC"
+    # The languages the notes are written in, as ISO 639-1 codes ("en,de"): due phrases such as
+    # "bis Freitag" are read in these (app/date_languages.py). English is always included.
+    notes_languages: str = "en"
     # The workstreams offered on a meeting, comma-separated. Anything already on a meeting is added.
     workstreams: str = "Product,Engineering,Design,Growth,Operations,Hiring"
     calendar_cache_seconds: int = 60
@@ -169,6 +172,10 @@ class Settings(BaseSettings):
         if self.bedrock_model_id.strip():
             self.bedrock_model = self.bedrock_model_id.strip()
         return self
+
+    @property
+    def notes_language_list(self) -> list[str]:
+        return list(dict.fromkeys(c.strip() for c in self.notes_languages.split(",") if c.strip()))
 
     @property
     def workstream_list(self) -> list[str]:

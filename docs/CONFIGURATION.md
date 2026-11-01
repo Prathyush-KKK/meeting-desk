@@ -31,6 +31,7 @@ Two flags pick the implementation. Everything else below only matters when the f
 | variable | default | what it is |
 | --- | --- | --- |
 | `DISPLAY_TIMEZONE` | `UTC` | The IANA zone every time is shown in - the meeting list, manual meetings, due dates, "read HH:MM". Relative dues ("by Friday") are resolved in it. |
+| `NOTES_LANGUAGES` | `en` | The languages the notes are written in, as ISO 639-1 codes, comma-separated (`en,de,fr`). Due phrases are read in each, English first: "bis Freitag", "d'ici lundi prochain", "fin du mois". German, French, Spanish, Portuguese, Italian and Dutch also get their prepositions and "next Monday" / "end of the week" phrasing; any other language dateparser knows reads plain dates. An unknown code stops the app at start. The model reads any language regardless. |
 | `WORKSTREAMS` | `Product,Engineering,Design,Growth,Operations,Hiring` | The workstreams offered on a meeting and a point. Any workstream already used is offered too. |
 | `CALENDAR_LOOKBACK_DAYS`, `CALENDAR_LOOKAHEAD_DAYS` | `30`, `14` | The calendar window of the meeting list. Captured meetings stay listed whatever their date. |
 
