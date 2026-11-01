@@ -156,8 +156,8 @@ def connect_account(
     the person arrives at Step 1 with their calendar already there.
     """
     _require_connect_config(settings)
-    client = connect_flow.oauth_client(settings, getattr(request.app.state, "transport", None))
-    url, state, verifier = connect_flow.authorization_url(client, settings, login_hint=email)
+    with connect_flow.oauth_client(settings, getattr(request.app.state, "transport", None)) as client:
+        url, state, verifier = connect_flow.authorization_url(client, settings, login_hint=email)
     request.session[CONNECT_STATE_KEY] = state
     request.session[CONNECT_VERIFIER_KEY] = verifier
     request.session[CONNECT_NEXT_KEY] = safe_next(next)
@@ -188,10 +188,10 @@ def connect_callback(
             status.HTTP_400_BAD_REQUEST, "The connect flow did not come back with a valid state."
         )
 
-    client = connect_flow.oauth_client(settings, getattr(request.app.state, "transport", None))
     try:
-        token = connect_flow.exchange_code(client, code, verifier)
-        info = connect_flow.fetch_userinfo(client, token)
+        with connect_flow.oauth_client(settings, getattr(request.app.state, "transport", None)) as client:
+            token = connect_flow.exchange_code(client, code, verifier)
+            info = connect_flow.fetch_userinfo(client, token)
     except connect_flow.ConnectError as exc:
         raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from exc
 

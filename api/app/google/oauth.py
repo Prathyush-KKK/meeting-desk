@@ -4,18 +4,23 @@ Distinct from sign-in (``app/auth/oidc.py``, which only identifies a person). Th
 scope list below with offline access so a refresh token comes back, ``prompt=consent`` so Google
 issues that refresh token every time (a reconnect replaces a revoked one), and
 ``include_granted_scopes`` so a later, wider request keeps what was granted before (incremental
-consent). Built on authlib's ``OAuth2Client``; the token exchange goes through the same transport
-as the Google clients, so it is mocked the same way in tests.
+consent). PKCE throughout: the redirect carries the S256 challenge, the token request the verifier.
+
+The three HTTP steps are plain requests on an ``httpx.Client`` with the same transport as the
+Google clients, so the tests mock them the same way. authlib supplies the PKCE challenge and the
+random tokens; its own httpx client moved to httpx2 in 1.8, which an httpx transport cannot drive.
 """
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
+from urllib.parse import urlencode
 
 import httpx
 from authlib.common.security import generate_token
-from authlib.integrations.httpx_client import OAuth2Client
+from authlib.oauth2.rfc7636 import create_s256_code_challenge
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -73,58 +78,86 @@ def is_configured(settings: Settings) -> bool:
     return bool(settings.google_client_id and settings.google_client_secret and settings.token_key)
 
 
-def oauth_client(settings: Settings, transport: httpx.BaseTransport | None = None) -> OAuth2Client:
-    return OAuth2Client(
-        client_id=settings.google_client_id,
-        client_secret=settings.google_client_secret,
-        scope=" ".join(connection_scopes(settings)),
-        redirect_uri=settings.google_connect_redirect_uri,
-        # Google documents client_id / client_secret in the token request body.
-        token_endpoint_auth_method="client_secret_post",
-        # PKCE: the authorization request carries the S256 challenge, the token request the
-        # verifier. An authorization code intercepted on the way back is then worth nothing on its
-        # own, which is what stops a code injected into the callback from becoming a connection.
-        code_challenge_method="S256",
-        transport=transport,
-        timeout=settings.google_api_timeout_seconds,
+@dataclass
+class ConnectClient:
+    """The connect flow's settings and the HTTP client its two Google calls go through."""
+
+    settings: Settings
+    http: httpx.Client
+
+    def __enter__(self) -> ConnectClient:
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        self.http.close()
+
+
+def oauth_client(settings: Settings, transport: httpx.BaseTransport | None = None) -> ConnectClient:
+    return ConnectClient(
+        settings, httpx.Client(transport=transport, timeout=settings.google_api_timeout_seconds)
     )
 
 
-def authorization_url(client: OAuth2Client, settings: Settings, login_hint: str = "") -> tuple[str, str, str]:
+def authorization_url(
+    client: ConnectClient, settings: Settings, login_hint: str = ""
+) -> tuple[str, str, str]:
     """(url, state, code_verifier). Offline access, forced consent, incremental scopes, the domain.
 
     The verifier is the caller's to keep for the length of the round trip (the connect route puts
-    it in the session beside the state) and to hand back to ``exchange_code``.
+    it in the session beside the state) and to hand back to ``exchange_code``. Only the S256
+    challenge goes to Google here, so an authorization code intercepted on the way back is worth
+    nothing on its own: that is what stops a code injected into the callback from becoming a
+    connection.
     """
-    extra: dict[str, Any] = {
+    state = generate_token(30)
+    code_verifier = generate_token(48)
+    params: dict[str, str] = {
+        "response_type": "code",
+        "client_id": settings.google_client_id,
+        "redirect_uri": settings.google_connect_redirect_uri,
+        "scope": " ".join(connection_scopes(settings)),
+        "state": state,
+        "code_challenge": create_s256_code_challenge(code_verifier),
+        "code_challenge_method": "S256",
         "access_type": "offline",
         "prompt": "consent",
         "include_granted_scopes": "true",
     }
     if settings.google_hosted_domain:
-        extra["hd"] = settings.google_hosted_domain
+        params["hd"] = settings.google_hosted_domain
     if login_hint:
-        extra["login_hint"] = login_hint
-    code_verifier = generate_token(48)
-    url, state = client.create_authorization_url(AUTH_URL, code_verifier=code_verifier, **extra)
-    return url, state, code_verifier
+        params["login_hint"] = login_hint
+    return f"{AUTH_URL}?{urlencode(params)}", state, code_verifier
 
 
-def exchange_code(client: OAuth2Client, code: str, code_verifier: str = "") -> dict[str, Any]:
+def exchange_code(client: ConnectClient, code: str, code_verifier: str = "") -> dict[str, Any]:
+    """The authorization code for tokens. Google documents client_id / client_secret in the body."""
+    form = {
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": client.settings.google_connect_redirect_uri,
+        "client_id": client.settings.google_client_id,
+        "client_secret": client.settings.google_client_secret,
+    }
+    if code_verifier:
+        form["code_verifier"] = code_verifier
     try:
-        token = client.fetch_token(
-            TOKEN_URL,
-            code=code,
-            grant_type="authorization_code",
-            **({"code_verifier": code_verifier} if code_verifier else {}),
-        )
-    except Exception as exc:  # authlib raises its own hierarchy; the message is what matters
+        response = client.http.post(TOKEN_URL, data=form, headers={"Accept": "application/json"})
+        body = response.json() if response.content else {}
+    except (httpx.HTTPError, ValueError) as exc:
         raise ConnectError(f"Google refused the authorization code: {exc}") from exc
-    return dict(token)
+    if response.status_code >= 400 or not isinstance(body, dict) or not body.get("access_token"):
+        detail = (body.get("error_description") or body.get("error")) if isinstance(body, dict) else None
+        raise ConnectError(
+            f"Google refused the authorization code: {detail or f'HTTP {response.status_code}'}"
+        )
+    return body
 
 
-def fetch_userinfo(client: OAuth2Client, token: dict[str, Any]) -> dict[str, Any]:
-    response = client.get(USERINFO_URL, headers={"Authorization": f"Bearer {token.get('access_token', '')}"})
+def fetch_userinfo(client: ConnectClient, token: dict[str, Any]) -> dict[str, Any]:
+    response = client.http.get(
+        USERINFO_URL, headers={"Authorization": f"Bearer {token.get('access_token', '')}"}
+    )
     if response.status_code >= 400:
         raise ConnectError(f"Google did not say whose account this is ({response.status_code}).")
     return dict(response.json())

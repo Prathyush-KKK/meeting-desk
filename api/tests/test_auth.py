@@ -175,3 +175,96 @@ def test_sign_in_commits_before_the_route_runs(client: TestClient) -> None:
     finally:
         deps.Session.commit = original  # type: ignore[method-assign]
     assert len(seen) >= 2, "one commit inside authenticate, one when the request ends"
+
+
+# --- the Google callback, end to end ------------------------------------------------------------------
+
+
+def test_the_google_callback_checks_a_signed_id_token_and_signs_the_person_in(tmp_path: Path) -> None:
+    """The whole sign-in round trip on the HTTP client authlib really uses (httpx2): the code is
+    exchanged with its PKCE verifier, the RS256 id_token is checked against Google's keys and the
+    nonce from the login, and the person on the allow-list gets the session cookie."""
+    import base64
+    import json
+    import time
+    from urllib.parse import parse_qs, urlparse
+
+    import httpx2
+    from itsdangerous import TimestampSigner
+    from joserfc import jwt
+    from joserfc.jwk import RSAKey
+
+    from app.auth.oidc import build_oauth
+
+    client_id = "client-id.apps.googleusercontent.com"
+    settings = make_settings(tmp_path, auth_dev_user="", google_client_id=client_id, google_client_secret="s")
+    key = RSAKey.generate_key(2048, parameters={"kid": "google-1"})
+    seen: list[httpx2.Request] = []
+    nonce_box: dict[str, str] = {}
+
+    def google(request: httpx2.Request) -> httpx2.Response:
+        seen.append(request)
+        if request.url.path == "/oauth2/v3/certs":
+            return httpx2.Response(200, json={"keys": [key.as_dict(private=False)]})
+        now = int(time.time())
+        claims = {
+            "iss": "https://accounts.google.com",
+            "aud": client_id,
+            "sub": "google-sub-daniel",
+            "email": ADMIN,
+            "email_verified": True,
+            "hd": "example.com",
+            "nonce": nonce_box["nonce"],
+            "iat": now,
+            "exp": now + 3600,
+        }
+        id_token = jwt.encode({"alg": "RS256", "kid": "google-1"}, claims, key)
+        return httpx2.Response(
+            200,
+            json={
+                "access_token": "ya29.token",
+                "id_token": id_token,
+                "token_type": "Bearer",
+                "expires_in": 3600,
+            },
+        )
+
+    app = create_app(settings)
+    oauth = build_oauth(settings)
+    oauth.google.server_metadata.update(
+        {
+            "issuer": "https://accounts.google.com",
+            "authorization_endpoint": "https://accounts.google.com/o/oauth2/v2/auth",
+            "token_endpoint": "https://oauth2.googleapis.com/token",
+            "jwks_uri": "https://www.googleapis.com/oauth2/v3/certs",
+            "id_token_signing_alg_values_supported": ["RS256"],
+            "_loaded_at": 1,
+        }
+    )
+    oauth.google.client_kwargs["transport"] = httpx2.MockTransport(google)
+    app.state.oauth = oauth
+
+    with TestClient(app) as client:
+        login = client.get("/auth/login", follow_redirects=False)
+        query = parse_qs(urlparse(login.headers["location"]).query)
+        raw = TimestampSigner(settings.session_secret).unsign(
+            client.cookies[settings.state_cookie], max_age=settings.state_cookie_max_age_seconds
+        )
+        stored = next(
+            v for k, v in json.loads(base64.urlsafe_b64decode(raw)).items() if k.startswith("_state_google_")
+        )
+        nonce_box["nonce"] = query["nonce"][0]
+
+        done = client.get(
+            "/auth/callback", params={"code": "4/sign-in", "state": query["state"][0]}, follow_redirects=False
+        )
+
+    assert done.status_code in (302, 303, 307), done.text
+    assert settings.session_cookie in done.cookies or settings.session_cookie in client.cookies
+    token_request = next(r for r in seen if r.url.path == "/token")
+    form = dict(httpx2.QueryParams(token_request.content.decode()))
+    assert form["code"] == "4/sign-in"
+    assert form["code_verifier"] == stored["data"]["code_verifier"]
+    assert any(r.url.path == "/oauth2/v3/certs" for r in seen), (
+        "the id_token was not checked against Google's keys"
+    )

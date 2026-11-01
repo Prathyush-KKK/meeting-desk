@@ -27,6 +27,9 @@ All notable changes to this project are documented here. The format follows
   to 1.31.
 - procrastinate 3.10. A database whose procrastinate schema came from 2.x needs procrastinate's 3.x
   SQL migrations; see docs/DEPLOY.md.
+- FastAPI 0.143 and Authlib 1.9, no longer held back. The metrics middleware reads FastAPI's
+  nested router table, and "Connect an account" makes its token and userinfo requests through
+  httpx itself (Authlib's client moved to httpx2).
 
 ### Fixed
 
