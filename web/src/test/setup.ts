@@ -41,13 +41,16 @@ if (!("ResizeObserver" in globalThis)) {
   (globalThis as { ResizeObserver?: unknown }).ResizeObserver = StubResizeObserver;
 }
 
-// TanStack Virtual sizes its scroll box with offsetWidth/offsetHeight, which jsdom always reports
-// as 0. Only the grid's box is given a size (it is the one element carrying data-rows), so nothing
-// else in the suite sees a layout it would not see in a browser.
+// TanStack Virtual sizes its scroll box with clientWidth/clientHeight (offsetWidth/offsetHeight
+// before virtual-core 3.19), which jsdom always reports as 0. Only the grid's box is given a size
+// (it is the one element carrying data-rows), so nothing else in the suite sees a layout it would
+// not see in a browser.
 const VIEWPORT = { width: 1200, height: 640 };
 for (const [property, value] of [
   ["offsetWidth", VIEWPORT.width],
   ["offsetHeight", VIEWPORT.height],
+  ["clientWidth", VIEWPORT.width],
+  ["clientHeight", VIEWPORT.height],
 ] as const) {
   Object.defineProperty(HTMLElement.prototype, property, {
     configurable: true,
