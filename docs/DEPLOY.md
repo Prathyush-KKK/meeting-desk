@@ -22,8 +22,8 @@ push it:
 
 ```bash
 docker build -f deploy/Dockerfile.api --build-arg EXTRAS='[llm]' \
-  -t registry.example.com/meeting-desk:0.1.0 .
-docker push registry.example.com/meeting-desk:0.1.0
+  -t registry.example.com/meeting-desk:0.2.0 .
+docker push registry.example.com/meeting-desk:0.2.0
 ```
 
 Three stages: node + pnpm build `web/dist`, a Python stage builds a venv, and a `python:3.12-slim`
@@ -111,7 +111,7 @@ helm template meeting-desk deploy/helm/meeting-desk \
 #    in "The image" above), host, domain and secret store.
 helm upgrade --install meeting-desk deploy/helm/meeting-desk \
   -n meeting-desk -f deploy/helm/meeting-desk/values-production.example.yaml \
-  --set image.repository=registry.example.com/meeting-desk --set image.tag=0.1.0 \
+  --set image.repository=registry.example.com/meeting-desk --set image.tag=0.2.0 \
   --set build.commit=$(git rev-parse --short HEAD) --wait
 ```
 

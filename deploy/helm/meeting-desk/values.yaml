@@ -14,7 +14,7 @@ fullnameOverride: ""
 # can pull from, and set image.repository to it (docs/DEPLOY.md, "The image").
 image:
   repository: registry.example.com/meeting-desk
-  tag: "0.1.0"
+  tag: "0.2.0"
   pullPolicy: IfNotPresent
 imagePullSecrets: []
 

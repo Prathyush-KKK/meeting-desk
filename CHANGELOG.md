@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-01
+
 ### Added
 
 - Export as GitHub Issues-ready Markdown: one block per action item with its title, owner, due
@@ -22,16 +24,18 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
-- Dependencies updated: SQLAlchemy 2.1.5, React 19.3.1 (with react-dom), google-cloud-aiplatform 2.5,
-  boto3 1.43, Ruff 0.17, pytest 9, pytest-cov 7, and the nginx image behind `deploy/Dockerfile.web`
-  to 1.31.
+- No dependency is held back by a known break any more:
+  - FastAPI 0.162: the metrics middleware reads FastAPI's nested router table.
+  - Authlib 1.9: "Connect an account" makes its token and userinfo requests through httpx itself,
+    since Authlib's own client moved to httpx2.
 - procrastinate 3.10. A database whose procrastinate schema came from 2.x needs procrastinate's 3.x
   SQL migrations; see docs/DEPLOY.md.
-- Web toolchain: Tailwind CSS 4 (still reading `tailwind.config.js` through `@config`), TypeScript
-  7, Vitest 5, Playwright 1.64. The anthropic SDK is on 2.x.
-- FastAPI 0.143 and Authlib 1.9, no longer held back. The metrics middleware reads FastAPI's
-  nested router table, and "Connect an account" makes its token and userinfo requests through
-  httpx itself (Authlib's client moved to httpx2).
+- The anthropic SDK is on 2.3; the request Meeting Desk sends is unchanged.
+- Web toolchain: Tailwind CSS 4 (the theme still lives in `tailwind.config.js`, read through
+  `@config`), TypeScript 7, Vitest 5, Playwright 1.64 (`npx playwright install chromium` once).
+- Other updates: SQLAlchemy 2.1.6, Alembic 1.20.1, google-cloud-aiplatform 2.7, boto3 1.43,
+  React 19.3.1 (with react-dom), TanStack Query and Virtual, Ruff 0.17, pytest 9, and the nginx
+  image behind `deploy/Dockerfile.web` to 1.31.
 
 ### Fixed
 
@@ -79,5 +83,6 @@ The first public release.
 - Starlette 0.49.1 or later is required, for the Range-header denial-of-service fix in the static
   file serving the web app goes through. Authlib is past the 1.6.4 and 1.6.5 security fixes.
 
-[Unreleased]: https://github.com/Prathyush-KKK/meeting-desk/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Prathyush-KKK/meeting-desk/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Prathyush-KKK/meeting-desk/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Prathyush-KKK/meeting-desk/releases/tag/v0.1.0
