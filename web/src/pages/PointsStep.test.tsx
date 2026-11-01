@@ -7,7 +7,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { download, pointsToGithubMarkdown } from "@/lib/export";
+import { download, pointsToGithubMarkdown, pointsToJiraCsv, pointsToNotionCsv } from "@/lib/export";
 import { PointsStep } from "@/pages/PointsStep";
 import type { ExtractionRecord, MeetingItem, Point, Transfer } from "@/api/types";
 
@@ -89,6 +89,24 @@ describe("PointsStep", () => {
     expect(menu).toHaveValue("");
     await userEvent.selectOptions(menu, "github");
     expect(download).toHaveBeenCalledTimes(2);
+  });
+
+  it("downloads the Jira and Notion imports under their own names", async () => {
+    h.points = [POINT, { ...POINT, id: "p-2", kind: "decision", text: "Choose the plan" }];
+    renderStep();
+    const menu = screen.getByRole("combobox", { name: "Export points" });
+    await userEvent.selectOptions(menu, "jira");
+    expect(download).toHaveBeenLastCalledWith(pointsToJiraCsv(h.points as Point[], MEETING), "2026-09-22-vendor-call-with-maya.jira.csv", "text/csv;charset=utf-8");
+    await userEvent.selectOptions(menu, "notion");
+    expect(download).toHaveBeenLastCalledWith(pointsToNotionCsv(h.points as Point[], MEETING), "2026-09-22-vendor-call-with-maya.notion.csv", "text/csv;charset=utf-8");
+    expect(menu).toHaveValue("");
+  });
+
+  it("disables the Jira import, like GitHub, when there is no action item, but not Notion", () => {
+    h.points = [{ ...POINT, kind: "decision" }];
+    renderStep();
+    expect(screen.getByRole("option", { name: "Jira import (.csv)" })).toBeDisabled();
+    expect(screen.getByRole("option", { name: "Notion import (.csv)" })).toBeEnabled();
   });
 
   it("disables GitHub export when the active list has no action items", () => {
