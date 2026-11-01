@@ -14,6 +14,7 @@ from datetime import datetime
 
 import dateparser
 
+from app import date_languages
 from app.extract.provider import ExtractionContext
 from app.extract.schema import ExtractionOutput
 from app.relative_dates import resolve as resolve_relative
@@ -155,7 +156,8 @@ def parse_due(text: str, base: datetime | None = None, timezone: str = "") -> da
         parsed = dateparser.parse(candidate, languages=["en"], settings=settings)
         if parsed is not None:
             return parsed.replace(tzinfo=tz)
-    return None
+    other = date_languages.parse(value, base_dt, settings)  # NOTES_LANGUAGES beyond English
+    return datetime(other.year, other.month, other.day, tzinfo=tz) if other else None
 
 
 def _candidates(value: str) -> list[str]:

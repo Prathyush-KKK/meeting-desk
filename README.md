@@ -187,7 +187,8 @@ These are ideas, and contributions are welcome:
   export today is a Markdown file to paste from).
 - More note sources: Zoom and Microsoft Teams cloud transcripts, Otter, Fireflies.
 - Per-user calendars and personal workspaces.
-- Notes and extraction in languages other than English.
+- More languages for due-date shorthand (German, French, Spanish, Portuguese, Italian and Dutch are
+  in; see `NOTES_LANGUAGES`).
 
 Open an [issue](https://github.com/Prathyush-KKK/meeting-desk/issues) to discuss one before you
 start.

@@ -11,6 +11,7 @@ from datetime import date, datetime
 
 import dateparser
 
+from app import date_languages
 from app.relative_dates import resolve as resolve_relative
 from app.tz import as_zone
 
@@ -65,7 +66,7 @@ def parse_date(value: str, base: datetime | None = None, timezone: str = "") -> 
         parsed = dateparser.parse(candidate, languages=["en"], settings=settings)
         if parsed is not None:
             return parsed.date()
-    return None
+    return date_languages.parse(text, base_dt, settings)  # NOTES_LANGUAGES beyond English
 
 
 def serial_for(value: str, base: datetime | None = None) -> int | None:

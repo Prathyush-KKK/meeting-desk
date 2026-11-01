@@ -13,6 +13,9 @@ All notable changes to this project are documented here. The format follows
 - Zoom and Teams transcripts: their saved `.txt` transcripts ("[Name] 10:02:15" or "Name   0:03"
   before each turn) and Teams' `.docx` download become "Speaker: words" lines, like `.vtt` files.
   The `.docx` is unpacked in the browser; nothing new is installed or uploaded.
+- `NOTES_LANGUAGES`: due dates in notes written in other languages. "bis Freitag", "avant
+  vendredi", "nächsten Montag", "fin du mois" resolve the way their English versions do; German,
+  French, Spanish, Portuguese, Italian and Dutch have full tables, other languages read plain dates.
 
 ### Changed
 

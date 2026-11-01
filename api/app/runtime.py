@@ -12,6 +12,7 @@ from typing import Any
 
 import httpx
 
+from app import date_languages
 from app.clock import Clock, build_clock
 from app.config import Settings
 from app.db import Database
@@ -38,6 +39,7 @@ class Runtime:
     ) -> Runtime:
         db = Database(settings.database_url)
         clock = build_clock(settings)
+        date_languages.configure(settings.notes_language_list)
         google = build_google(settings, db, transport=transport, wall_clock=clock.now)
         return cls(
             settings=settings,
