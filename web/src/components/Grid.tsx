@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { MARK_CLASS, type CellMark } from "@/components/marks";
 import { Button } from "@/components/ui/button";
 import { a1, colLetter, type Layout } from "@/lib/sheet";
 import { cn } from "@/lib/utils";
 import { useCloseOnBack, useNarrow } from "@/lib/overlay";
 
-export type CellMark = "new" | "key" | "conflict" | "moved" | "edited";
+export type { CellMark };
 
 /**
  * TanStack Virtual for grids over 300 rows. Under that the table renders every row
@@ -19,20 +20,6 @@ export const VIRTUALIZE_OVER = 300;
 const ROW_HEIGHT = 28;
 /** jsdom reports a zero-sized scroll box; without a starting rect nothing would ever render. */
 const INITIAL_RECT = { width: 1200, height: 640 };
-
-/**
- * The five marks, in the one selection hue. Three variants carry all of
- * them: a tint for what is being written, an outline for what needs a decision, a strike for what
- * only moves. The Transfer legend wears the same three on its own labels, so the legend is the
- * rule rather than a copy of it.
- */
-export const MARK_CLASS: Record<CellMark, string> = {
-  new: "sel-tint",
-  edited: "sel-tint font-medium",
-  key: "sel-soft italic",
-  conflict: "sel-outline sel-soft",
-  moved: "sel-strike",
-};
 
 interface Props {
   rows: string[][];
@@ -98,6 +85,9 @@ export function Grid({ rows, layout, marks, anchor, onCellClick, editable, maxHe
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const virtualised = order.length > VIRTUALIZE_OVER;
+  // TanStack Virtual's API cannot be memoised by the React Compiler. This app does not use the
+  // compiler, so the lint's notice has nothing to act on here.
+  // oxlint-disable-next-line react/incompatible-library
   const virtualizer = useVirtualizer({
     count: order.length,
     getScrollElement: () => scrollRef.current,

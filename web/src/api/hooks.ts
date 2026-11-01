@@ -343,7 +343,10 @@ export function usePointEditor(meetingId: string | null, lifecycle: Lifecycle = 
   const drafts = useRef<Record<string, PointPatch>>({});
   const versions = useRef<Record<string, number>>({});
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
-  const [, bump] = useReducer((n: number) => n + 1, 0);
+  // Every change to the drafts re-renders (a new object each time, even when the count is the
+  // same), and carries the count with it so render never reads the ref.
+  const [{ pending }, sync] = useReducer((_: { pending: number }, next: { pending: number }) => next, { pending: 0 });
+  const bump = useCallback(() => sync({ pending: Object.keys(drafts.current).length }), []);
   const [savedAt, setSavedAt] = useState<string | null>(null);
 
   const flush = useCallback(
@@ -364,7 +367,7 @@ export function usePointEditor(meetingId: string | null, lifecycle: Lifecycle = 
         },
       );
     },
-    [patch],
+    [patch, bump],
   );
 
   const edit = useCallback(
@@ -376,7 +379,7 @@ export function usePointEditor(meetingId: string | null, lifecycle: Lifecycle = 
       if (Object.keys(body).every((k) => IMMEDIATE_FIELDS.has(k))) flush(id);
       else timers.current[id] = setTimeout(() => flush(id), AUTOSAVE_MS);
     },
-    [flush],
+    [flush, bump],
   );
 
   useEffect(() => {
@@ -397,7 +400,7 @@ export function usePointEditor(meetingId: string | null, lifecycle: Lifecycle = 
     [],
   );
 
-  return { edit, merge, savedAt, pending: Object.keys(drafts.current).length };
+  return { edit, merge, savedAt, pending };
 }
 
 export function useBulkPatchPoints(meetingId: string | null, lifecycle: Lifecycle = "active") {

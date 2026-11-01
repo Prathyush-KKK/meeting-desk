@@ -7,7 +7,7 @@
 // The entry carries no URL change (App.tsx owns the query string), so the URL effect there never
 // sees a difference and never replaces what was pushed.
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 /** Below the 768 px breakpoint, where the detail panel and the cell editor become overlays. */
 export const NARROW_QUERY = "(max-width: 767.98px)";
@@ -38,7 +38,10 @@ export function useNarrow(): boolean {
  */
 export function useCloseOnBack(open: boolean, close: () => void): void {
   const closeRef = useRef(close);
-  closeRef.current = close;
+  // The latest close, for the popstate handler below; kept current after each render.
+  useLayoutEffect(() => {
+    closeRef.current = close;
+  });
 
   useEffect(() => {
     if (!open) return;

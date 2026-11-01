@@ -236,3 +236,26 @@ describe("the Sheets page idempotency key", () => {
     expect(h.save.mock.calls[1][0].batch_id).not.toBe(h.save.mock.calls[0][0].batch_id);
   });
 });
+
+describe("changing tab", () => {
+  it("drops the staged edits of the tab left behind", async () => {
+    const twoTabs = { ...book, tabs: [...book.tabs, { sheet_id: "t2", title: "Backlog", index: 1 }] };
+    book.tabs = twoTabs.tabs;
+    try {
+      const onSelect = vi.fn();
+      const view = render(<SheetsPage selection={{ wb: "wb-1", tab: "t1" }} onSelect={onSelect} me={me} />);
+      await editOwner(view.container, "Noah S");
+      await screen.findByText("1 unsaved");
+
+      view.rerender(<SheetsPage selection={{ wb: "wb-1", tab: "t2" }} onSelect={onSelect} me={me} />);
+      expect(screen.queryByText("1 unsaved")).not.toBeInTheDocument();
+
+      // Coming back does not bring the old edit back either: it was dropped, not hidden.
+      view.rerender(<SheetsPage selection={{ wb: "wb-1", tab: "t1" }} onSelect={onSelect} me={me} />);
+      expect(screen.queryByText("1 unsaved")).not.toBeInTheDocument();
+      expect(cell(view.container, "2,2")).toHaveTextContent("Alex S");
+    } finally {
+      book.tabs = [{ sheet_id: "t1", title: "Roadmap", index: 0 }];
+    }
+  });
+});

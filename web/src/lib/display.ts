@@ -167,3 +167,13 @@ export function meetingLabel(title: string, date: string | null | undefined): st
   if (Number.isNaN(d.getTime())) return title;
   return `${title} · ${d.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" })}`;
 }
+
+/**
+ * Bottom right is where every step keeps its primary button (Continue, Transfer, Insert and
+ * write, Save to Sheet), and a toast with Undo would sit on it for ten seconds. From
+ * 768 px the bottom centre only ever covers hint text; on a phone the bottom is all buttons, so the
+ * toast goes to the top, over the page tabs for as long as it lasts.
+ */
+export function toastPosition(narrow: boolean): "top-center" | "bottom-center" {
+  return narrow ? "top-center" : "bottom-center";
+}

@@ -150,7 +150,7 @@ describe("the first-run notice", () => {
 // A toast with Undo used to sit on the step's primary button for ten seconds.
 describe("toasts", () => {
   it("never sit bottom right, where every step keeps its primary button", async () => {
-    const { toastPosition } = await import("@/App");
+    const { toastPosition } = await import("@/lib/display");
     expect(toastPosition(false)).toBe("bottom-center"); // from 768 px: over hint text at most
     expect(toastPosition(true)).toBe("top-center"); // a phone's bottom is all buttons
   });
