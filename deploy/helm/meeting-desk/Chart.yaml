@@ -6,9 +6,9 @@ description: >-
   token health).
 type: application
 # The chart's own version. Bump it on any template change.
-version: 0.1.0
+version: 0.2.0
 # The default application version; `image.tag` overrides what is actually deployed.
-appVersion: "0.1.0"
+appVersion: "0.2.0"
 home: https://github.com/Prathyush-KKK/meeting-desk
 maintainers:
   - name: Meeting Desk

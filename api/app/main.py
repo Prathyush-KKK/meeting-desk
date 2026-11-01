@@ -145,7 +145,7 @@ def create_app(
     metrics().set_build_info(resolved.app_version, resolved.git_commit)
     # Every breaker gauge reads 0 from the first scrape, before any call has been made.
     provider_telemetry().initialise()
-    app = FastAPI(title=resolved.app_name, version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title=resolved.app_name, version=resolved.app_version, lifespan=lifespan)
 
     runtime = Runtime.build(resolved, transport=transport, extraction=extraction)
     app.state.runtime = runtime

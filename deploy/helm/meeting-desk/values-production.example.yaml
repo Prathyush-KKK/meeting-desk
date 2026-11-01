@@ -8,10 +8,10 @@
 
 image:
   repository: registry.example.com/meeting-desk   # the registry you pushed your build to
-  tag: "0.1.0"
+  tag: "0.2.0"
 
 build:
-  version: "0.1.0"
+  version: "0.2.0"
   commit: "set-by-ci"
 
 api:

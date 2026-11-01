@@ -198,7 +198,7 @@ class Settings(BaseSettings):
     metrics_port: int = 9464
     metrics_host: str = "0.0.0.0"
     log_level: str = "INFO"
-    app_version: str = "0.1.0"
+    app_version: str = "0.2.0"
     git_commit: str = "unknown"
 
     # --- jobs (procrastinate on Postgres) ---------------------------------------------------

@@ -103,7 +103,7 @@ class Metrics:
 
     def set_build_info(self, version: str = "", commit: str = "") -> None:
         self.build_info.labels(
-            version=version or os.getenv("APP_VERSION", "0.1.0"),
+            version=version or os.getenv("APP_VERSION", "0.2.0"),
             commit=commit or os.getenv("GIT_COMMIT", "unknown"),
         ).set(1)
 
